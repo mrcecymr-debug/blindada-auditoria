@@ -242,6 +242,157 @@ export const ACTION_ITEMS: ActionItem[] = [
   },
 ];
 
+interface ActionRule {
+  questionCode: string;
+  threshold: number;
+  item: ActionItem;
+}
+
+const ACTION_RULES: ActionRule[] = [
+  {
+    questionCode: 'P03', threshold: 0.4,
+    item: { priority: 2, category: 'PERIMETRO', vulnerability: 'Muro/cerca insuficiente', solution: 'Elevar muro para 2,2m + concertina ou cerca eletrica', product: 'Projeto customizado / Cerca eletrica', investment: 'R$ 3.000-8.000', installation: 'Profissional 3-5 dias', impact: '+30%' },
+  },
+  {
+    questionCode: 'P05', threshold: 0.35,
+    item: { priority: 2, category: 'PERIMETRO', vulnerability: 'Muitas janelas acessiveis', solution: 'Instalar sensores de abertura + grades nas janelas vulneraveis', product: 'Sensor Intelbras XAS / Grades tubulares', investment: 'R$ 200-500/janela', installation: 'Profissional', impact: '+18%' },
+  },
+  {
+    questionCode: 'P07', threshold: 0.35,
+    item: { priority: 2, category: 'PERIMETRO', vulnerability: 'Janelas sem protecao adequada', solution: 'Instalar grades tubulares ou pelicula de seguranca', product: 'Serralheria local 25mm / Pelicula 3M', investment: 'R$ 300/un', installation: 'Profissional', impact: '+18%' },
+  },
+  {
+    questionCode: 'P06', threshold: 0.3,
+    item: { priority: 3, category: 'PERIMETRO', vulnerability: 'Garagem vulneravel', solution: 'Instalar portao automatico com controle remoto ou app', product: 'Motor Garen / PPA', investment: 'R$ 800-2.000', installation: 'Profissional 1 dia', impact: '+12%' },
+  },
+  {
+    questionCode: 'I01', threshold: 0.35,
+    item: { priority: 2, category: 'ILUMINACAO', vulnerability: 'Iluminacao externa deficiente', solution: 'Instalar sensor de presenca PIR 180 graus com lampadas LED', product: 'Intelbras ESP 360 A / Lampada LED 20W', investment: 'R$ 65-150', installation: 'DIY 15min', impact: '+15%' },
+  },
+  {
+    questionCode: 'I02', threshold: 0.35,
+    item: { priority: 3, category: 'ILUMINACAO', vulnerability: 'Poucos pontos de iluminacao', solution: 'Adicionar pontos de luz no perimetro com sensor', product: 'Refletor LED Solar / Timer', investment: 'R$ 80-200', installation: 'DIY 30min', impact: '+10%' },
+  },
+  {
+    questionCode: 'I03', threshold: 0.3,
+    item: { priority: 3, category: 'ILUMINACAO', vulnerability: 'Sem iluminacao de emergencia', solution: 'Instalar lampadas recarregaveis e/ou nobreak', product: 'Lampada emergencia LED / Nobreak SMS', investment: 'R$ 50-300', installation: 'DIY 10min', impact: '+5%' },
+  },
+  {
+    questionCode: 'A01', threshold: 0.4,
+    item: { priority: 1, category: 'ACESSO', vulnerability: 'Fechadura da porta principal inadequada', solution: 'Substituir por fechadura tetra ou eletronica com senha', product: 'Papaiz 510 / Yale Digital YDF40', investment: 'R$ 180-800', installation: 'DIY 30min / Profissional', impact: '+25%' },
+  },
+  {
+    questionCode: 'A02', threshold: 0.35,
+    item: { priority: 1, category: 'ACESSO', vulnerability: 'Porta principal fragil', solution: 'Substituir por porta macica ou blindada', product: 'Porta macica / Porta blindada nivel II', investment: 'R$ 800-5.000', installation: 'Profissional 1 dia', impact: '+20%' },
+  },
+  {
+    questionCode: 'A03', threshold: 0.3,
+    item: { priority: 2, category: 'ACESSO', vulnerability: 'Sem trancas adicionais', solution: 'Instalar ferrolho duplo ou barra transversal', product: 'Ferrolho tetra / Barra transversal', investment: 'R$ 40-120', installation: 'DIY 20min', impact: '+8%' },
+  },
+  {
+    questionCode: 'A04', threshold: 0.35,
+    item: { priority: 2, category: 'ACESSO', vulnerability: 'Porta de servico/fundos vulneravel', solution: 'Reforcar com porta gradeada + fechadura tetra', product: 'Porta metalica / Grade tubular', investment: 'R$ 400-1.200', installation: 'Profissional', impact: '+12%' },
+  },
+  {
+    questionCode: 'A05', threshold: 0.35,
+    item: { priority: 3, category: 'ACESSO', vulnerability: 'Sem video porteiro', solution: 'Instalar video porteiro com tela ou smart com app', product: 'Intelbras IV 7010 / Ring Doorbell', investment: 'R$ 250-800', installation: 'Profissional', impact: '+10%' },
+  },
+  {
+    questionCode: 'E01', threshold: 0.35,
+    item: { priority: 1, category: 'ELETRONICA', vulnerability: 'Sem sistema de alarme', solution: 'Instalar alarme monitorado 24h com resposta', product: 'Verisure / ADT / Intelbras AMT', investment: 'R$ 89-200/mes', installation: 'Profissional', impact: '+40%' },
+  },
+  {
+    questionCode: 'E02', threshold: 0.35,
+    item: { priority: 1, category: 'ELETRONICA', vulnerability: 'Sem sensores de abertura', solution: 'Instalar sensores wireless em portas e janelas principais', product: 'Intelbras XAS 4010 / Sensor RF', investment: 'R$ 40-80/un', installation: 'DIY 10min/un', impact: '+15%' },
+  },
+  {
+    questionCode: 'E03', threshold: 0.3,
+    item: { priority: 2, category: 'ELETRONICA', vulnerability: 'Sem sensores de movimento', solution: 'Instalar sensores PIR em areas internas criticas', product: 'Intelbras IVP 3000 / Sensor dual', investment: 'R$ 60-150/un', installation: 'DIY 15min', impact: '+12%' },
+  },
+  {
+    questionCode: 'E04', threshold: 0.35,
+    item: { priority: 2, category: 'ELETRONICA', vulnerability: 'Sem cameras de seguranca', solution: 'Instalar kit cameras WiFi Full HD com visao noturna', product: 'Tapo C200 / Intelbras iM3', investment: 'R$ 150-400/un', installation: 'DIY 1h', impact: '+20%' },
+  },
+  {
+    questionCode: 'E05', threshold: 0.3,
+    item: { priority: 3, category: 'ELETRONICA', vulnerability: 'Qualidade de gravacao baixa', solution: 'Atualizar para cameras Full HD 1080p ou superior', product: 'Camera 2K / 4K com WDR', investment: 'R$ 200-600/un', installation: 'DIY 30min', impact: '+8%' },
+  },
+  {
+    questionCode: 'E06', threshold: 0.3,
+    item: { priority: 3, category: 'ELETRONICA', vulnerability: 'Armazenamento de video inadequado', solution: 'Configurar gravacao em nuvem + local com redundancia', product: 'NVR + Cloud 30 dias', investment: 'R$ 300-800', installation: 'DIY 1h', impact: '+6%' },
+  },
+  {
+    questionCode: 'E07', threshold: 0.3,
+    item: { priority: 2, category: 'ELETRONICA', vulnerability: 'Sem botao de panico', solution: 'Instalar botao de panico portatil integrado ao alarme', product: 'Botao RF / App celular', investment: 'R$ 50-120', installation: 'DIY 5min', impact: '+10%' },
+  },
+  {
+    questionCode: 'E08', threshold: 0.3,
+    item: { priority: 3, category: 'AUTOMACAO', vulnerability: 'Sem automacao residencial', solution: 'Instalar lampadas smart e timer para simulacao de presenca', product: 'Positivo Casa Inteligente / Sonoff', investment: 'R$ 45-200', installation: 'DIY 5min', impact: '+8%' },
+  },
+  {
+    questionCode: 'H01', threshold: 0.35,
+    item: { priority: 2, category: 'HUMANO', vulnerability: 'Residencia vazia por longos periodos', solution: 'Automacao de luzes + monitoramento remoto via cameras', product: 'Timer smart + Camera WiFi', investment: 'R$ 200-500', installation: 'DIY 30min', impact: '+15%' },
+  },
+  {
+    questionCode: 'H02', threshold: 0.35,
+    item: { priority: 3, category: 'HUMANO', vulnerability: 'Viagens frequentes sem protecao', solution: 'Sistema de simulacao de presenca + monitoramento remoto', product: 'Smart plugs + Timer / Camera', investment: 'R$ 100-300', installation: 'DIY 15min', impact: '+10%' },
+  },
+  {
+    questionCode: 'H03', threshold: 0.25,
+    item: { priority: 3, category: 'HUMANO', vulnerability: 'Sem presenca animal dissuasora', solution: 'Considerar alarme com som de cachorro ou animal de guarda', product: 'Alarme simulador / Treinamento', investment: 'R$ 80-500', installation: 'Variavel', impact: '+5%' },
+  },
+  {
+    questionCode: 'H04', threshold: 0.3,
+    item: { priority: 2, category: 'HUMANO', vulnerability: 'Sem seguranca/ronda no bairro', solution: 'Contratar ronda motorizada ou aderir a vigilancia comunitaria', product: 'Empresa ronda / Grupo comunitario', investment: 'R$ 80-200/mes', installation: 'Imediato', impact: '+20%' },
+  },
+  {
+    questionCode: 'H05', threshold: 0.3,
+    item: { priority: 3, category: 'HUMANO', vulnerability: 'Vizinhanca sem interacao', solution: 'Criar grupo WhatsApp e rede de vigilancia com vizinhos', product: 'Grupo WhatsApp / App comunitario', investment: 'Gratuito', installation: 'Imediato', impact: '+10%' },
+  },
+  {
+    questionCode: 'H06', threshold: 0.35,
+    item: { priority: 2, category: 'HUMANO', vulnerability: 'Exposicao excessiva em redes sociais', solution: 'Configurar perfis como privados, evitar postar localizacao em tempo real', product: 'Configuracao de privacidade', investment: 'Gratuito', installation: 'Imediato', impact: '+8%' },
+  },
+  {
+    questionCode: 'H07', threshold: 0.3,
+    item: { priority: 1, category: 'HUMANO', vulnerability: 'Historico de incidentes na regiao', solution: 'Reforcar seguranca geral + registrar B.O. + monitoramento 24h', product: 'Central monitorada + Cameras', investment: 'R$ 200-500/mes', installation: 'Profissional', impact: '+30%' },
+  },
+  {
+    questionCode: 'H08', threshold: 0.4,
+    item: { priority: 1, category: 'HUMANO', vulnerability: 'Bairro com alto indice de criminalidade', solution: 'Investir em seguranca completa: alarme + cameras + ronda', product: 'Pacote completo seguranca', investment: 'R$ 300-800/mes', installation: 'Profissional', impact: '+35%' },
+  },
+];
+
+function getAnswerScore(questionCode: string, answer: string): number {
+  const question = QUESTIONS.find(q => q.code === questionCode);
+  if (!question || !answer) return 0;
+  const optionIndex = question.options.indexOf(answer);
+  const totalOptions = question.options.length;
+  if (optionIndex < 0 || totalOptions <= 1) return 0;
+  return optionIndex / (totalOptions - 1);
+}
+
+export function generateActionItems(answers: Record<string, AuditAnswer>): ActionItem[] {
+  const items: ActionItem[] = [];
+  const answeredCodes = new Set(Object.keys(answers).filter(code => answers[code]?.answer));
+
+  if (answeredCodes.size === 0) return [];
+
+  for (const rule of ACTION_RULES) {
+    const answer = answers[rule.questionCode];
+    if (!answer || !answer.answer) continue;
+
+    const score = getAnswerScore(rule.questionCode, answer.answer);
+    if (score <= rule.threshold) {
+      items.push({ ...rule.item });
+    }
+  }
+
+  items.sort((a, b) => a.priority - b.priority);
+
+  return items;
+}
+
 export function calculateScore(answers: Record<string, AuditAnswer>): {
   totalScore: number;
   maxScore: number;
