@@ -7,10 +7,156 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
 import { QUESTIONS, CATEGORIES, getCategoryColor, AuditQuestion } from '@/lib/audit-data';
+
+const GUIDE_STEPS = [
+  {
+    icon: 'clipboard-outline' as const,
+    title: 'Passo 1 - Levantamento',
+    description: 'Responda as perguntas de cada categoria de seguranca. Toque na categoria para expandir e selecione a opcao que melhor descreve seu imovel. Quanto mais perguntas responder, mais precisa sera a analise.',
+  },
+  {
+    icon: 'bar-chart-outline' as const,
+    title: 'Passo 2 - Painel',
+    description: 'Acompanhe sua pontuacao geral e por categoria no painel. O grafico mostra os pontos fortes e fracos da seguranca do seu imovel em tempo real conforme voce responde.',
+  },
+  {
+    icon: 'shield-checkmark-outline' as const,
+    title: 'Passo 3 - Acoes',
+    description: 'Consulte as acoes recomendadas geradas automaticamente com base nas suas respostas. Cada acao inclui prioridade, produto sugerido, estimativa de investimento e tipo de instalacao.',
+  },
+  {
+    icon: 'document-text-outline' as const,
+    title: 'Passo 4 - Relatorio',
+    description: 'Salve o levantamento para criar um relatorio completo. Voce pode baixar o PDF da auditoria ou do plano de acao, e compartilhar via WhatsApp ou outras plataformas.',
+  },
+  {
+    icon: 'bulb-outline' as const,
+    title: 'Dica',
+    description: 'Voce pode alterar qualquer resposta a qualquer momento. O painel, as acoes e o relatorio serao atualizados automaticamente. Use o campo de observacao em cada pergunta para anotar detalhes extras.',
+  },
+];
+
+function GuideModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={guideStyles.overlay}>
+        <Animated.View entering={FadeIn.duration(300)} style={[guideStyles.container, { paddingBottom: Platform.OS === 'web' ? 34 : Math.max(insets.bottom, 20) }]}>
+          <View style={guideStyles.handle} />
+          <View style={guideStyles.header}>
+            <View style={guideStyles.headerLeft}>
+              <View style={guideStyles.headerIcon}>
+                <Ionicons name="book-outline" size={20} color={Colors.accent} />
+              </View>
+              <Text style={guideStyles.headerTitle}>Como Usar o App</Text>
+            </View>
+            <Pressable onPress={onClose} hitSlop={12}>
+              <Ionicons name="close" size={24} color={Colors.textSecondary} />
+            </Pressable>
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false} style={guideStyles.scroll}>
+            {GUIDE_STEPS.map((step, idx) => (
+              <Animated.View key={idx} entering={FadeInDown.delay(idx * 80).duration(300)}>
+                <View style={[guideStyles.stepCard, idx === GUIDE_STEPS.length - 1 && { borderColor: Colors.accent + '40', backgroundColor: Colors.accent + '08' }]}>
+                  <View style={[guideStyles.stepIcon, idx === GUIDE_STEPS.length - 1 && { backgroundColor: Colors.accent + '20' }]}>
+                    <Ionicons name={step.icon} size={22} color={idx === GUIDE_STEPS.length - 1 ? Colors.accent : Colors.text} />
+                  </View>
+                  <View style={guideStyles.stepContent}>
+                    <Text style={guideStyles.stepTitle}>{step.title}</Text>
+                    <Text style={guideStyles.stepDesc}>{step.description}</Text>
+                  </View>
+                </View>
+              </Animated.View>
+            ))}
+          </ScrollView>
+
+          <Pressable
+            onPress={() => { onClose(); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+            style={guideStyles.closeBtn}
+          >
+            <Ionicons name="checkmark" size={18} color="#fff" />
+            <Text style={guideStyles.closeBtnText}>Entendi</Text>
+          </Pressable>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+}
+
+const guideStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'flex-end',
+  },
+  container: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: '85%',
+    paddingHorizontal: 20,
+  },
+  handle: {
+    width: 40, height: 4, borderRadius: 2,
+    backgroundColor: Colors.border,
+    alignSelf: 'center',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    marginBottom: 16,
+  },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerIcon: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: Colors.accent + '15',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  headerTitle: { fontSize: 18, fontWeight: '700' as const, color: Colors.text },
+  scroll: { marginBottom: 16 },
+  stepCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.card,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    gap: 12,
+  },
+  stepIcon: {
+    width: 42, height: 42, borderRadius: 12,
+    backgroundColor: Colors.surfaceLight,
+    justifyContent: 'center', alignItems: 'center',
+    flexShrink: 0,
+  },
+  stepContent: { flex: 1 },
+  stepTitle: { fontSize: 14, fontWeight: '700' as const, color: Colors.accent, marginBottom: 4 },
+  stepDesc: { fontSize: 13, color: Colors.textSecondary, lineHeight: 19 },
+  closeBtn: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.accent,
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginBottom: 4,
+  },
+  closeBtnText: { fontSize: 16, fontWeight: '600' as const, color: '#fff' },
+});
 
 function CategorySection({ categoryKey, label, icon, questions }: {
   categoryKey: string; label: string; icon: string; questions: AuditQuestion[];
@@ -168,6 +314,7 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
 export default function SurveyScreen() {
   const insets = useSafeAreaInsets();
   const { answeredCount, totalCount, score } = useAudit();
+  const [showGuide, setShowGuide] = useState(false);
   const progress = totalCount > 0 ? answeredCount / totalCount : 0;
 
   const groupedQuestions = CATEGORIES.map(cat => ({
@@ -182,10 +329,17 @@ export default function SurveyScreen() {
         style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
       >
         <View style={styles.headerContent}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Levantamento</Text>
             <Text style={styles.headerSubtitle}>{answeredCount} de {totalCount} perguntas</Text>
           </View>
+          <Pressable
+            onPress={() => { setShowGuide(true); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+            style={styles.guideBtn}
+            hitSlop={8}
+          >
+            <Ionicons name="help-circle-outline" size={22} color={Colors.accent} />
+          </Pressable>
           <View style={styles.scoreCircle}>
             <Text style={styles.scoreText}>{score.percentage}%</Text>
           </View>
@@ -214,6 +368,8 @@ export default function SurveyScreen() {
           />
         ))}
       </ScrollView>
+
+      <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
     </View>
   );
 }
@@ -232,6 +388,9 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 28, fontWeight: '700' as const, color: Colors.text },
   headerSubtitle: { fontSize: 14, color: Colors.textSecondary, marginTop: 4 },
+  guideBtn: {
+    marginRight: 10,
+  },
   scoreCircle: {
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: Colors.accent + '20',
