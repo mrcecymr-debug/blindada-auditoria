@@ -8,9 +8,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import Colors from '@/constants/colors';
 import { useAudit, SavedAudit } from '@/lib/audit-context';
 import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS } from '@/lib/audit-data';
+import { generateReportHTML } from '@/lib/pdf-report';
 
 function SaveModal({ visible, onClose, onSave }: {
   visible: boolean; onClose: () => void; onSave: (name: string) => void;
@@ -73,6 +76,52 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
   const insets = useSafeAreaInsets();
   const score = calculateScore(audit.answers);
   const date = new Date(audit.date);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    try {
+      setPdfLoading(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const html = generateReportHTML(audit);
+      const { uri } = await Print.printToFileAsync({ html, base64: false });
+      setPdfLoading(false);
+
+      if (Platform.OS === 'web') {
+        await Print.printAsync({ html });
+      } else {
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync(uri, {
+            mimeType: 'application/pdf',
+            dialogTitle: 'Salvar Relatório PDF',
+            UTI: 'com.adobe.pdf',
+          });
+        }
+      }
+    } catch (e) {
+      setPdfLoading(false);
+    }
+  };
+
+  const handleSharePDF = async () => {
+    try {
+      setPdfLoading(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const html = generateReportHTML(audit);
+      const { uri } = await Print.printToFileAsync({ html, base64: false });
+      setPdfLoading(false);
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(uri, {
+          mimeType: 'application/pdf',
+          dialogTitle: 'Compartilhar Relatório',
+          UTI: 'com.adobe.pdf',
+        });
+      }
+    } catch (e) {
+      setPdfLoading(false);
+    }
+  };
 
   const vulnerabilities = [
     { text: 'Ausencia de sistema de alarme monitorado', points: -15 },
@@ -106,6 +155,24 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
             <Text style={styles.headerSubtitle}>
               {date.toLocaleDateString('pt-BR')} - {audit.answeredCount}/{audit.totalCount} respostas
             </Text>
+          </View>
+          <View style={styles.pdfActions}>
+            <Pressable
+              onPress={handleDownloadPDF}
+              style={styles.pdfBtn}
+              disabled={pdfLoading}
+            >
+              <Ionicons name="download-outline" size={20} color={Colors.accent} />
+            </Pressable>
+            {Platform.OS !== 'web' && (
+              <Pressable
+                onPress={handleSharePDF}
+                style={styles.pdfBtn}
+                disabled={pdfLoading}
+              >
+                <Ionicons name="share-outline" size={20} color={Colors.accent} />
+              </Pressable>
+            )}
           </View>
         </View>
       </LinearGradient>
@@ -283,7 +350,7 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
             resizeMode="contain"
           />
           <Text style={styles.footerText}>Casa Blindada Auditoria v3.0</Text>
-          <Text style={styles.footerText}>Validade: 6 meses</Text>
+          <Text style={styles.footerText}>Marcelo Ribeiro</Text>
         </View>
       </ScrollView>
     </View>
@@ -575,6 +642,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceLight,
     justifyContent: 'center', alignItems: 'center',
     marginRight: 12,
+  },
+  pdfActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  pdfBtn: {
+    width: 38, height: 38, borderRadius: 12,
+    backgroundColor: Colors.accent + '18',
+    justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.accent + '30',
   },
   scrollView: { flex: 1 },
   scrollContent: { padding: 16, gap: 16 },
