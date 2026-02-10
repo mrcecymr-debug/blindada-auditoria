@@ -12,9 +12,8 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import Colors from '@/constants/colors';
 import { useAudit, SavedAudit } from '@/lib/audit-context';
-import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS } from '@/lib/audit-data';
+import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS, generateActionItems } from '@/lib/audit-data';
 import { generateReportHTML, generateActionPlanHTML } from '@/lib/pdf-report';
-import { ACTION_ITEMS } from '@/lib/audit-data';
 
 function SaveModal({ visible, onClose, onSave }: {
   visible: boolean; onClose: () => void; onSave: (name: string) => void;
@@ -78,6 +77,7 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
   const score = calculateScore(audit.answers);
   const date = new Date(audit.date);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const dynamicActions = React.useMemo(() => generateActionItems(audit.answers), [audit.answers]);
 
   const handleDownloadPDF = async () => {
     try {
@@ -373,7 +373,13 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
           <View style={styles.section}>
             <Text style={styles.sectionNumber}>07</Text>
             <Text style={styles.sectionTitle}>Plano de Acao</Text>
-            {ACTION_ITEMS.map((item, idx) => {
+            {dynamicActions.length === 0 && (
+              <View style={{ padding: 20, alignItems: 'center' }}>
+                <Ionicons name="checkmark-circle-outline" size={40} color={Colors.success} />
+                <Text style={{ color: Colors.text, fontSize: 14, textAlign: 'center', marginTop: 10 }}>Nenhuma vulnerabilidade critica identificada com base nas respostas do levantamento.</Text>
+              </View>
+            )}
+            {dynamicActions.map((item, idx) => {
               const pColor = item.priority === 1 ? Colors.danger : item.priority === 2 ? Colors.warning : Colors.accent;
               const pLabel = item.priority === 1 ? 'URGENTE' : item.priority === 2 ? 'IMPORTANTE' : 'RECOMENDADO';
               return (

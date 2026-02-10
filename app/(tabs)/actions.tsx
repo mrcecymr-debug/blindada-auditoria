@@ -1,13 +1,14 @@
 import React from 'react';
 import {
-  StyleSheet, Text, View, ScrollView, Pressable, Linking, Platform,
+  StyleSheet, Text, View, ScrollView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import Colors from '@/constants/colors';
-import { ACTION_ITEMS, ActionItem } from '@/lib/audit-data';
+import { generateActionItems, ActionItem } from '@/lib/audit-data';
+import { useAudit } from '@/lib/audit-context';
 
 function PriorityBadge({ priority }: { priority: number }) {
   const colors = {
@@ -32,6 +33,7 @@ function ActionCard({ item, index }: { item: ActionItem; index: number }) {
       ILUMINACAO: 'bulb-outline',
       PERIMETRO: 'shield-outline',
       AUTOMACAO: 'settings-outline',
+      HUMANO: 'people-outline',
     };
     return icons[cat] || 'construct-outline';
   };
@@ -90,9 +92,15 @@ function ActionCard({ item, index }: { item: ActionItem; index: number }) {
 
 export default function ActionsScreen() {
   const insets = useSafeAreaInsets();
-  const priority1 = ACTION_ITEMS.filter(i => i.priority === 1);
-  const priority2 = ACTION_ITEMS.filter(i => i.priority === 2);
-  const priority3 = ACTION_ITEMS.filter(i => i.priority === 3);
+  const { answers, answeredCount } = useAudit();
+
+  const actionItems = React.useMemo(() => generateActionItems(answers), [answers]);
+
+  const priority1 = actionItems.filter(i => i.priority === 1);
+  const priority2 = actionItems.filter(i => i.priority === 2);
+  const priority3 = actionItems.filter(i => i.priority === 3);
+
+  const hasActions = actionItems.length > 0;
 
   return (
     <View style={styles.container}>
@@ -101,7 +109,11 @@ export default function ActionsScreen() {
         style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
       >
         <Text style={styles.headerTitle}>Plano de Acao</Text>
-        <Text style={styles.headerSubtitle}>Recomendacoes priorizadas de seguranca</Text>
+        <Text style={styles.headerSubtitle}>
+          {hasActions
+            ? `${actionItems.length} acoes identificadas no levantamento`
+            : 'Recomendacoes baseadas no seu levantamento'}
+        </Text>
       </LinearGradient>
 
       <ScrollView
@@ -111,32 +123,54 @@ export default function ActionsScreen() {
         }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInDown.duration(400)}>
-          <View style={styles.investmentCard}>
-            <Text style={styles.investmentTitle}>Resumo de Investimento</Text>
-            <View style={styles.investmentRow}>
-              <View style={[styles.investmentDot, { backgroundColor: Colors.danger }]} />
-              <Text style={styles.investmentLabel}>Prioridade 1 (7 dias)</Text>
-              <Text style={styles.investmentValue}>R$ 500-1.000</Text>
+        {!hasActions && (
+          <Animated.View entering={FadeInDown.duration(400)}>
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIconContainer}>
+                <Ionicons name={answeredCount === 0 ? 'clipboard-outline' : 'checkmark-circle-outline'} size={48} color={answeredCount === 0 ? Colors.textMuted : Colors.success} />
+              </View>
+              <Text style={styles.emptyTitle}>
+                {answeredCount === 0
+                  ? 'Nenhum levantamento realizado'
+                  : 'Nenhuma vulnerabilidade critica encontrada'}
+              </Text>
+              <Text style={styles.emptySubtitle}>
+                {answeredCount === 0
+                  ? 'Responda as perguntas na aba "Levantamento" para receber recomendacoes personalizadas de seguranca.'
+                  : 'Com base nas suas respostas, sua residencia esta com boa seguranca. Continue monitorando regularmente.'}
+              </Text>
             </View>
-            <View style={styles.investmentRow}>
-              <View style={[styles.investmentDot, { backgroundColor: Colors.warning }]} />
-              <Text style={styles.investmentLabel}>Prioridade 2 (30 dias)</Text>
-              <Text style={styles.investmentValue}>R$ 800-1.500</Text>
+          </Animated.View>
+        )}
+
+        {hasActions && (
+          <Animated.View entering={FadeInDown.duration(400)}>
+            <View style={styles.investmentCard}>
+              <Text style={styles.investmentTitle}>Resumo de Acoes</Text>
+              <View style={styles.investmentRow}>
+                <View style={[styles.investmentDot, { backgroundColor: Colors.danger }]} />
+                <Text style={styles.investmentLabel}>Critico - Implementar em 7 dias</Text>
+                <Text style={styles.investmentValue}>{priority1.length} {priority1.length === 1 ? 'acao' : 'acoes'}</Text>
+              </View>
+              <View style={styles.investmentRow}>
+                <View style={[styles.investmentDot, { backgroundColor: Colors.warning }]} />
+                <Text style={styles.investmentLabel}>Importante - Implementar em 30 dias</Text>
+                <Text style={styles.investmentValue}>{priority2.length} {priority2.length === 1 ? 'acao' : 'acoes'}</Text>
+              </View>
+              <View style={styles.investmentRow}>
+                <View style={[styles.investmentDot, { backgroundColor: Colors.info }]} />
+                <Text style={styles.investmentLabel}>Melhoria - Implementar em 90 dias</Text>
+                <Text style={styles.investmentValue}>{priority3.length} {priority3.length === 1 ? 'acao' : 'acoes'}</Text>
+              </View>
+              <View style={styles.investmentDivider} />
+              <View style={styles.investmentRow}>
+                <Ionicons name="list-outline" size={16} color={Colors.accent} />
+                <Text style={[styles.investmentLabel, { color: Colors.accent, fontWeight: '700' as const }]}>Total de Acoes</Text>
+                <Text style={[styles.investmentValue, { color: Colors.accent }]}>{actionItems.length}</Text>
+              </View>
             </View>
-            <View style={styles.investmentRow}>
-              <View style={[styles.investmentDot, { backgroundColor: Colors.info }]} />
-              <Text style={styles.investmentLabel}>Prioridade 3 (90 dias)</Text>
-              <Text style={styles.investmentValue}>R$ 8.000+</Text>
-            </View>
-            <View style={styles.investmentDivider} />
-            <View style={styles.investmentRow}>
-              <Ionicons name="wallet-outline" size={16} color={Colors.accent} />
-              <Text style={[styles.investmentLabel, { color: Colors.accent, fontWeight: '700' as const }]}>Total Estimado</Text>
-              <Text style={[styles.investmentValue, { color: Colors.accent }]}>R$ 9.300-10.500</Text>
-            </View>
-          </View>
-        </Animated.View>
+          </Animated.View>
+        )}
 
         {priority1.length > 0 && (
           <View style={styles.prioritySection}>
@@ -145,7 +179,7 @@ export default function ActionsScreen() {
               <Text style={styles.sectionTitle}>Prioridade 1 - Implementar em 7 dias</Text>
             </View>
             {priority1.map((item, idx) => (
-              <ActionCard key={idx} item={item} index={idx} />
+              <ActionCard key={`p1-${idx}`} item={item} index={idx} />
             ))}
           </View>
         )}
@@ -157,7 +191,7 @@ export default function ActionsScreen() {
               <Text style={styles.sectionTitle}>Prioridade 2 - Implementar em 30 dias</Text>
             </View>
             {priority2.map((item, idx) => (
-              <ActionCard key={idx} item={item} index={idx + priority1.length} />
+              <ActionCard key={`p2-${idx}`} item={item} index={idx + priority1.length} />
             ))}
           </View>
         )}
@@ -169,7 +203,7 @@ export default function ActionsScreen() {
               <Text style={styles.sectionTitle}>Prioridade 3 - Implementar em 90 dias</Text>
             </View>
             {priority3.map((item, idx) => (
-              <ActionCard key={idx} item={item} index={idx + priority1.length + priority2.length} />
+              <ActionCard key={`p3-${idx}`} item={item} index={idx + priority1.length + priority2.length} />
             ))}
           </View>
         )}
@@ -188,6 +222,36 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 14, color: Colors.textSecondary, marginTop: 4 },
   scrollView: { flex: 1 },
   scrollContent: { padding: 16, gap: 16 },
+  emptyState: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 32,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    gap: 12,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.card,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
   investmentCard: {
     backgroundColor: Colors.surface,
     borderRadius: 20,
