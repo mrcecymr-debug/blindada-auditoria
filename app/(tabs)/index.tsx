@@ -36,7 +36,7 @@ const GUIDE_STEPS = [
   {
     icon: 'bulb-outline' as const,
     title: 'Dica',
-    description: 'Voce pode alterar qualquer resposta a qualquer momento. O painel, as acoes e o relatorio serao atualizados automaticamente. Use o campo de observacao em cada pergunta para anotar detalhes extras.',
+    description: 'Voce pode alterar qualquer resposta a qualquer momento na aba Levantamento. O painel e as acoes serao atualizados automaticamente, porem voce devera SALVAR um NOVO relatorio com um nome diferente para essas suas NOVAS alteracoes. Use o campo de observacao em cada pergunta do Levantamento para anotar detalhes extras.',
   },
 ];
 
