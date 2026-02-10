@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Pressable, Platform,
-  Modal, TextInput, FlatList,
+  Modal, TextInput, FlatList, Image, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -122,11 +122,14 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
             colors={[Colors.primaryLight, Colors.surface]}
             style={styles.reportHeader}
           >
-            <View style={styles.reportBrand}>
-              <Ionicons name="shield-checkmark" size={28} color={Colors.accent} />
-              <Text style={styles.reportBrandText}>CASA BLINDADA</Text>
+            <View style={styles.reportLogoContainer}>
+              <Image
+                source={require('@/assets/images/logo-casa-blindada.jpg')}
+                style={styles.reportLogo}
+                resizeMode="contain"
+              />
             </View>
-            <Text style={styles.reportSubbrand}>Auditoria de Seguranca Residencial 2026</Text>
+            <View style={styles.reportDivider} />
 
             <View style={styles.reportMeta}>
               <View style={styles.reportMetaItem}>
@@ -274,6 +277,11 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
         </Animated.View>
 
         <View style={styles.footer}>
+          <Image
+            source={require('@/assets/images/logo-casa-blindada.jpg')}
+            style={styles.footerLogo}
+            resizeMode="contain"
+          />
           <Text style={styles.footerText}>Casa Blindada Auditoria v3.0</Text>
           <Text style={styles.footerText}>Validade: 6 meses</Text>
         </View>
@@ -755,26 +763,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  reportBrand: {
-    flexDirection: 'row',
+  reportLogoContainer: {
     alignItems: 'center',
-    gap: 10,
+    paddingVertical: 8,
   },
-  reportBrandText: {
-    fontSize: 20,
-    fontWeight: '800' as const,
-    color: Colors.text,
-    letterSpacing: 2,
+  reportLogo: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
   },
-  reportSubbrand: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginTop: 6,
-    marginLeft: 38,
+  reportDivider: {
+    height: 1,
+    backgroundColor: Colors.accent + '30',
+    marginTop: 16,
+    marginHorizontal: 20,
   },
   reportMeta: {
     flexDirection: 'row',
-    marginTop: 20,
+    marginTop: 16,
     gap: 12,
   },
   reportMetaItem: {
@@ -903,8 +909,15 @@ const styles = StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
-    paddingVertical: 16,
-    gap: 4,
+    paddingVertical: 20,
+    gap: 6,
+  },
+  footerLogo: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginBottom: 4,
+    opacity: 0.7,
   },
   footerText: { fontSize: 11, color: Colors.textMuted },
 });
