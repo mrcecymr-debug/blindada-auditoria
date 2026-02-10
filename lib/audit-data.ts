@@ -5,6 +5,7 @@ export interface AuditQuestion {
   question: string;
   weight: number;
   options: string[];
+  inverted?: boolean;
 }
 
 export interface AuditAnswer {
@@ -22,6 +23,8 @@ export interface ActionItem {
   investment: string;
   installation: string;
   impact: string;
+  questionLabel?: string;
+  answerText?: string;
 }
 
 export interface CategoryScore {
@@ -61,11 +64,13 @@ export const QUESTIONS: AuditQuestion[] = [
     code: 'P04', category: 'Perimetro e Estrutura', categoryKey: 'perimetro',
     question: 'Quantidade de portas externas', weight: 8,
     options: ['0 (apenas portao)', '1 porta', '2 portas', '3 portas', '4+ portas'],
+    inverted: true,
   },
   {
     code: 'P05', category: 'Perimetro e Estrutura', categoryKey: 'perimetro',
     question: 'Quantidade de janelas acessiveis do solo (<2,5m)', weight: 10,
     options: ['0 janelas', '1 janela', '2 janelas', '3-4 janelas', '5-6 janelas', '7-10 janelas', '10+ janelas', 'Todas >2,5m', 'Outro (especificar)'],
+    inverted: true,
   },
   {
     code: 'P06', category: 'Perimetro e Estrutura', categoryKey: 'perimetro',
@@ -171,6 +176,7 @@ export const QUESTIONS: AuditQuestion[] = [
     code: 'H02', category: 'Fatores Humanos', categoryKey: 'humano',
     question: 'Frequencia de viagens/ausencias longas', weight: 6,
     options: ['Nunca viaja', 'Raramente 1x/ano', 'Moderado 2-3x/ano', 'Frequente 4-6x/ano', 'Muito frequente mensal', 'Ausencias >1 mese', 'Casa temporada', 'Outro (especificar)'],
+    inverted: true,
   },
   {
     code: 'H03', category: 'Fatores Humanos', categoryKey: 'humano',
@@ -196,11 +202,13 @@ export const QUESTIONS: AuditQuestion[] = [
     code: 'H07', category: 'Fatores Humanos', categoryKey: 'humano',
     question: 'Historico de incidentes nos ultimos 24 meses', weight: 8,
     options: ['Nenhum', 'Tentativa furto carro', 'Tentativa invasao', 'Furto consumado', 'Roubo/assalto', 'Multiplos incidentes', 'Incidentes vizinhos', 'Area historico criminal', 'Outro (especificar)'],
+    inverted: true,
   },
   {
     code: 'H08', category: 'Fatores Humanos', categoryKey: 'humano',
     question: 'Indice de criminalidade do bairro/regiao', weight: 10,
     options: ['Muito baixo <5/1000', 'Baixo 5-15/1000', 'Medio 15-30/1000', 'Alto 30-50/1000', 'Muito alto >50/1000', 'Dados indisponiveis', 'Consultado SSP', 'Outro (especificar)'],
+    inverted: true,
   },
 ];
 
@@ -369,7 +377,8 @@ function getAnswerScore(questionCode: string, answer: string): number {
   const optionIndex = question.options.indexOf(answer);
   const totalOptions = question.options.length;
   if (optionIndex < 0 || totalOptions <= 1) return 0;
-  return optionIndex / (totalOptions - 1);
+  const rawScore = optionIndex / (totalOptions - 1);
+  return question.inverted ? 1 - rawScore : rawScore;
 }
 
 export function generateActionItems(answers: Record<string, AuditAnswer>): ActionItem[] {
@@ -384,7 +393,12 @@ export function generateActionItems(answers: Record<string, AuditAnswer>): Actio
 
     const score = getAnswerScore(rule.questionCode, answer.answer);
     if (score <= rule.threshold) {
-      items.push({ ...rule.item });
+      const question = QUESTIONS.find(q => q.code === rule.questionCode);
+      items.push({
+        ...rule.item,
+        questionLabel: question?.question ?? '',
+        answerText: answer.answer,
+      });
     }
   }
 
@@ -413,8 +427,9 @@ export function calculateScore(answers: Record<string, AuditAnswer>): {
       const optionIndex = q.options.indexOf(answer.answer);
       const totalOptions = q.options.length;
       if (optionIndex >= 0 && totalOptions > 1) {
-        const score = ((optionIndex) / (totalOptions - 1)) * q.weight;
-        categoryMap[q.categoryKey].earned += score;
+        const rawScore = optionIndex / (totalOptions - 1);
+        const adjustedScore = q.inverted ? 1 - rawScore : rawScore;
+        categoryMap[q.categoryKey].earned += adjustedScore * q.weight;
       }
     }
   }

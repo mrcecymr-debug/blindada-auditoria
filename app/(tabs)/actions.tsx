@@ -54,6 +54,14 @@ function ActionCard({ item, index }: { item: ActionItem; index: number }) {
           <PriorityBadge priority={item.priority} />
         </View>
 
+        {item.answerText && (
+          <View style={styles.answerRow}>
+            <Ionicons name="chatbubble-ellipses-outline" size={13} color={Colors.warning} />
+            <Text style={styles.answerLabel}>{item.questionLabel}:</Text>
+            <Text style={styles.answerValue}>{item.answerText}</Text>
+          </View>
+        )}
+
         <View style={styles.actionDivider} />
 
         <View style={styles.actionBody}>
@@ -304,6 +312,18 @@ const styles = StyleSheet.create({
   actionTitleGroup: { flex: 1 },
   actionCategory: { fontSize: 11, color: Colors.textMuted, fontWeight: '600' as const },
   actionVulnerability: { fontSize: 15, fontWeight: '600' as const, color: Colors.text, marginTop: 2 },
+  answerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+    backgroundColor: Colors.warning + '10',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  answerLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '500' as const },
+  answerValue: { fontSize: 12, color: Colors.warning, fontWeight: '600' as const, flex: 1 },
   priorityBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,

@@ -294,7 +294,8 @@ export function generateActionPlanHTML(audit: SavedAudit): string {
         </div>
         <span style="color:#2ED573;font-weight:700;font-size:15px;">${item.impact}</span>
       </div>
-      <div style="color:#FF6B6B;font-weight:600;font-size:14px;margin-bottom:6px;">${item.vulnerability}</div>
+      <div style="color:#FF6B6B;font-weight:600;font-size:14px;margin-bottom:4px;">${item.vulnerability}</div>
+      ${item.answerText ? `<div style="background:#FF9F4315;padding:4px 10px;border-radius:6px;margin-bottom:6px;font-size:11px;"><span style="color:#8A9BB5;">${item.questionLabel}:</span> <span style="color:#FF9F43;font-weight:600;">${item.answerText}</span></div>` : ''}
       <div style="color:#E8ECF0;font-size:13px;margin-bottom:8px;">${item.solution}</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         <div><span style="color:#8A9BB5;font-size:11px;">Produto:</span> <span style="color:#E8ECF0;font-size:12px;">${item.product}</span></div>

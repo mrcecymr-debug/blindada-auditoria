@@ -375,6 +375,13 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
                     <Text style={styles.actionCardImpact}>{item.impact}</Text>
                   </View>
                   <Text style={styles.actionCardVuln}>{item.vulnerability}</Text>
+                  {item.answerText && (
+                    <View style={styles.actionCardAnswerRow}>
+                      <Ionicons name="chatbubble-ellipses-outline" size={12} color={Colors.warning} />
+                      <Text style={styles.actionCardAnswerLabel}>{item.questionLabel}:</Text>
+                      <Text style={styles.actionCardAnswerValue}>{item.answerText}</Text>
+                    </View>
+                  )}
                   <Text style={styles.actionCardSolution}>{item.solution}</Text>
                   <View style={styles.actionCardDetails}>
                     <View style={styles.actionCardDetail}>
@@ -1128,6 +1135,18 @@ const styles = StyleSheet.create({
     color: Colors.danger,
     marginBottom: 4,
   },
+  actionCardAnswerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 6,
+    backgroundColor: Colors.warning + '10',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  actionCardAnswerLabel: { fontSize: 10, color: Colors.textMuted },
+  actionCardAnswerValue: { fontSize: 11, color: Colors.warning, fontWeight: '600' as const, flex: 1 },
   actionCardSolution: {
     fontSize: 13,
     color: Colors.text,
