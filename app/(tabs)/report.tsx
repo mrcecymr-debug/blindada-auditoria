@@ -13,7 +13,8 @@ import * as Sharing from 'expo-sharing';
 import Colors from '@/constants/colors';
 import { useAudit, SavedAudit } from '@/lib/audit-context';
 import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS } from '@/lib/audit-data';
-import { generateReportHTML } from '@/lib/pdf-report';
+import { generateReportHTML, generateActionPlanHTML } from '@/lib/pdf-report';
+import { ACTION_ITEMS } from '@/lib/audit-data';
 
 function SaveModal({ visible, onClose, onSave }: {
   visible: boolean; onClose: () => void; onSave: (name: string) => void;
@@ -117,6 +118,31 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
           dialogTitle: 'Compartilhar Relatório',
           UTI: 'com.adobe.pdf',
         });
+      }
+    } catch (e) {
+      setPdfLoading(false);
+    }
+  };
+
+  const handleActionPlanPDF = async (share: boolean) => {
+    try {
+      setPdfLoading(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const html = generateActionPlanHTML(audit);
+      const { uri } = await Print.printToFileAsync({ html, base64: false });
+      setPdfLoading(false);
+
+      if (Platform.OS === 'web') {
+        await Print.printAsync({ html });
+      } else {
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync(uri, {
+            mimeType: 'application/pdf',
+            dialogTitle: share ? 'Compartilhar Plano de Acao' : 'Salvar Plano de Acao PDF',
+            UTI: 'com.adobe.pdf',
+          });
+        }
       }
     } catch (e) {
       setPdfLoading(false);
@@ -339,6 +365,79 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
                 <Text style={[styles.budgetLabel, { color: Colors.accent, fontWeight: '700' as const }]}>Custo Total</Text>
                 <Text style={[styles.budgetValue, { color: Colors.accent, fontSize: 18 }]}>R$ 9.300-10.500</Text>
               </View>
+            </View>
+          </View>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(700).duration(400)}>
+          <View style={styles.section}>
+            <Text style={styles.sectionNumber}>07</Text>
+            <Text style={styles.sectionTitle}>Plano de Acao</Text>
+            {ACTION_ITEMS.map((item, idx) => {
+              const pColor = item.priority === 1 ? Colors.danger : item.priority === 2 ? Colors.warning : Colors.accent;
+              const pLabel = item.priority === 1 ? 'URGENTE' : item.priority === 2 ? 'IMPORTANTE' : 'RECOMENDADO';
+              return (
+                <View key={idx} style={[styles.actionCard, { borderLeftColor: pColor }]}>
+                  <View style={styles.actionCardHeader}>
+                    <View style={styles.actionCardHeaderLeft}>
+                      <View style={[styles.actionCardNum, { backgroundColor: pColor + '20' }]}>
+                        <Text style={[styles.actionCardNumText, { color: pColor }]}>{idx + 1}</Text>
+                      </View>
+                      <View style={[styles.actionCardBadge, { backgroundColor: pColor }]}>
+                        <Text style={styles.actionCardBadgeText}>{pLabel}</Text>
+                      </View>
+                      <Text style={styles.actionCardCategory}>{item.category}</Text>
+                    </View>
+                    <Text style={styles.actionCardImpact}>{item.impact}</Text>
+                  </View>
+                  <Text style={styles.actionCardVuln}>{item.vulnerability}</Text>
+                  <Text style={styles.actionCardSolution}>{item.solution}</Text>
+                  <View style={styles.actionCardDetails}>
+                    <View style={styles.actionCardDetail}>
+                      <Text style={styles.actionCardDetailLabel}>Produto</Text>
+                      <Text style={styles.actionCardDetailValue}>{item.product}</Text>
+                    </View>
+                    <View style={styles.actionCardDetail}>
+                      <Text style={styles.actionCardDetailLabel}>Investimento</Text>
+                      <Text style={[styles.actionCardDetailValue, { color: Colors.accent }]}>{item.investment}</Text>
+                    </View>
+                    <View style={styles.actionCardDetail}>
+                      <Text style={styles.actionCardDetailLabel}>Instalacao</Text>
+                      <Text style={styles.actionCardDetailValue}>{item.installation}</Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+
+            <View style={styles.actionPdfButtons}>
+              <Pressable
+                onPress={() => handleActionPlanPDF(false)}
+                style={styles.actionPdfBtn}
+                disabled={pdfLoading}
+              >
+                <LinearGradient
+                  colors={[Colors.accent, Colors.accentDark]}
+                  style={styles.actionPdfBtnGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Ionicons name="download-outline" size={20} color="#fff" />
+                  <Text style={styles.actionPdfBtnText}>Baixar Plano de Acao PDF</Text>
+                </LinearGradient>
+              </Pressable>
+              {Platform.OS !== 'web' && (
+                <Pressable
+                  onPress={() => handleActionPlanPDF(true)}
+                  style={styles.actionPdfBtn}
+                  disabled={pdfLoading}
+                >
+                  <View style={styles.actionShareBtnInner}>
+                    <Ionicons name="share-outline" size={20} color={Colors.accent} />
+                    <Text style={[styles.actionPdfBtnText, { color: Colors.accent }]}>Compartilhar via WhatsApp</Text>
+                  </View>
+                </Pressable>
+              )}
             </View>
           </View>
         </Animated.View>
@@ -998,4 +1097,119 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   footerText: { fontSize: 11, color: Colors.textMuted },
+  actionCard: {
+    backgroundColor: Colors.card,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    borderLeftWidth: 4,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  actionCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  actionCardHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  actionCardNum: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionCardNumText: {
+    fontSize: 12,
+    fontWeight: '700' as const,
+  },
+  actionCardBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  actionCardBadgeText: {
+    fontSize: 9,
+    fontWeight: '700' as const,
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  actionCardCategory: {
+    fontSize: 10,
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  actionCardImpact: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+    color: Colors.success,
+  },
+  actionCardVuln: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.danger,
+    marginBottom: 4,
+  },
+  actionCardSolution: {
+    fontSize: 13,
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  actionCardDetails: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  actionCardDetail: {
+    gap: 2,
+  },
+  actionCardDetailLabel: {
+    fontSize: 10,
+    color: Colors.textMuted,
+  },
+  actionCardDetailValue: {
+    fontSize: 12,
+    color: Colors.text,
+    fontWeight: '500' as const,
+  },
+  actionPdfButtons: {
+    gap: 10,
+    marginTop: 16,
+  },
+  actionPdfBtn: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  actionPdfBtnGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
+  actionPdfBtnText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#fff',
+  },
+  actionShareBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: Colors.accent + '40',
+    borderRadius: 14,
+    backgroundColor: Colors.accent + '10',
+  },
 });
