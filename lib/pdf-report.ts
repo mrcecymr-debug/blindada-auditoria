@@ -256,23 +256,6 @@ export function generateReportHTML(audit: SavedAudit): string {
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-number">SECAO 06</div>
-    <div class="section-title">Orcamento Total</div>
-    <div class="budget-item">
-      <span class="budget-label">Investimento Imediato (P1)</span>
-      <span class="budget-value">R$ 500-1.000</span>
-    </div>
-    <div class="budget-item">
-      <span class="budget-label">Melhorias Graduais (P2-3)</span>
-      <span class="budget-value">R$ 8.800-9.500</span>
-    </div>
-    <div class="budget-total">
-      <span class="budget-label">Custo Total</span>
-      <span class="budget-value">R$ 9.300-10.500</span>
-    </div>
-  </div>
-
   <div class="footer">
     <div class="footer-left">
       <img src="data:image/jpeg;base64,${LOGO_BASE64}" class="footer-logo" alt="Casa Blindada" />
@@ -426,25 +409,6 @@ export function generateActionPlanHTML(audit: SavedAudit): string {
           <div style="color:#E8ECF0;font-size:13px;">${item.task}</div>
         </div>
       `).join('')}
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-num">04</div>
-    <div class="section-title">Orcamento Estimado</div>
-    <div style="background:#0D1B2A;border:1px solid #1A2D44;border-radius:12px;padding:16px;">
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1A2D44;">
-        <span style="color:#8A9BB5;">Investimento Imediato (P1)</span>
-        <span style="color:#E8ECF0;font-weight:600;">R$ 500-1.000</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1A2D44;">
-        <span style="color:#8A9BB5;">Melhorias Graduais (P2-3)</span>
-        <span style="color:#E8ECF0;font-weight:600;">R$ 8.800-9.500</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:12px 0;">
-        <span style="color:#00C6AE;font-weight:700;">Custo Total</span>
-        <span style="color:#00C6AE;font-weight:700;font-size:18px;">R$ 9.300-10.500</span>
-      </div>
     </div>
   </div>
 

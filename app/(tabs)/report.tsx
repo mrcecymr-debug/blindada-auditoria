@@ -350,28 +350,6 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
         <Animated.View entering={FadeInDown.delay(600).duration(400)}>
           <View style={styles.section}>
             <Text style={styles.sectionNumber}>06</Text>
-            <Text style={styles.sectionTitle}>Orcamento Total</Text>
-            <View style={styles.budgetContainer}>
-              <View style={styles.budgetRow}>
-                <Text style={styles.budgetLabel}>Investimento Imediato (P1)</Text>
-                <Text style={styles.budgetValue}>R$ 500-1.000</Text>
-              </View>
-              <View style={styles.budgetRow}>
-                <Text style={styles.budgetLabel}>Melhorias Graduais (P2-3)</Text>
-                <Text style={styles.budgetValue}>R$ 8.800-9.500</Text>
-              </View>
-              <View style={styles.budgetDivider} />
-              <View style={styles.budgetRow}>
-                <Text style={[styles.budgetLabel, { color: Colors.accent, fontWeight: '700' as const }]}>Custo Total</Text>
-                <Text style={[styles.budgetValue, { color: Colors.accent, fontSize: 18 }]}>R$ 9.300-10.500</Text>
-              </View>
-            </View>
-          </View>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(700).duration(400)}>
-          <View style={styles.section}>
-            <Text style={styles.sectionNumber}>07</Text>
             <Text style={styles.sectionTitle}>Plano de Acao</Text>
             {dynamicActions.length === 0 && (
               <View style={{ padding: 20, alignItems: 'center' }}>
@@ -1077,19 +1055,6 @@ const styles = StyleSheet.create({
   timelineWeek: { fontSize: 14, fontWeight: '700' as const, color: Colors.text },
   timelineDays: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
   timelineTask: { fontSize: 13, color: Colors.textSecondary, marginTop: 4 },
-  budgetContainer: { gap: 10 },
-  budgetRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  budgetLabel: { fontSize: 13, color: Colors.textSecondary },
-  budgetValue: { fontSize: 15, fontWeight: '700' as const, color: Colors.text },
-  budgetDivider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginVertical: 4,
-  },
   footer: {
     alignItems: 'center',
     paddingVertical: 20,
