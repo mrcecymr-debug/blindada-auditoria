@@ -12,7 +12,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import Colors from '@/constants/colors';
 import { useAudit, SavedAudit } from '@/lib/audit-context';
-import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS, generateActionItems } from '@/lib/audit-data';
+import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS, generateActionItems, getTopVulnerabilities } from '@/lib/audit-data';
 import { generateReportHTML, generateActionPlanHTML } from '@/lib/pdf-report';
 
 function SaveModal({ visible, onClose, onSave }: {
@@ -149,13 +149,7 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
     }
   };
 
-  const vulnerabilities = [
-    { text: 'Ausencia de sistema de alarme monitorado', points: -15 },
-    { text: 'Fechaduras comuns na porta principal', points: -10 },
-    { text: 'Muro baixo ou inexistente', points: -15 },
-    { text: 'Janelas acessiveis sem grades', points: -10 },
-    { text: 'Iluminacao externa inadequada', points: -8 },
-  ];
+  const vulnerabilities = React.useMemo(() => getTopVulnerabilities(audit.answers, 5), [audit.answers]);
 
   const timeline = [
     { week: 'Semana 1', days: 'Dias 1-7', task: 'Fechaduras + sensores porta/janela' },
@@ -315,15 +309,25 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
           <View style={styles.section}>
             <Text style={styles.sectionNumber}>04</Text>
             <Text style={styles.sectionTitle}>Top 5 Vulnerabilidades Criticas</Text>
-            {vulnerabilities.map((v, idx) => (
-              <View key={idx} style={styles.vulnRow}>
-                <View style={styles.vulnNumber}>
-                  <Text style={styles.vulnNumberText}>{idx + 1}</Text>
-                </View>
-                <Text style={styles.vulnText}>{v.text}</Text>
-                <Text style={styles.vulnPoints}>{v.points}</Text>
+            {vulnerabilities.length === 0 ? (
+              <View style={{ padding: 20, alignItems: 'center' }}>
+                <Ionicons name="checkmark-circle-outline" size={40} color={Colors.success} />
+                <Text style={{ color: Colors.text, fontSize: 14, textAlign: 'center', marginTop: 10 }}>Nenhuma vulnerabilidade identificada. Responda o levantamento para gerar a analise.</Text>
               </View>
-            ))}
+            ) : (
+              vulnerabilities.map((v, idx) => (
+                <View key={idx} style={styles.vulnRow}>
+                  <View style={styles.vulnNumber}>
+                    <Text style={styles.vulnNumberText}>{idx + 1}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.vulnText}>{v.question}</Text>
+                    <Text style={styles.vulnAnswer}>{v.answer}</Text>
+                  </View>
+                  <Text style={styles.vulnPoints}>-{v.lostPoints}</Text>
+                </View>
+              ))
+            )}
           </View>
         </Animated.View>
 
@@ -1034,7 +1038,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   vulnNumberText: { fontSize: 12, fontWeight: '700' as const, color: Colors.danger },
-  vulnText: { fontSize: 13, color: Colors.text, flex: 1 },
+  vulnText: { fontSize: 13, color: Colors.text },
+  vulnAnswer: { fontSize: 11, color: Colors.warning, marginTop: 2 },
   vulnPoints: { fontSize: 13, fontWeight: '700' as const, color: Colors.danger },
   timelineRow: {
     flexDirection: 'row',

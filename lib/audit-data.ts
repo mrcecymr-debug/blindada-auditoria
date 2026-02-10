@@ -407,6 +407,44 @@ export function generateActionItems(answers: Record<string, AuditAnswer>): Actio
   return items;
 }
 
+export interface VulnerabilityItem {
+  code: string;
+  question: string;
+  answer: string;
+  category: string;
+  score: number;
+  maxWeight: number;
+  lostPoints: number;
+}
+
+export function getTopVulnerabilities(answers: Record<string, AuditAnswer>, count: number = 5): VulnerabilityItem[] {
+  const vulns: VulnerabilityItem[] = [];
+
+  for (const q of QUESTIONS) {
+    const a = answers[q.code];
+    if (!a || !a.answer) continue;
+
+    const score = getAnswerScore(q.code, a.answer);
+    if (score >= 1) continue;
+
+    const lostPoints = Math.round((1 - score) * q.weight);
+    if (lostPoints <= 0) continue;
+
+    vulns.push({
+      code: q.code,
+      question: q.question,
+      answer: a.answer,
+      category: q.category,
+      score,
+      maxWeight: q.weight,
+      lostPoints,
+    });
+  }
+
+  vulns.sort((a, b) => b.lostPoints - a.lostPoints);
+  return vulns.slice(0, count);
+}
+
 export function calculateScore(answers: Record<string, AuditAnswer>): {
   totalScore: number;
   maxScore: number;
