@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Pressable, Modal,
-  FlatList, TextInput, Platform,
+  FlatList, TextInput, Platform, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -328,18 +328,24 @@ export default function SurveyScreen() {
         colors={[Colors.primary, Colors.background]}
         style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
       >
+        <View style={styles.logoRow}>
+          <Image
+            source={require('@/assets/images/logo-casa-blindada.jpg')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <Pressable
+            onPress={() => { setShowGuide(true); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+            hitSlop={8}
+          >
+            <Ionicons name="help-circle-outline" size={24} color={Colors.accent} />
+          </Pressable>
+        </View>
         <View style={styles.headerContent}>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Levantamento</Text>
             <Text style={styles.headerSubtitle}>{answeredCount} de {totalCount} perguntas</Text>
           </View>
-          <Pressable
-            onPress={() => { setShowGuide(true); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
-            style={styles.guideBtn}
-            hitSlop={8}
-          >
-            <Ionicons name="help-circle-outline" size={22} color={Colors.accent} />
-          </Pressable>
           <View style={styles.scoreCircle}>
             <Text style={styles.scoreText}>{score.percentage}%</Text>
           </View>
@@ -380,17 +386,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
   },
+  logoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  logoImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+  },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 8,
   },
   headerTitle: { fontSize: 28, fontWeight: '700' as const, color: Colors.text },
   headerSubtitle: { fontSize: 14, color: Colors.textSecondary, marginTop: 4 },
-  guideBtn: {
-    marginRight: 10,
-  },
   scoreCircle: {
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: Colors.accent + '20',
