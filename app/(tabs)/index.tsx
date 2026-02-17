@@ -3,6 +3,9 @@ import {
   StyleSheet, Text, View, ScrollView, Pressable, Modal,
   FlatList, TextInput, Platform, Image,
 } from 'react-native';
+import { supabase } from "@/lib/supabase";
+import { Button } from "react-native";
+
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -311,8 +314,16 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
   );
 }
 
-export default function SurveyScreen() {
-  const insets = useSafeAreaInsets();
+  export default function SurveyScreen() {
+    const insets = useSafeAreaInsets();
+
+    const handleLogout = async () => {
+      console.log("LOGOUT DISPARADO");
+      await supabase.auth.signOut();
+      console.log("LOGOUT CONCLUIDO");
+    };
+
+
   const { answeredCount, totalCount, score } = useAudit();
   const [showGuide, setShowGuide] = useState(false);
   const progress = totalCount > 0 ? answeredCount / totalCount : 0;
@@ -334,13 +345,34 @@ export default function SurveyScreen() {
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <Pressable
-            onPress={() => { setShowGuide(true); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
-            hitSlop={8}
-          >
-            <Ionicons name="help-circle-outline" size={24} color={Colors.accent} />
-          </Pressable>
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <Pressable
+              onPress={handleLogout}
+              style={{
+                backgroundColor: "red",
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                Sair
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                setShowGuide(true);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }}
+              hitSlop={8}
+            >
+              <Ionicons name="help-circle-outline" size={24} color={Colors.accent} />
+            </Pressable>
+          </View>
         </View>
+
         <View style={styles.headerContent}>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Levantamento</Text>
@@ -374,7 +406,7 @@ export default function SurveyScreen() {
           />
         ))}
       </ScrollView>
-
+      <Button title="Sair" onPress={handleLogout} />
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
     </View>
   );
