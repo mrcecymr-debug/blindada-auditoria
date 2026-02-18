@@ -349,17 +349,21 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <Pressable
               onPress={handleLogout}
-              style={{
-                backgroundColor: "red",
+              style={({ pressed }) => ({
                 paddingHorizontal: 12,
                 paddingVertical: 6,
-                borderRadius: 8,
-              }}
+                borderWidth: 1.2,
+                borderColor: Colors.accent,
+                borderRadius: 6,
+                backgroundColor: pressed ? Colors.accent + "15" : "transparent",
+              })}
             >
-              <Text style={{ color: "#fff", fontWeight: "bold" }}>
+              <Text style={{ color: Colors.accent, fontSize: 13, fontWeight: "600" }}>
                 Sair
               </Text>
             </Pressable>
+
+
 
             <Pressable
               onPress={() => {
