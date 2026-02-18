@@ -8,12 +8,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
 import Colors from '@/constants/colors';
 import { useAudit, SavedAudit } from '@/lib/audit-context';
 import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS, generateActionItems, getTopVulnerabilities } from '@/lib/audit-data';
-import { generateReportHTML, generateActionPlanHTML } from '@/lib/pdf-report';
 
 function SaveModal({ visible, onClose, onSave }: {
   visible: boolean; onClose: () => void; onSave: (name: string) => void;
@@ -76,78 +73,7 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
   const insets = useSafeAreaInsets();
   const score = calculateScore(audit.answers);
   const date = new Date(audit.date);
-  const [pdfLoading, setPdfLoading] = useState(false);
   const dynamicActions = React.useMemo(() => generateActionItems(audit.answers), [audit.answers]);
-
-  const handleDownloadPDF = async () => {
-    try {
-      setPdfLoading(true);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const html = generateReportHTML(audit);
-      const { uri } = await Print.printToFileAsync({ html, base64: false });
-      setPdfLoading(false);
-
-      if (Platform.OS === 'web') {
-        await Print.printAsync({ html });
-      } else {
-        const isAvailable = await Sharing.isAvailableAsync();
-        if (isAvailable) {
-          await Sharing.shareAsync(uri, {
-            mimeType: 'application/pdf',
-            dialogTitle: 'Salvar Relatório PDF',
-            UTI: 'com.adobe.pdf',
-          });
-        }
-      }
-    } catch (e) {
-      setPdfLoading(false);
-    }
-  };
-
-  const handleSharePDF = async () => {
-    try {
-      setPdfLoading(true);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const html = generateReportHTML(audit);
-      const { uri } = await Print.printToFileAsync({ html, base64: false });
-      setPdfLoading(false);
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (isAvailable) {
-        await Sharing.shareAsync(uri, {
-          mimeType: 'application/pdf',
-          dialogTitle: 'Compartilhar Relatório',
-          UTI: 'com.adobe.pdf',
-        });
-      }
-    } catch (e) {
-      setPdfLoading(false);
-    }
-  };
-
-  const handleActionPlanPDF = async (share: boolean) => {
-    try {
-      setPdfLoading(true);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const html = generateActionPlanHTML(audit);
-      const { uri } = await Print.printToFileAsync({ html, base64: false });
-      setPdfLoading(false);
-
-      if (Platform.OS === 'web') {
-        await Print.printAsync({ html });
-      } else {
-        const isAvailable = await Sharing.isAvailableAsync();
-        if (isAvailable) {
-          await Sharing.shareAsync(uri, {
-            mimeType: 'application/pdf',
-            dialogTitle: share ? 'Compartilhar Plano de Acao' : 'Salvar Plano de Acao PDF',
-            UTI: 'com.adobe.pdf',
-          });
-        }
-      }
-    } catch (e) {
-      setPdfLoading(false);
-    }
-  };
 
   const vulnerabilities = React.useMemo(() => getTopVulnerabilities(audit.answers, 5), [audit.answers]);
 
@@ -175,24 +101,6 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
             <Text style={styles.headerSubtitle}>
               {date.toLocaleDateString('pt-BR')} - {audit.answeredCount}/{audit.totalCount} respostas
             </Text>
-          </View>
-          <View style={styles.pdfActions}>
-            <Pressable
-              onPress={handleDownloadPDF}
-              style={styles.pdfBtn}
-              disabled={pdfLoading}
-            >
-              <Ionicons name="download-outline" size={20} color={Colors.accent} />
-            </Pressable>
-            {Platform.OS !== 'web' && (
-              <Pressable
-                onPress={handleSharePDF}
-                style={styles.pdfBtn}
-                disabled={pdfLoading}
-              >
-                <Ionicons name="share-outline" size={20} color={Colors.accent} />
-              </Pressable>
-            )}
           </View>
         </View>
       </LinearGradient>
@@ -405,35 +313,6 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
               );
             })}
 
-            <View style={styles.actionPdfButtons}>
-              <Pressable
-                onPress={() => handleActionPlanPDF(false)}
-                style={styles.actionPdfBtn}
-                disabled={pdfLoading}
-              >
-                <LinearGradient
-                  colors={[Colors.accent, Colors.accentDark]}
-                  style={styles.actionPdfBtnGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                >
-                  <Ionicons name="download-outline" size={20} color="#fff" />
-                  <Text style={styles.actionPdfBtnText}>Baixar Plano de Acao PDF</Text>
-                </LinearGradient>
-              </Pressable>
-              {Platform.OS !== 'web' && (
-                <Pressable
-                  onPress={() => handleActionPlanPDF(true)}
-                  style={styles.actionPdfBtn}
-                  disabled={pdfLoading}
-                >
-                  <View style={styles.actionShareBtnInner}>
-                    <Ionicons name="share-outline" size={20} color={Colors.accent} />
-                    <Text style={[styles.actionPdfBtnText, { color: Colors.accent }]}>Compartilhar via WhatsApp</Text>
-                  </View>
-                </Pressable>
-              )}
-            </View>
           </View>
         </Animated.View>
 
@@ -736,17 +615,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceLight,
     justifyContent: 'center', alignItems: 'center',
     marginRight: 12,
-  },
-  pdfActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  pdfBtn: {
-    width: 38, height: 38, borderRadius: 12,
-    backgroundColor: Colors.accent + '18',
-    justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.accent + '30',
   },
   scrollView: { flex: 1 },
   scrollContent: { padding: 16, gap: 16 },
@@ -1173,38 +1041,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.text,
     fontWeight: '500' as const,
-  },
-  actionPdfButtons: {
-    gap: 10,
-    marginTop: 16,
-  },
-  actionPdfBtn: {
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  actionPdfBtnGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-  },
-  actionPdfBtnText: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: '#fff',
-  },
-  actionShareBtnInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: Colors.accent + '40',
-    borderRadius: 14,
-    backgroundColor: Colors.accent + '10',
   },
 });
