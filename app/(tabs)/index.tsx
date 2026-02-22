@@ -4,6 +4,7 @@ import {
   FlatList, TextInput, Platform, Image,
 } from 'react-native';
 import { supabase } from "@/lib/supabase";
+import { clearSessionToken } from "@/lib/session-guard";
 import { Button } from "react-native";
 
 import { Ionicons } from '@expo/vector-icons';
@@ -318,9 +319,8 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
     const insets = useSafeAreaInsets();
 
     const handleLogout = async () => {
-      console.log("LOGOUT DISPARADO");
+      await clearSessionToken();
       await supabase.auth.signOut();
-      console.log("LOGOUT CONCLUIDO");
     };
 
 

@@ -1,7 +1,8 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
+import { AppState } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { StatusBar } from "expo-status-bar";
@@ -9,11 +10,13 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { AuditProvider } from "@/lib/audit-context";
 import { supabase } from "@/lib/supabase";
+import { validateSession, clearSessionToken } from "@/lib/session-guard";
 
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const router = useRouter();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const {
@@ -24,8 +27,28 @@ function RootLayoutNav() {
       }
     });
 
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      const valid = await validateSession();
+      if (!valid) {
+        await clearSessionToken();
+        await supabase.auth.signOut();
+      }
+    };
+
+    intervalRef.current = setInterval(checkSession, 30000);
+
+    const appStateListener = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        checkSession();
+      }
+    });
+
     return () => {
       subscription.unsubscribe();
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      appStateListener.remove();
     };
   }, []);
 
