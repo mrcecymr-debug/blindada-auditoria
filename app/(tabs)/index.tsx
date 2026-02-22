@@ -410,7 +410,6 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
           />
         ))}
       </ScrollView>
-      <Button title="Sair" onPress={handleLogout} />
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
     </View>
   );
