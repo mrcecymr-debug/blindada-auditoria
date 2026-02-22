@@ -269,50 +269,80 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
                 <Text style={{ color: Colors.text, fontSize: 14, textAlign: 'center', marginTop: 10 }}>Nenhuma vulnerabilidade critica identificada com base nas respostas do levantamento.</Text>
               </View>
             )}
-            {dynamicActions.map((item, idx) => {
-              const pColor = item.priority === 1 ? Colors.danger : item.priority === 2 ? Colors.warning : Colors.accent;
-              const pLabel = item.priority === 1 ? 'URGENTE' : item.priority === 2 ? 'IMPORTANTE' : 'RECOMENDADO';
-              return (
-                <View key={idx} style={[styles.actionCard, { borderLeftColor: pColor }]}>
-                  <View style={styles.actionCardHeader}>
-                    <View style={styles.actionCardHeaderLeft}>
-                      <View style={[styles.actionCardNum, { backgroundColor: pColor + '20' }]}>
-                        <Text style={[styles.actionCardNumText, { color: pColor }]}>{idx + 1}</Text>
-                      </View>
-                      <View style={[styles.actionCardBadge, { backgroundColor: pColor }]}>
-                        <Text style={styles.actionCardBadgeText}>{pLabel}</Text>
-                      </View>
-                      <Text style={styles.actionCardCategory}>{item.category}</Text>
-                    </View>
-                    <Text style={styles.actionCardImpact}>{item.impact}</Text>
-                  </View>
-                  <Text style={styles.actionCardVuln}>{item.vulnerability}</Text>
-                  {item.answerText && (
-                    <View style={styles.actionCardAnswerRow}>
-                      <Ionicons name="chatbubble-ellipses-outline" size={12} color={Colors.warning} />
-                      <Text style={styles.actionCardAnswerLabel}>{item.questionLabel}:</Text>
-                      <Text style={styles.actionCardAnswerValue}>{item.answerText}</Text>
-                    </View>
-                  )}
-                  <Text style={styles.actionCardSolution}>{item.solution}</Text>
-                  <View style={styles.actionCardDetails}>
-                    <View style={styles.actionCardDetail}>
-                      <Text style={styles.actionCardDetailLabel}>Produto</Text>
-                      <Text style={styles.actionCardDetailValue}>{item.product}</Text>
-                    </View>
-                    <View style={styles.actionCardDetail}>
-                      <Text style={styles.actionCardDetailLabel}>Investimento</Text>
-                      <Text style={[styles.actionCardDetailValue, { color: Colors.accent }]}>{item.investment}</Text>
-                    </View>
-                    <View style={styles.actionCardDetail}>
-                      <Text style={styles.actionCardDetailLabel}>Instalacao</Text>
-                      <Text style={styles.actionCardDetailValue}>{item.installation}</Text>
-                    </View>
-                  </View>
-                </View>
-              );
-            })}
+            {(() => {
+              const p1 = dynamicActions.filter(i => i.priority === 1);
+              const p2 = dynamicActions.filter(i => i.priority === 2);
+              const p3 = dynamicActions.filter(i => i.priority === 3);
+              let counter = 0;
 
+              const renderGroup = (items: typeof dynamicActions, label: string, color: string, description: string) => {
+                if (items.length === 0) return null;
+                return (
+                  <View key={label} style={{ marginTop: 12 }}>
+                    <View style={styles.reportPriorityHeader}>
+                      <View style={[styles.reportPriorityDot, { backgroundColor: color }]} />
+                      <Text style={[styles.reportPriorityLabel, { color }]}>{label}</Text>
+                      <Text style={styles.reportPriorityDesc}> - {description}</Text>
+                      <View style={[styles.reportPriorityCount, { backgroundColor: color + '20' }]}>
+                        <Text style={[styles.reportPriorityCountText, { color }]}>{items.length}</Text>
+                      </View>
+                    </View>
+                    {items.map((item) => {
+                      counter++;
+                      const pColor = item.priority === 1 ? Colors.danger : item.priority === 2 ? Colors.warning : Colors.info;
+                      const pLabel = item.priority === 1 ? 'CRITICO' : item.priority === 2 ? 'IMPORTANTE' : 'MELHORIA';
+                      return (
+                        <View key={`action-${counter}`} style={[styles.actionCard, { borderLeftColor: pColor }]}>
+                          <View style={styles.actionCardHeader}>
+                            <View style={styles.actionCardHeaderLeft}>
+                              <View style={[styles.actionCardNum, { backgroundColor: pColor + '20' }]}>
+                                <Text style={[styles.actionCardNumText, { color: pColor }]}>{counter}</Text>
+                              </View>
+                              <View style={[styles.actionCardBadge, { backgroundColor: pColor }]}>
+                                <Text style={styles.actionCardBadgeText}>{pLabel}</Text>
+                              </View>
+                              <Text style={styles.actionCardCategory}>{item.category}</Text>
+                            </View>
+                            <Text style={styles.actionCardImpact}>{item.impact}</Text>
+                          </View>
+                          <Text style={styles.actionCardVuln}>{item.vulnerability}</Text>
+                          {item.answerText && (
+                            <View style={styles.actionCardAnswerRow}>
+                              <Ionicons name="chatbubble-ellipses-outline" size={12} color={Colors.warning} />
+                              <Text style={styles.actionCardAnswerLabel}>{item.questionLabel}:</Text>
+                              <Text style={styles.actionCardAnswerValue}>{item.answerText}</Text>
+                            </View>
+                          )}
+                          <Text style={styles.actionCardSolution}>{item.solution}</Text>
+                          <View style={styles.actionCardDetails}>
+                            <View style={styles.actionCardDetail}>
+                              <Text style={styles.actionCardDetailLabel}>Produto</Text>
+                              <Text style={styles.actionCardDetailValue}>{item.product}</Text>
+                            </View>
+                            <View style={styles.actionCardDetail}>
+                              <Text style={styles.actionCardDetailLabel}>Investimento</Text>
+                              <Text style={[styles.actionCardDetailValue, { color: Colors.accent }]}>{item.investment}</Text>
+                            </View>
+                            <View style={styles.actionCardDetail}>
+                              <Text style={styles.actionCardDetailLabel}>Instalacao</Text>
+                              <Text style={styles.actionCardDetailValue}>{item.installation}</Text>
+                            </View>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                );
+              };
+
+              return (
+                <>
+                  {renderGroup(p1, 'Critico', Colors.danger, 'Implementar em 7 dias')}
+                  {renderGroup(p2, 'Importante', Colors.warning, 'Implementar em 30 dias')}
+                  {renderGroup(p3, 'Melhoria', Colors.info, 'Implementar em 90 dias')}
+                </>
+              );
+            })()}
           </View>
         </Animated.View>
 
@@ -1041,5 +1071,38 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.text,
     fontWeight: '500' as const,
+  },
+  reportPriorityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  reportPriorityDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  reportPriorityLabel: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+  },
+  reportPriorityDesc: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    flex: 1,
+  },
+  reportPriorityCount: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginLeft: 8,
+  },
+  reportPriorityCountText: {
+    fontSize: 12,
+    fontWeight: '700' as const,
   },
 });
