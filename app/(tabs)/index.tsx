@@ -348,7 +348,7 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
             />
             <View>
               <Text style={styles.logoTitle}>Casa Blindada</Text>
-              <Text style={styles.logoSubtitle}>Auditoria de Segurança</Text>
+              <Text style={styles.logoSubtitle}>Segurança é estratégia</Text>
             </View>
           </View>
 
