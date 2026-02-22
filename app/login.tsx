@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginScreen() {
@@ -20,6 +21,15 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        router.replace("/(tabs)");
+      }
+    });
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) return;
@@ -35,6 +45,8 @@ export default function LoginScreen() {
 
     if (error) {
       alert("Email ou senha incorretos.");
+    } else {
+      router.replace("/(tabs)");
     }
   };
 

@@ -1,7 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { StatusBar } from "expo-status-bar";
@@ -14,36 +14,17 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const router = useRouter();
-  const prevLoggedIn = useRef<boolean | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-
-    supabase.auth.getSession().then(({ data }) => {
-      if (isMounted) {
-        prevLoggedIn.current = !!data.session;
-      }
-    });
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      if (!isMounted) return;
-      const isLoggedIn = !!newSession;
-      if (prevLoggedIn.current !== null && prevLoggedIn.current !== isLoggedIn) {
-        setTimeout(() => {
-          if (isLoggedIn) {
-            router.replace("/(tabs)");
-          } else {
-            router.replace("/login");
-          }
-        }, 100);
+      if (!newSession) {
+        router.replace("/login");
       }
-      prevLoggedIn.current = isLoggedIn;
     });
 
     return () => {
-      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
