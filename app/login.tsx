@@ -149,7 +149,7 @@ export default function LoginScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <Text style={styles.footerText}>Auditoria de Seguranca Residencial</Text>
+          <Text style={styles.footerText}>MR Eng - Seguranca Residencial</Text>
         </Animated.View>
       </KeyboardAvoidingView>
     </LinearGradient>
