@@ -151,7 +151,7 @@ export default function LoginScreen() {
 
           <View style={styles.footerSection}>
             <Text style={styles.footerBrand}>MR ENG</Text>
-            <Text style={styles.footerSub}>Seguranca e estrategia</Text>
+            <Text style={styles.footerSub}>Seguranca Estrategica</Text>
           </View>
         </Animated.View>
       </KeyboardAvoidingView>
