@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
-  StyleSheet, Text, View, ScrollView, Platform,
+  StyleSheet, Text, View, ScrollView, Platform, Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -101,6 +101,15 @@ function ActionCard({ item, index }: { item: ActionItem; index: number }) {
 export default function ActionsScreen() {
   const insets = useSafeAreaInsets();
   const { answers, answeredCount } = useAudit();
+  const scrollRef = useRef<ScrollView>(null);
+  const sectionYRef = useRef<Record<string, number>>({});
+
+  const scrollToSection = (key: string) => {
+    const y = sectionYRef.current[key];
+    if (y !== undefined && scrollRef.current) {
+      scrollRef.current.scrollTo({ y, animated: true });
+    }
+  };
 
   const actionItems = React.useMemo(() => generateActionItems(answers), [answers]);
 
@@ -125,6 +134,7 @@ export default function ActionsScreen() {
       </LinearGradient>
 
       <ScrollView
+        ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={[styles.scrollContent, {
           paddingBottom: Platform.OS === 'web' ? 34 + 84 : 100,
@@ -155,21 +165,36 @@ export default function ActionsScreen() {
           <Animated.View entering={FadeInDown.duration(400)}>
             <View style={styles.investmentCard}>
               <Text style={styles.investmentTitle}>Resumo de Acoes</Text>
-              <View style={styles.investmentRow}>
+              <Pressable
+                style={({ pressed }) => [styles.investmentRow, styles.investmentRowBtn, pressed && { opacity: 0.6 }]}
+                onPress={() => scrollToSection('p1')}
+                disabled={priority1.length === 0}
+              >
                 <View style={[styles.investmentDot, { backgroundColor: Colors.danger }]} />
                 <Text style={styles.investmentLabel}>Critico - Implementar em 7 dias</Text>
                 <Text style={styles.investmentValue}>{priority1.length} {priority1.length === 1 ? 'acao' : 'acoes'}</Text>
-              </View>
-              <View style={styles.investmentRow}>
+                <Ionicons name="chevron-forward" size={14} color={Colors.textMuted} />
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.investmentRow, styles.investmentRowBtn, pressed && { opacity: 0.6 }]}
+                onPress={() => scrollToSection('p2')}
+                disabled={priority2.length === 0}
+              >
                 <View style={[styles.investmentDot, { backgroundColor: Colors.warning }]} />
                 <Text style={styles.investmentLabel}>Importante - Implementar em 30 dias</Text>
                 <Text style={styles.investmentValue}>{priority2.length} {priority2.length === 1 ? 'acao' : 'acoes'}</Text>
-              </View>
-              <View style={styles.investmentRow}>
+                <Ionicons name="chevron-forward" size={14} color={Colors.textMuted} />
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.investmentRow, styles.investmentRowBtn, pressed && { opacity: 0.6 }]}
+                onPress={() => scrollToSection('p3')}
+                disabled={priority3.length === 0}
+              >
                 <View style={[styles.investmentDot, { backgroundColor: Colors.info }]} />
                 <Text style={styles.investmentLabel}>Melhoria - Implementar em 90 dias</Text>
                 <Text style={styles.investmentValue}>{priority3.length} {priority3.length === 1 ? 'acao' : 'acoes'}</Text>
-              </View>
+                <Ionicons name="chevron-forward" size={14} color={Colors.textMuted} />
+              </Pressable>
               <View style={styles.investmentDivider} />
               <View style={styles.investmentRow}>
                 <Ionicons name="list-outline" size={16} color={Colors.accent} />
@@ -181,7 +206,10 @@ export default function ActionsScreen() {
         )}
 
         {priority1.length > 0 && (
-          <View style={styles.prioritySection}>
+          <View
+            style={styles.prioritySection}
+            onLayout={(e) => { sectionYRef.current['p1'] = e.nativeEvent.layout.y; }}
+          >
             <View style={styles.sectionHeader}>
               <View style={[styles.sectionDot, { backgroundColor: Colors.danger }]} />
               <Text style={styles.sectionTitle}>Prioridade 1 - Implementar em 7 dias</Text>
@@ -193,7 +221,10 @@ export default function ActionsScreen() {
         )}
 
         {priority2.length > 0 && (
-          <View style={styles.prioritySection}>
+          <View
+            style={styles.prioritySection}
+            onLayout={(e) => { sectionYRef.current['p2'] = e.nativeEvent.layout.y; }}
+          >
             <View style={styles.sectionHeader}>
               <View style={[styles.sectionDot, { backgroundColor: Colors.warning }]} />
               <Text style={styles.sectionTitle}>Prioridade 2 - Implementar em 30 dias</Text>
@@ -205,7 +236,10 @@ export default function ActionsScreen() {
         )}
 
         {priority3.length > 0 && (
-          <View style={styles.prioritySection}>
+          <View
+            style={styles.prioritySection}
+            onLayout={(e) => { sectionYRef.current['p3'] = e.nativeEvent.layout.y; }}
+          >
             <View style={styles.sectionHeader}>
               <View style={[styles.sectionDot, { backgroundColor: Colors.info }]} />
               <Text style={styles.sectionTitle}>Prioridade 3 - Implementar em 90 dias</Text>
@@ -273,6 +307,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  investmentRowBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    borderRadius: 8,
   },
   investmentDot: { width: 8, height: 8, borderRadius: 4 },
   investmentLabel: { fontSize: 13, color: Colors.textSecondary, flex: 1 },
