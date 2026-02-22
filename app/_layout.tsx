@@ -14,36 +14,47 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const [session, setSession] = useState<any | undefined>(undefined);
+  const [initialLoad, setInitialLoad] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
-      setSession(data.session);
+      if (isMounted) {
+        setSession(data.session);
+        setInitialLoad(false);
+      }
     };
 
     getSession();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("AUTH CHANGE:", session);
-      setSession(session);
-
-      // 🔥 REDIRECIONAMENTO FORÇADO
-      if (!session) {
-        router.replace("/login");
-      } else {
-        router.replace("/(tabs)");
-      }
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!isMounted) return;
+      setSession((prev: any) => {
+        const wasLoggedIn = !!prev;
+        const isLoggedIn = !!newSession;
+        if (wasLoggedIn !== isLoggedIn) {
+          if (isLoggedIn) {
+            router.replace("/(tabs)");
+          } else {
+            router.replace("/login");
+          }
+        }
+        return newSession;
+      });
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
-  if (session === undefined) {
+  if (session === undefined && initialLoad) {
     return null;
   }
 
