@@ -258,6 +258,7 @@ interface ActionRule {
 
 interface UpgradeTier {
   maxIndex: number;
+  priority: number;
   solution: string;
   product: string;
   investment: string;
@@ -277,269 +278,269 @@ const UPGRADE_MAP: Record<string, DynamicUpgrade> = {
     vulnerability: 'Muro/cerca insuficiente',
     priority: 2, category: 'PERIMETRO', impact: '+30%',
     tiers: [
-      { maxIndex: 2, solution: 'Instalar muro de alvenaria 2,0-2,5m', product: 'Projeto alvenaria / Gradil metalico', investment: 'R$ 3.000-6.000', installation: 'Profissional 3-5 dias' },
-      { maxIndex: 5, solution: 'Elevar muro para 2,5m+ com concertina ou espiculas', product: 'Concertina / Espiculas metalicas', investment: 'R$ 1.500-3.000', installation: 'Profissional 1-2 dias' },
-      { maxIndex: 8, solution: 'Adicionar cerca eletrica com alarme integrado', product: 'Cerca eletrica + Central alarme', investment: 'R$ 2.000-4.000', installation: 'Profissional 1 dia' },
-      { maxIndex: 10, solution: 'Instalar cerca eletrica dupla com alarme e monitoramento', product: 'Cerca eletrica dupla + Monitoramento', investment: 'R$ 3.000-6.000', installation: 'Profissional 2 dias' },
-      { maxIndex: 99, solution: 'Complementar com muro + cerca eletrica + alarme perimetral', product: 'Sistema perimetral completo', investment: 'R$ 5.000-10.000', installation: 'Profissional 3-5 dias' },
+      { maxIndex: 2, priority: 1, solution: 'Instalar muro de alvenaria 2,0-2,5m', product: 'Projeto alvenaria / Gradil metalico', investment: 'R$ 3.000-6.000', installation: 'Profissional 3-5 dias' },
+      { maxIndex: 5, priority: 2, solution: 'Elevar muro para 2,5m+ com concertina ou espiculas', product: 'Concertina / Espiculas metalicas', investment: 'R$ 1.500-3.000', installation: 'Profissional 1-2 dias' },
+      { maxIndex: 8, priority: 2, solution: 'Adicionar cerca eletrica com alarme integrado', product: 'Cerca eletrica + Central alarme', investment: 'R$ 2.000-4.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 10, priority: 3, solution: 'Instalar cerca eletrica dupla com alarme e monitoramento', product: 'Cerca eletrica dupla + Monitoramento', investment: 'R$ 3.000-6.000', installation: 'Profissional 2 dias' },
+      { maxIndex: 99, priority: 3, solution: 'Complementar com muro + cerca eletrica + alarme perimetral', product: 'Sistema perimetral completo', investment: 'R$ 5.000-10.000', installation: 'Profissional 3-5 dias' },
     ],
   },
   'P05': {
     vulnerability: 'Muitas janelas acessiveis',
     priority: 2, category: 'PERIMETRO', impact: '+18%',
     tiers: [
-      { maxIndex: 99, solution: 'Instalar sensores de abertura + grades nas janelas vulneraveis', product: 'Sensor Intelbras XAS / Grades tubulares', investment: 'R$ 200-500/janela', installation: 'Profissional' },
+      { maxIndex: 99, priority: 2, solution: 'Instalar sensores de abertura + grades nas janelas vulneraveis', product: 'Sensor Intelbras XAS / Grades tubulares', investment: 'R$ 200-500/janela', installation: 'Profissional' },
     ],
   },
   'P07': {
     vulnerability: 'Janelas sem protecao adequada',
     priority: 2, category: 'PERIMETRO', impact: '+18%',
     tiers: [
-      { maxIndex: 1, solution: 'Instalar grades decorativas ou tubulares', product: 'Serralheria local 25mm', investment: 'R$ 300/un', installation: 'Profissional' },
-      { maxIndex: 3, solution: 'Aplicar pelicula de seguranca 3M ou vidro laminado', product: 'Pelicula 3M / Vidro laminado', investment: 'R$ 200-600/un', installation: 'Profissional' },
-      { maxIndex: 5, solution: 'Instalar pelicula de seguranca + grades reforçadas', product: 'Pelicula 3M + Grades tubulares', investment: 'R$ 400-800/un', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Instalar persianas metalicas automatizadas', product: 'Persianas metalicas / Portinholas', investment: 'R$ 800-1.500/un', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Instalar grades decorativas ou tubulares', product: 'Serralheria local 25mm', investment: 'R$ 300/un', installation: 'Profissional' },
+      { maxIndex: 3, priority: 2, solution: 'Aplicar pelicula de seguranca 3M ou vidro laminado', product: 'Pelicula 3M / Vidro laminado', investment: 'R$ 200-600/un', installation: 'Profissional' },
+      { maxIndex: 5, priority: 2, solution: 'Instalar pelicula de seguranca + grades reforçadas', product: 'Pelicula 3M + Grades tubulares', investment: 'R$ 400-800/un', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar persianas metalicas automatizadas', product: 'Persianas metalicas / Portinholas', investment: 'R$ 800-1.500/un', installation: 'Profissional' },
     ],
   },
   'P06': {
     vulnerability: 'Garagem vulneravel',
     priority: 3, category: 'PERIMETRO', impact: '+12%',
     tiers: [
-      { maxIndex: 2, solution: 'Instalar portao com fechamento manual seguro', product: 'Portao metalico / Cadeado reforcado', investment: 'R$ 500-1.500', installation: 'Profissional 1 dia' },
-      { maxIndex: 4, solution: 'Instalar motor automatico com controle remoto', product: 'Motor Garen / PPA', investment: 'R$ 800-2.000', installation: 'Profissional 1 dia' },
-      { maxIndex: 6, solution: 'Atualizar para portao com biometria ou app', product: 'Motor + Modulo WiFi/Biometria', investment: 'R$ 1.500-3.000', installation: 'Profissional 1 dia' },
-      { maxIndex: 99, solution: 'Instalar sistema duplo portao (eclusa) com automacao', product: 'Portao duplo + Automacao', investment: 'R$ 3.000-6.000', installation: 'Profissional 2-3 dias' },
+      { maxIndex: 2, priority: 1, solution: 'Instalar portao com fechamento manual seguro', product: 'Portao metalico / Cadeado reforcado', investment: 'R$ 500-1.500', installation: 'Profissional 1 dia' },
+      { maxIndex: 4, priority: 2, solution: 'Instalar motor automatico com controle remoto', product: 'Motor Garen / PPA', investment: 'R$ 800-2.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 6, priority: 3, solution: 'Atualizar para portao com biometria ou app', product: 'Motor + Modulo WiFi/Biometria', investment: 'R$ 1.500-3.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar sistema duplo portao (eclusa) com automacao', product: 'Portao duplo + Automacao', investment: 'R$ 3.000-6.000', installation: 'Profissional 2-3 dias' },
     ],
   },
   'I01': {
     vulnerability: 'Iluminacao externa deficiente',
     priority: 2, category: 'ILUMINACAO', impact: '+15%',
     tiers: [
-      { maxIndex: 1, solution: 'Instalar sensor de presenca PIR com lampada LED', product: 'Intelbras ESP 360 A / Lampada LED 20W', investment: 'R$ 65-150', installation: 'DIY 15min' },
-      { maxIndex: 3, solution: 'Instalar iluminacao smart WiFi com app', product: 'Lampada Smart WiFi / Intelbras', investment: 'R$ 80-200', installation: 'DIY 15min' },
-      { maxIndex: 5, solution: 'Integrar iluminacao ao sistema de alarme', product: 'Central alarme + Modulo iluminacao', investment: 'R$ 200-500', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Instalar holofotes LED com sensor e automacao completa', product: 'Holofote LED 100W + Smart Hub', investment: 'R$ 300-800', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Instalar sensor de presenca PIR com lampada LED', product: 'Intelbras ESP 360 A / Lampada LED 20W', investment: 'R$ 65-150', installation: 'DIY 15min' },
+      { maxIndex: 3, priority: 2, solution: 'Instalar iluminacao smart WiFi com app', product: 'Lampada Smart WiFi / Intelbras', investment: 'R$ 80-200', installation: 'DIY 15min' },
+      { maxIndex: 5, priority: 3, solution: 'Integrar iluminacao ao sistema de alarme', product: 'Central alarme + Modulo iluminacao', investment: 'R$ 200-500', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar holofotes LED com sensor e automacao completa', product: 'Holofote LED 100W + Smart Hub', investment: 'R$ 300-800', installation: 'Profissional' },
     ],
   },
   'I02': {
     vulnerability: 'Poucos pontos de iluminacao',
     priority: 3, category: 'ILUMINACAO', impact: '+10%',
     tiers: [
-      { maxIndex: 1, solution: 'Adicionar iluminacao frente + laterais', product: 'Refletor LED / Arandela externa', investment: 'R$ 80-200', installation: 'DIY 30min' },
-      { maxIndex: 3, solution: 'Completar iluminacao do perimetro todo', product: 'Kit refletores LED perimetral', investment: 'R$ 200-500', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Instalar postes com lampadas e sensor no perimetro completo', product: 'Postes + Lampadas LED + Timer', investment: 'R$ 400-1.000', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Adicionar iluminacao frente + laterais', product: 'Refletor LED / Arandela externa', investment: 'R$ 80-200', installation: 'DIY 30min' },
+      { maxIndex: 3, priority: 2, solution: 'Completar iluminacao do perimetro todo', product: 'Kit refletores LED perimetral', investment: 'R$ 200-500', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar postes com lampadas e sensor no perimetro completo', product: 'Postes + Lampadas LED + Timer', investment: 'R$ 400-1.000', installation: 'Profissional' },
     ],
   },
   'I03': {
     vulnerability: 'Sem iluminacao de emergencia',
     priority: 3, category: 'ILUMINACAO', impact: '+5%',
     tiers: [
-      { maxIndex: 1, solution: 'Instalar lampadas recarregaveis nos ambientes principais', product: 'Lampada emergencia LED', investment: 'R$ 30-80', installation: 'DIY 10min' },
-      { maxIndex: 3, solution: 'Instalar nobreak para sistemas criticos de seguranca', product: 'Nobreak SMS / APC', investment: 'R$ 200-500', installation: 'DIY 30min' },
-      { maxIndex: 99, solution: 'Instalar gerador ou nobreak completo com autonomia estendida', product: 'Gerador / Nobreak industrial', investment: 'R$ 1.500-5.000', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Instalar lampadas recarregaveis nos ambientes principais', product: 'Lampada emergencia LED', investment: 'R$ 30-80', installation: 'DIY 10min' },
+      { maxIndex: 3, priority: 2, solution: 'Instalar nobreak para sistemas criticos de seguranca', product: 'Nobreak SMS / APC', investment: 'R$ 200-500', installation: 'DIY 30min' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar gerador ou nobreak completo com autonomia estendida', product: 'Gerador / Nobreak industrial', investment: 'R$ 1.500-5.000', installation: 'Profissional' },
     ],
   },
   'A01': {
     vulnerability: 'Fechadura da porta principal inadequada',
     priority: 1, category: 'ACESSO', impact: '+25%',
     tiers: [
-      { maxIndex: 1, solution: 'Substituir por fechadura tetra chave', product: 'Papaiz 510 / Stam', investment: 'R$ 180-250', installation: 'DIY 30min' },
-      { maxIndex: 2, solution: 'Substituir por fechadura multiponto 3 ou 5 pontos', product: 'Fechadura multiponto Stam / Pado', investment: 'R$ 300-600', installation: 'Profissional' },
-      { maxIndex: 4, solution: 'Substituir por fechadura eletronica com senha 6+ digitos', product: 'Yale YDF40 / Samsung SHP', investment: 'R$ 500-1.200', installation: 'Profissional' },
-      { maxIndex: 6, solution: 'Substituir por fechadura biometrica digital ou facial', product: 'Samsung SHP-DP / Yale Assure', investment: 'R$ 800-2.000', installation: 'Profissional' },
-      { maxIndex: 9, solution: 'Substituir por fechadura smart WiFi/Bluetooth com app e backup', product: 'Yale Doorman / August Smart Lock', investment: 'R$ 1.200-3.000', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Instalar combo eletronica + mecanica de alta seguranca', product: 'Yale Doorman + Multiponto', investment: 'R$ 2.000-4.000', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Substituir por fechadura tetra chave', product: 'Papaiz 510 / Stam', investment: 'R$ 180-250', installation: 'DIY 30min' },
+      { maxIndex: 2, priority: 2, solution: 'Substituir por fechadura multiponto 3 ou 5 pontos', product: 'Fechadura multiponto Stam / Pado', investment: 'R$ 300-600', installation: 'Profissional' },
+      { maxIndex: 4, priority: 2, solution: 'Substituir por fechadura eletronica com senha 6+ digitos', product: 'Yale YDF40 / Samsung SHP', investment: 'R$ 500-1.200', installation: 'Profissional' },
+      { maxIndex: 6, priority: 3, solution: 'Substituir por fechadura biometrica digital ou facial', product: 'Samsung SHP-DP / Yale Assure', investment: 'R$ 800-2.000', installation: 'Profissional' },
+      { maxIndex: 9, priority: 3, solution: 'Substituir por fechadura smart WiFi/Bluetooth com app e backup', product: 'Yale Doorman / August Smart Lock', investment: 'R$ 1.200-3.000', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar combo eletronica + mecanica de alta seguranca', product: 'Yale Doorman + Multiponto', investment: 'R$ 2.000-4.000', installation: 'Profissional' },
     ],
   },
   'A02': {
     vulnerability: 'Porta principal fragil',
     priority: 1, category: 'ACESSO', impact: '+20%',
     tiers: [
-      { maxIndex: 0, solution: 'Substituir por porta de madeira macica', product: 'Porta macica cedro/angelim', investment: 'R$ 800-2.000', installation: 'Profissional 1 dia' },
-      { maxIndex: 2, solution: 'Substituir por porta de aco ou blindada nivel I', product: 'Porta aco / Blindada nivel I', investment: 'R$ 2.000-4.000', installation: 'Profissional 1 dia' },
-      { maxIndex: 4, solution: 'Atualizar para porta blindada nivel II ou III', product: 'Porta blindada nivel II-III', investment: 'R$ 3.000-6.000', installation: 'Profissional 1 dia' },
-      { maxIndex: 99, solution: 'Instalar porta blindada nivel IV+ ou porta cofre', product: 'Porta blindada IV+ / Porta cofre', investment: 'R$ 5.000-15.000', installation: 'Profissional 1-2 dias' },
+      { maxIndex: 0, priority: 1, solution: 'Substituir por porta de madeira macica', product: 'Porta macica cedro/angelim', investment: 'R$ 800-2.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 2, priority: 1, solution: 'Substituir por porta de aco ou blindada nivel I', product: 'Porta aco / Blindada nivel I', investment: 'R$ 2.000-4.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 4, priority: 3, solution: 'Atualizar para porta blindada nivel II ou III', product: 'Porta blindada nivel II-III', investment: 'R$ 3.000-6.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar porta blindada nivel IV+ ou porta cofre', product: 'Porta blindada IV+ / Porta cofre', investment: 'R$ 5.000-15.000', installation: 'Profissional 1-2 dias' },
     ],
   },
   'A03': {
     vulnerability: 'Sem trancas adicionais',
     priority: 2, category: 'ACESSO', impact: '+8%',
     tiers: [
-      { maxIndex: 0, solution: 'Instalar ferrolho simples ou duplo', product: 'Ferrolho tetra / Ferrolho duplo', investment: 'R$ 40-80', installation: 'DIY 20min' },
-      { maxIndex: 2, solution: 'Instalar barra transversal de seguranca', product: 'Barra transversal aco', investment: 'R$ 80-150', installation: 'DIY 30min' },
-      { maxIndex: 3, solution: 'Instalar tranca eletronica com acionamento remoto', product: 'Tranca eletronica / Smart lock', investment: 'R$ 200-500', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Complementar com tranca eletronica integrada ao alarme', product: 'Tranca smart + Central alarme', investment: 'R$ 300-800', installation: 'Profissional' },
+      { maxIndex: 0, priority: 1, solution: 'Instalar ferrolho simples ou duplo', product: 'Ferrolho tetra / Ferrolho duplo', investment: 'R$ 40-80', installation: 'DIY 20min' },
+      { maxIndex: 2, priority: 2, solution: 'Instalar barra transversal de seguranca', product: 'Barra transversal aco', investment: 'R$ 80-150', installation: 'DIY 30min' },
+      { maxIndex: 3, priority: 3, solution: 'Instalar tranca eletronica com acionamento remoto', product: 'Tranca eletronica / Smart lock', investment: 'R$ 200-500', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Complementar com tranca eletronica integrada ao alarme', product: 'Tranca smart + Central alarme', investment: 'R$ 300-800', installation: 'Profissional' },
     ],
   },
   'A04': {
     vulnerability: 'Porta de servico/fundos vulneravel',
     priority: 2, category: 'ACESSO', impact: '+12%',
     tiers: [
-      { maxIndex: 1, solution: 'Instalar porta metalica com fechadura tetra', product: 'Porta metalica / Fechadura tetra', investment: 'R$ 400-800', installation: 'Profissional' },
-      { maxIndex: 2, solution: 'Instalar grade de protecao reforçada', product: 'Grade tubular 25mm', investment: 'R$ 300-600', installation: 'Profissional' },
-      { maxIndex: 3, solution: 'Instalar porta gradeada + porta interna com fechadura', product: 'Grade + Porta metal + Fechadura', investment: 'R$ 600-1.200', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Reforcar com porta gradeada dupla + sensor de abertura', product: 'Grade dupla + Sensor alarme', investment: 'R$ 800-1.500', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Instalar porta metalica com fechadura tetra', product: 'Porta metalica / Fechadura tetra', investment: 'R$ 400-800', installation: 'Profissional' },
+      { maxIndex: 2, priority: 2, solution: 'Instalar grade de protecao reforçada', product: 'Grade tubular 25mm', investment: 'R$ 300-600', installation: 'Profissional' },
+      { maxIndex: 3, priority: 3, solution: 'Instalar porta gradeada + porta interna com fechadura', product: 'Grade + Porta metal + Fechadura', investment: 'R$ 600-1.200', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Reforcar com porta gradeada dupla + sensor de abertura', product: 'Grade dupla + Sensor alarme', investment: 'R$ 800-1.500', installation: 'Profissional' },
     ],
   },
   'A05': {
     vulnerability: 'Sem video porteiro',
     priority: 3, category: 'ACESSO', impact: '+10%',
     tiers: [
-      { maxIndex: 0, solution: 'Instalar interfone audio basico', product: 'Interfone HDL / Intelbras', investment: 'R$ 80-150', installation: 'Profissional' },
-      { maxIndex: 1, solution: 'Instalar video porteiro com tela colorida', product: 'Intelbras IV 7010 HF', investment: 'R$ 250-500', installation: 'Profissional' },
-      { maxIndex: 3, solution: 'Instalar video porteiro smart com app', product: 'Ring Doorbell / Intelbras Allo', investment: 'R$ 500-1.000', installation: 'Profissional' },
-      { maxIndex: 5, solution: 'Instalar sistema smart com reconhecimento facial', product: 'Doorbell AI / Hikvision Smart', investment: 'R$ 800-2.000', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Sistema completo integrado com fechadura e abertura remota', product: 'Video porteiro + Fechadura smart', investment: 'R$ 1.500-3.000', installation: 'Profissional' },
+      { maxIndex: 0, priority: 1, solution: 'Instalar interfone audio basico', product: 'Interfone HDL / Intelbras', investment: 'R$ 80-150', installation: 'Profissional' },
+      { maxIndex: 1, priority: 2, solution: 'Instalar video porteiro com tela colorida', product: 'Intelbras IV 7010 HF', investment: 'R$ 250-500', installation: 'Profissional' },
+      { maxIndex: 3, priority: 2, solution: 'Instalar video porteiro smart com app', product: 'Ring Doorbell / Intelbras Allo', investment: 'R$ 500-1.000', installation: 'Profissional' },
+      { maxIndex: 5, priority: 3, solution: 'Instalar sistema smart com reconhecimento facial', product: 'Doorbell AI / Hikvision Smart', investment: 'R$ 800-2.000', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Sistema completo integrado com fechadura e abertura remota', product: 'Video porteiro + Fechadura smart', investment: 'R$ 1.500-3.000', installation: 'Profissional' },
     ],
   },
   'E01': {
     vulnerability: 'Sistema de alarme insuficiente',
     priority: 1, category: 'ELETRONICA', impact: '+40%',
     tiers: [
-      { maxIndex: 1, solution: 'Instalar alarme local com discagem automatica', product: 'Intelbras AMT 2118 / JFL', investment: 'R$ 300-600', installation: 'Profissional' },
-      { maxIndex: 3, solution: 'Contratar alarme monitorado 24h com resposta', product: 'Verisure / ADT', investment: 'R$ 89-200/mes', installation: 'Profissional' },
-      { maxIndex: 5, solution: 'Atualizar para monitorado com resposta armada', product: 'Verisure Premium / Prosegur', investment: 'R$ 150-300/mes', installation: 'Profissional' },
-      { maxIndex: 7, solution: 'Instalar alarme smart com IA e deteccao inteligente', product: 'Ajax Systems / Intelbras Cloud', investment: 'R$ 2.000-5.000', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Sistema hibrido completo: local + monitorado + cerca + panico', product: 'Sistema completo integrado', investment: 'R$ 3.000-8.000', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Instalar alarme local com discagem automatica', product: 'Intelbras AMT 2118 / JFL', investment: 'R$ 300-600', installation: 'Profissional' },
+      { maxIndex: 3, priority: 1, solution: 'Contratar alarme monitorado 24h com resposta', product: 'Verisure / ADT', investment: 'R$ 89-200/mes', installation: 'Profissional' },
+      { maxIndex: 5, priority: 2, solution: 'Atualizar para monitorado com resposta armada', product: 'Verisure Premium / Prosegur', investment: 'R$ 150-300/mes', installation: 'Profissional' },
+      { maxIndex: 7, priority: 3, solution: 'Instalar alarme smart com IA e deteccao inteligente', product: 'Ajax Systems / Intelbras Cloud', investment: 'R$ 2.000-5.000', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Sistema hibrido completo: local + monitorado + cerca + panico', product: 'Sistema completo integrado', investment: 'R$ 3.000-8.000', installation: 'Profissional' },
     ],
   },
   'E02': {
     vulnerability: 'Sensores de abertura insuficientes',
     priority: 1, category: 'ELETRONICA', impact: '+15%',
     tiers: [
-      { maxIndex: 1, solution: 'Instalar sensores nas portas e janelas principais', product: 'Intelbras XAS 4010 / Sensor RF', investment: 'R$ 40-80/un', installation: 'DIY 10min/un' },
-      { maxIndex: 4, solution: 'Cobrir todas as portas e janelas com sensores', product: 'Kit sensores wireless completo', investment: 'R$ 200-500', installation: 'DIY 1h' },
-      { maxIndex: 6, solution: 'Instalar sensores em todas aberturas incluindo basculantes', product: 'Sensores porta+janela+basculante', investment: 'R$ 300-600', installation: 'DIY 2h' },
-      { maxIndex: 99, solution: 'Atualizar para sensores wireless de ultima geracao', product: 'Sensores wireless premium', investment: 'R$ 400-800', installation: 'DIY 2h' },
+      { maxIndex: 1, priority: 1, solution: 'Instalar sensores nas portas e janelas principais', product: 'Intelbras XAS 4010 / Sensor RF', investment: 'R$ 40-80/un', installation: 'DIY 10min/un' },
+      { maxIndex: 4, priority: 2, solution: 'Cobrir todas as portas e janelas com sensores', product: 'Kit sensores wireless completo', investment: 'R$ 200-500', installation: 'DIY 1h' },
+      { maxIndex: 6, priority: 3, solution: 'Instalar sensores em todas aberturas incluindo basculantes', product: 'Sensores porta+janela+basculante', investment: 'R$ 300-600', installation: 'DIY 2h' },
+      { maxIndex: 99, priority: 3, solution: 'Atualizar para sensores wireless de ultima geracao', product: 'Sensores wireless premium', investment: 'R$ 400-800', installation: 'DIY 2h' },
     ],
   },
   'E03': {
     vulnerability: 'Sensores de movimento insuficientes',
     priority: 2, category: 'ELETRONICA', impact: '+12%',
     tiers: [
-      { maxIndex: 1, solution: 'Instalar sensores PIR em areas internas criticas', product: 'Intelbras IVP 3000', investment: 'R$ 60-150/un', installation: 'DIY 15min' },
-      { maxIndex: 3, solution: 'Atualizar para sensores PIR pet-friendly', product: 'PIR pet 25kg / Sensor dual', investment: 'R$ 100-200/un', installation: 'DIY 15min' },
-      { maxIndex: 5, solution: 'Instalar sensores dual PIR + microondas', product: 'Sensor duplo PIR+MW', investment: 'R$ 150-300/un', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Instalar sensores com camera de deteccao inteligente', product: 'Sensor camera IA / Cortina', investment: 'R$ 300-600/un', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Instalar sensores PIR em areas internas criticas', product: 'Intelbras IVP 3000', investment: 'R$ 60-150/un', installation: 'DIY 15min' },
+      { maxIndex: 3, priority: 2, solution: 'Atualizar para sensores PIR pet-friendly', product: 'PIR pet 25kg / Sensor dual', investment: 'R$ 100-200/un', installation: 'DIY 15min' },
+      { maxIndex: 5, priority: 3, solution: 'Instalar sensores dual PIR + microondas', product: 'Sensor duplo PIR+MW', investment: 'R$ 150-300/un', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar sensores com camera de deteccao inteligente', product: 'Sensor camera IA / Cortina', investment: 'R$ 300-600/un', installation: 'Profissional' },
     ],
   },
   'E04': {
     vulnerability: 'Cameras de seguranca insuficientes',
     priority: 2, category: 'ELETRONICA', impact: '+20%',
     tiers: [
-      { maxIndex: 0, solution: 'Instalar camera na entrada principal', product: 'Tapo C200 / Intelbras iM3', investment: 'R$ 150-300', installation: 'DIY 30min' },
-      { maxIndex: 2, solution: 'Adicionar cameras cobrindo frente e fundos', product: 'Kit 2-4 cameras WiFi Full HD', investment: 'R$ 300-800', installation: 'DIY 1h' },
-      { maxIndex: 4, solution: 'Completar cobertura do perimetro com cameras', product: 'Kit cameras perimetro completo', investment: 'R$ 800-2.000', installation: 'Profissional' },
-      { maxIndex: 6, solution: 'Adicionar cameras com reconhecimento facial ou leitura de placas', product: 'Camera IA facial / LPR', investment: 'R$ 1.000-3.000', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Instalar cameras PTZ com cobertura 360 graus', product: 'Camera PTZ / Dome motorizada', investment: 'R$ 1.500-4.000', installation: 'Profissional' },
+      { maxIndex: 0, priority: 1, solution: 'Instalar camera na entrada principal', product: 'Tapo C200 / Intelbras iM3', investment: 'R$ 150-300', installation: 'DIY 30min' },
+      { maxIndex: 2, priority: 1, solution: 'Adicionar cameras cobrindo frente e fundos', product: 'Kit 2-4 cameras WiFi Full HD', investment: 'R$ 300-800', installation: 'DIY 1h' },
+      { maxIndex: 4, priority: 2, solution: 'Completar cobertura do perimetro com cameras', product: 'Kit cameras perimetro completo', investment: 'R$ 800-2.000', installation: 'Profissional' },
+      { maxIndex: 6, priority: 3, solution: 'Adicionar cameras com reconhecimento facial ou leitura de placas', product: 'Camera IA facial / LPR', investment: 'R$ 1.000-3.000', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar cameras PTZ com cobertura 360 graus', product: 'Camera PTZ / Dome motorizada', investment: 'R$ 1.500-4.000', installation: 'Profissional' },
     ],
   },
   'E05': {
     vulnerability: 'Qualidade de gravacao baixa',
     priority: 3, category: 'ELETRONICA', impact: '+8%',
     tiers: [
-      { maxIndex: 2, solution: 'Atualizar para cameras Full HD 1080p', product: 'Camera Full HD / Intelbras VHD', investment: 'R$ 150-300/un', installation: 'DIY 30min' },
-      { maxIndex: 4, solution: 'Atualizar para cameras 2K ou 4K com WDR', product: 'Camera 2K/4K com WDR', investment: 'R$ 300-600/un', installation: 'DIY 30min' },
-      { maxIndex: 6, solution: 'Instalar cameras com visao noturna avancada 40m+', product: 'Camera IR 40m+ / Starlight', investment: 'R$ 400-800/un', installation: 'Profissional' },
-      { maxIndex: 99, solution: 'Atualizar para cameras colorida noturna com HDR', product: 'Camera ColorVu / Starlight+HDR', investment: 'R$ 500-1.200/un', installation: 'Profissional' },
+      { maxIndex: 2, priority: 2, solution: 'Atualizar para cameras Full HD 1080p', product: 'Camera Full HD / Intelbras VHD', investment: 'R$ 150-300/un', installation: 'DIY 30min' },
+      { maxIndex: 4, priority: 3, solution: 'Atualizar para cameras 2K ou 4K com WDR', product: 'Camera 2K/4K com WDR', investment: 'R$ 300-600/un', installation: 'DIY 30min' },
+      { maxIndex: 6, priority: 3, solution: 'Instalar cameras com visao noturna avancada 40m+', product: 'Camera IR 40m+ / Starlight', investment: 'R$ 400-800/un', installation: 'Profissional' },
+      { maxIndex: 99, priority: 3, solution: 'Atualizar para cameras colorida noturna com HDR', product: 'Camera ColorVu / Starlight+HDR', investment: 'R$ 500-1.200/un', installation: 'Profissional' },
     ],
   },
   'E06': {
     vulnerability: 'Armazenamento de video inadequado',
     priority: 3, category: 'ELETRONICA', impact: '+6%',
     tiers: [
-      { maxIndex: 2, solution: 'Instalar DVR local com armazenamento 7+ dias', product: 'DVR Intelbras / Hikvision', investment: 'R$ 300-600', installation: 'DIY 1h' },
-      { maxIndex: 4, solution: 'Atualizar para NVR com armazenamento 30+ dias', product: 'NVR + HD 2TB', investment: 'R$ 500-1.000', installation: 'DIY 1h' },
-      { maxIndex: 6, solution: 'Adicionar gravacao em nuvem para redundancia', product: 'Cloud 30 dias / Google Nest', investment: 'R$ 30-100/mes', installation: 'DIY 30min' },
-      { maxIndex: 99, solution: 'Sistema hibrido local + nuvem com gravacao continua e redundancia', product: 'NVR + Cloud + Redundancia', investment: 'R$ 800-2.000', installation: 'Profissional' },
+      { maxIndex: 2, priority: 2, solution: 'Instalar DVR local com armazenamento 7+ dias', product: 'DVR Intelbras / Hikvision', investment: 'R$ 300-600', installation: 'DIY 1h' },
+      { maxIndex: 4, priority: 3, solution: 'Atualizar para NVR com armazenamento 30+ dias', product: 'NVR + HD 2TB', investment: 'R$ 500-1.000', installation: 'DIY 1h' },
+      { maxIndex: 6, priority: 3, solution: 'Adicionar gravacao em nuvem para redundancia', product: 'Cloud 30 dias / Google Nest', investment: 'R$ 30-100/mes', installation: 'DIY 30min' },
+      { maxIndex: 99, priority: 3, solution: 'Sistema hibrido local + nuvem com gravacao continua e redundancia', product: 'NVR + Cloud + Redundancia', investment: 'R$ 800-2.000', installation: 'Profissional' },
     ],
   },
   'E07': {
     vulnerability: 'Botao de panico insuficiente',
     priority: 2, category: 'ELETRONICA', impact: '+10%',
     tiers: [
-      { maxIndex: 0, solution: 'Instalar botao de panico fixo em ponto estrategico', product: 'Botao panico fixo / Intelbras', investment: 'R$ 30-60', installation: 'DIY 10min' },
-      { maxIndex: 2, solution: 'Adicionar botao de panico portatil/chaveiro', product: 'Botao RF chaveiro / Portatil', investment: 'R$ 50-120', installation: 'DIY 5min' },
-      { maxIndex: 4, solution: 'Configurar panico no celular integrado a central', product: 'App alarme + Central monitorada', investment: 'R$ 50-100/mes', installation: 'DIY 10min' },
-      { maxIndex: 99, solution: 'Integrar panico com automacao por voz (Alexa/Google)', product: 'Assistente voz + Rotina panico', investment: 'R$ 200-500', installation: 'DIY 30min' },
+      { maxIndex: 0, priority: 1, solution: 'Instalar botao de panico fixo em ponto estrategico', product: 'Botao panico fixo / Intelbras', investment: 'R$ 30-60', installation: 'DIY 10min' },
+      { maxIndex: 2, priority: 2, solution: 'Adicionar botao de panico portatil/chaveiro', product: 'Botao RF chaveiro / Portatil', investment: 'R$ 50-120', installation: 'DIY 5min' },
+      { maxIndex: 4, priority: 3, solution: 'Configurar panico no celular integrado a central', product: 'App alarme + Central monitorada', investment: 'R$ 50-100/mes', installation: 'DIY 10min' },
+      { maxIndex: 99, priority: 3, solution: 'Integrar panico com automacao por voz (Alexa/Google)', product: 'Assistente voz + Rotina panico', investment: 'R$ 200-500', installation: 'DIY 30min' },
     ],
   },
   'E08': {
     vulnerability: 'Automacao residencial insuficiente',
     priority: 3, category: 'AUTOMACAO', impact: '+8%',
     tiers: [
-      { maxIndex: 0, solution: 'Instalar lampadas smart WiFi basicas', product: 'Positivo Casa Inteligente / Sonoff', investment: 'R$ 45-150', installation: 'DIY 5min' },
-      { maxIndex: 1, solution: 'Instalar central unificada de automacao', product: 'Hub Smart / Alexa Echo', investment: 'R$ 200-500', installation: 'DIY 30min' },
-      { maxIndex: 3, solution: 'Configurar cenas de automacao e geofencing', product: 'Smart Hub + Sensores', investment: 'R$ 300-800', installation: 'DIY 1h' },
-      { maxIndex: 99, solution: 'Implementar automacao com IA e controle de voz completo', product: 'Sistema IA completo', investment: 'R$ 1.000-3.000', installation: 'Profissional' },
+      { maxIndex: 0, priority: 2, solution: 'Instalar lampadas smart WiFi basicas', product: 'Positivo Casa Inteligente / Sonoff', investment: 'R$ 45-150', installation: 'DIY 5min' },
+      { maxIndex: 1, priority: 3, solution: 'Instalar central unificada de automacao', product: 'Hub Smart / Alexa Echo', investment: 'R$ 200-500', installation: 'DIY 30min' },
+      { maxIndex: 3, priority: 3, solution: 'Configurar cenas de automacao e geofencing', product: 'Smart Hub + Sensores', investment: 'R$ 300-800', installation: 'DIY 1h' },
+      { maxIndex: 99, priority: 3, solution: 'Implementar automacao com IA e controle de voz completo', product: 'Sistema IA completo', investment: 'R$ 1.000-3.000', installation: 'Profissional' },
     ],
   },
   'H01': {
     vulnerability: 'Residencia vazia por longos periodos',
     priority: 2, category: 'HUMANO', impact: '+15%',
     tiers: [
-      { maxIndex: 2, solution: 'Automacao de luzes com timer para simular presenca', product: 'Timer smart / Smart plug', investment: 'R$ 45-100', installation: 'DIY 10min' },
-      { maxIndex: 4, solution: 'Monitoramento remoto via cameras WiFi', product: 'Camera WiFi + App', investment: 'R$ 150-400', installation: 'DIY 30min' },
-      { maxIndex: 99, solution: 'Contratar servico de vigilancia ou empregada de confianca', product: 'Servico vigilancia / Ronda', investment: 'R$ 80-200/mes', installation: 'Imediato' },
+      { maxIndex: 2, priority: 1, solution: 'Automacao de luzes com timer para simular presenca', product: 'Timer smart / Smart plug', investment: 'R$ 45-100', installation: 'DIY 10min' },
+      { maxIndex: 4, priority: 2, solution: 'Monitoramento remoto via cameras WiFi', product: 'Camera WiFi + App', investment: 'R$ 150-400', installation: 'DIY 30min' },
+      { maxIndex: 99, priority: 3, solution: 'Contratar servico de vigilancia ou empregada de confianca', product: 'Servico vigilancia / Ronda', investment: 'R$ 80-200/mes', installation: 'Imediato' },
     ],
   },
   'H02': {
     vulnerability: 'Viagens frequentes sem protecao',
     priority: 3, category: 'HUMANO', impact: '+10%',
     tiers: [
-      { maxIndex: 99, solution: 'Sistema de simulacao de presenca + monitoramento remoto', product: 'Smart plugs + Timer / Camera', investment: 'R$ 100-300', installation: 'DIY 15min' },
+      { maxIndex: 99, priority: 3, solution: 'Sistema de simulacao de presenca + monitoramento remoto', product: 'Smart plugs + Timer / Camera', investment: 'R$ 100-300', installation: 'DIY 15min' },
     ],
   },
   'H03': {
     vulnerability: 'Sem presenca animal dissuasora',
     priority: 3, category: 'HUMANO', impact: '+5%',
     tiers: [
-      { maxIndex: 1, solution: 'Considerar cachorro medio ou grande como dissuasor', product: 'Cachorro medio/grande', investment: 'R$ 200-1.000', installation: 'Variavel' },
-      { maxIndex: 4, solution: 'Considerar raca de guarda com treinamento profissional', product: 'Raca guarda + Treinamento', investment: 'R$ 1.000-5.000', installation: 'Variavel' },
-      { maxIndex: 99, solution: 'Alarme simulador de som de cachorro como complemento', product: 'Alarme simulador cachorro', investment: 'R$ 80-200', installation: 'DIY 5min' },
+      { maxIndex: 1, priority: 2, solution: 'Considerar cachorro medio ou grande como dissuasor', product: 'Cachorro medio/grande', investment: 'R$ 200-1.000', installation: 'Variavel' },
+      { maxIndex: 4, priority: 3, solution: 'Considerar raca de guarda com treinamento profissional', product: 'Raca guarda + Treinamento', investment: 'R$ 1.000-5.000', installation: 'Variavel' },
+      { maxIndex: 99, priority: 3, solution: 'Alarme simulador de som de cachorro como complemento', product: 'Alarme simulador cachorro', investment: 'R$ 80-200', installation: 'DIY 5min' },
     ],
   },
   'H04': {
     vulnerability: 'Sem seguranca/ronda no bairro',
     priority: 2, category: 'HUMANO', impact: '+20%',
     tiers: [
-      { maxIndex: 1, solution: 'Solicitar policiamento mais frequente na regiao', product: 'Solicitacao PM / GCM', investment: 'Gratuito', installation: 'Imediato' },
-      { maxIndex: 3, solution: 'Contratar ronda motorizada noturna', product: 'Empresa ronda motorizada', investment: 'R$ 80-150/mes', installation: 'Imediato' },
-      { maxIndex: 5, solution: 'Contratar seguranca com guarita e ronda', product: 'Empresa seguranca + Guarita', investment: 'R$ 200-500/mes', installation: 'Imediato' },
-      { maxIndex: 7, solution: 'Contratar seguranca 24h com vigilancia armada', product: 'Seguranca 24h armada', investment: 'R$ 500-1.500/mes', installation: 'Imediato' },
-      { maxIndex: 99, solution: 'Instalar cameras comunitarias + vigilancia profissional', product: 'Cameras comunitarias + Vigilancia', investment: 'R$ 300-800/mes', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Solicitar policiamento mais frequente na regiao', product: 'Solicitacao PM / GCM', investment: 'Gratuito', installation: 'Imediato' },
+      { maxIndex: 3, priority: 2, solution: 'Contratar ronda motorizada noturna', product: 'Empresa ronda motorizada', investment: 'R$ 80-150/mes', installation: 'Imediato' },
+      { maxIndex: 5, priority: 2, solution: 'Contratar seguranca com guarita e ronda', product: 'Empresa seguranca + Guarita', investment: 'R$ 200-500/mes', installation: 'Imediato' },
+      { maxIndex: 7, priority: 3, solution: 'Contratar seguranca 24h com vigilancia armada', product: 'Seguranca 24h armada', investment: 'R$ 500-1.500/mes', installation: 'Imediato' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar cameras comunitarias + vigilancia profissional', product: 'Cameras comunitarias + Vigilancia', investment: 'R$ 300-800/mes', installation: 'Profissional' },
     ],
   },
   'H05': {
     vulnerability: 'Vizinhanca sem interacao',
     priority: 3, category: 'HUMANO', impact: '+10%',
     tiers: [
-      { maxIndex: 2, solution: 'Criar grupo WhatsApp com vizinhos proximos', product: 'Grupo WhatsApp', investment: 'Gratuito', installation: 'Imediato' },
-      { maxIndex: 4, solution: 'Organizar rede de vigilancia com troca de informacoes', product: 'App comunitario / Vizinhanca Segura', investment: 'Gratuito', installation: 'Imediato' },
-      { maxIndex: 99, solution: 'Organizar contratacao coletiva de seguranca e troca de chaves', product: 'Contratacao coletiva + Rede ativa', investment: 'R$ 50-100/mes cada', installation: 'Imediato' },
+      { maxIndex: 2, priority: 2, solution: 'Criar grupo WhatsApp com vizinhos proximos', product: 'Grupo WhatsApp', investment: 'Gratuito', installation: 'Imediato' },
+      { maxIndex: 4, priority: 3, solution: 'Organizar rede de vigilancia com troca de informacoes', product: 'App comunitario / Vizinhanca Segura', investment: 'Gratuito', installation: 'Imediato' },
+      { maxIndex: 99, priority: 3, solution: 'Organizar contratacao coletiva de seguranca e troca de chaves', product: 'Contratacao coletiva + Rede ativa', investment: 'R$ 50-100/mes cada', installation: 'Imediato' },
     ],
   },
   'H06': {
     vulnerability: 'Exposicao excessiva em redes sociais',
     priority: 2, category: 'HUMANO', impact: '+8%',
     tiers: [
-      { maxIndex: 1, solution: 'Evitar postar em tempo real, usar atraso de 24h+', product: 'Configuracao de privacidade', investment: 'Gratuito', installation: 'Imediato' },
-      { maxIndex: 3, solution: 'Configurar perfis como privados', product: 'Configuracao de privacidade', investment: 'Gratuito', installation: 'Imediato' },
-      { maxIndex: 99, solution: 'Implementar consciencia digital completa na familia', product: 'Treinamento privacidade digital', investment: 'Gratuito', installation: 'Imediato' },
+      { maxIndex: 1, priority: 1, solution: 'Evitar postar em tempo real, usar atraso de 24h+', product: 'Configuracao de privacidade', investment: 'Gratuito', installation: 'Imediato' },
+      { maxIndex: 3, priority: 2, solution: 'Configurar perfis como privados', product: 'Configuracao de privacidade', investment: 'Gratuito', installation: 'Imediato' },
+      { maxIndex: 99, priority: 3, solution: 'Implementar consciencia digital completa na familia', product: 'Treinamento privacidade digital', investment: 'Gratuito', installation: 'Imediato' },
     ],
   },
   'H07': {
     vulnerability: 'Historico de incidentes na regiao',
     priority: 1, category: 'HUMANO', impact: '+30%',
     tiers: [
-      { maxIndex: 99, solution: 'Reforcar seguranca geral + registrar B.O. + monitoramento 24h', product: 'Central monitorada + Cameras', investment: 'R$ 200-500/mes', installation: 'Profissional' },
+      { maxIndex: 99, priority: 1, solution: 'Reforcar seguranca geral + registrar B.O. + monitoramento 24h', product: 'Central monitorada + Cameras', investment: 'R$ 200-500/mes', installation: 'Profissional' },
     ],
   },
   'H08': {
     vulnerability: 'Bairro com alto indice de criminalidade',
     priority: 1, category: 'HUMANO', impact: '+35%',
     tiers: [
-      { maxIndex: 99, solution: 'Investir em seguranca completa: alarme + cameras + ronda', product: 'Pacote completo seguranca', investment: 'R$ 300-800/mes', installation: 'Profissional' },
+      { maxIndex: 99, priority: 1, solution: 'Investir em seguranca completa: alarme + cameras + ronda', product: 'Pacote completo seguranca', investment: 'R$ 300-800/mes', installation: 'Profissional' },
     ],
   },
 };
@@ -669,7 +670,7 @@ function getAnswerScore(questionCode: string, answer: string): number {
   return question.inverted ? 1 - rawScore : rawScore;
 }
 
-function getDynamicRecommendation(questionCode: string, answerText: string): { solution: string; product: string; investment: string; installation: string } | null {
+function getDynamicRecommendation(questionCode: string, answerText: string): { priority: number; solution: string; product: string; investment: string; installation: string } | null {
   const upgrade = UPGRADE_MAP[questionCode];
   if (!upgrade) return null;
 
@@ -681,12 +682,12 @@ function getDynamicRecommendation(questionCode: string, answerText: string): { s
 
   for (const tier of upgrade.tiers) {
     if (answerIndex <= tier.maxIndex) {
-      return { solution: tier.solution, product: tier.product, investment: tier.investment, installation: tier.installation };
+      return { priority: tier.priority, solution: tier.solution, product: tier.product, investment: tier.investment, installation: tier.installation };
     }
   }
 
   const lastTier = upgrade.tiers[upgrade.tiers.length - 1];
-  return { solution: lastTier.solution, product: lastTier.product, investment: lastTier.investment, installation: lastTier.installation };
+  return { priority: lastTier.priority, solution: lastTier.solution, product: lastTier.product, investment: lastTier.investment, installation: lastTier.installation };
 }
 
 export function generateActionItems(answers: Record<string, AuditAnswer>): ActionItem[] {
@@ -706,6 +707,7 @@ export function generateActionItems(answers: Record<string, AuditAnswer>): Actio
 
       items.push({
         ...rule.item,
+        priority: dynamic?.priority ?? rule.item.priority,
         solution: dynamic?.solution || rule.item.solution,
         product: dynamic?.product || rule.item.product,
         investment: dynamic?.investment || rule.item.investment,
