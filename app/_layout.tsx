@@ -35,7 +35,7 @@ function RootLayoutNav() {
         await clearSessionToken();
         Alert.alert(
           "Sessão encerrada",
-          "Sua conta foi acessada em outro dispositivo. Apenas um acesso por vez é permitido.",
+          "Sua conta foi acessada em outro dispositivo. Apenas um acesso por usuário é permitido.",
           [{ text: "Entendi" }]
         );
         await supabase.auth.signOut();
