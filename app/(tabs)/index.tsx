@@ -340,39 +340,36 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
         style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
       >
         <View style={styles.logoRow}>
-          <Image
-            source={require('@/assets/images/logo-casa-blindada.jpg')}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('@/assets/images/logo-casa-blindada.jpg')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            <View>
+              <Text style={styles.logoTitle}>Casa Blindada</Text>
+              <Text style={styles.logoSubtitle}>Auditoria de Segurança</Text>
+            </View>
+          </View>
 
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-            <Pressable
-              onPress={handleLogout}
-              style={({ pressed }) => ({
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderWidth: 1.2,
-                borderColor: Colors.accent,
-                borderRadius: 6,
-                backgroundColor: pressed ? Colors.accent + "15" : "transparent",
-              })}
-            >
-              <Text style={{ color: Colors.accent, fontSize: 13, fontWeight: "600" }}>
-                Sair
-              </Text>
-            </Pressable>
-
-
-
+          <View style={styles.headerActions}>
             <Pressable
               onPress={() => {
                 setShowGuide(true);
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }}
-              hitSlop={8}
+              style={({ pressed }) => [styles.headerActionBtn, styles.helpBtn, pressed && { opacity: 0.7 }]}
             >
-              <Ionicons name="help-circle-outline" size={24} color={Colors.accent} />
+              <Ionicons name="help-circle" size={16} color={Colors.accent} />
+              <Text style={styles.helpBtnText}>Ajuda</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={handleLogout}
+              style={({ pressed }) => [styles.headerActionBtn, styles.logoutBtn, pressed && { opacity: 0.7 }]}
+            >
+              <Ionicons name="log-out-outline" size={16} color="#FF6B6B" />
+              <Text style={styles.logoutBtnText}>Sair</Text>
             </Pressable>
           </View>
         </View>
@@ -427,10 +424,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   logoImage: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.accent + '40',
+  },
+  logoTitle: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+    color: Colors.text,
+    letterSpacing: 0.3,
+  },
+  logoSubtitle: {
+    fontSize: 10,
+    color: Colors.textSecondary,
+    marginTop: 1,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  helpBtn: {
+    backgroundColor: Colors.accent + '15',
+    borderWidth: 1,
+    borderColor: Colors.accent + '30',
+  },
+  helpBtnText: {
+    color: Colors.accent,
+    fontSize: 12,
+    fontWeight: '600' as const,
+  },
+  logoutBtn: {
+    backgroundColor: '#FF6B6B15',
+    borderWidth: 1,
+    borderColor: '#FF6B6B30',
+  },
+  logoutBtnText: {
+    color: '#FF6B6B',
+    fontSize: 12,
+    fontWeight: '600' as const,
   },
   headerContent: {
     flexDirection: 'row',
