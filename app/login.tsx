@@ -60,7 +60,7 @@ export default function LoginScreen() {
 
   return (
     <LinearGradient
-      colors={["#0B0F18", "#0E1422", "#0B0F18"]}
+      colors={["#070A12", "#0B1120", "#101828", "#0B1120", "#070A12"]}
       style={styles.container}
     >
       <KeyboardAvoidingView
@@ -71,24 +71,34 @@ export default function LoginScreen() {
           entering={FadeInDown.duration(800)}
           style={styles.content}
         >
-          {/* LOGO */}
-          <Image
-            source={require("@/assets/images/logo-casa-blindada.jpg")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <View style={styles.logoSection}>
+            <View style={styles.logoGlow}>
+              <Image
+                source={require("@/assets/images/logo-casa-blindada.jpg")}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.brandName}>CASA BLINDADA</Text>
+            <View style={styles.taglineLine}>
+              <View style={styles.taglineDash} />
+              <Text style={styles.tagline}>Seguranca e estrategia</Text>
+              <View style={styles.taglineDash} />
+            </View>
+          </View>
+
+          <View style={styles.divider} />
 
           <Text style={styles.title}>Bem-vindo</Text>
           <Text style={styles.subtitle}>
             Acesse sua conta para continuar
           </Text>
 
-          {/* EMAIL */}
           <View style={styles.inputContainer}>
             <Ionicons name="mail-outline" size={18} color="#D4AF37" />
             <TextInput
               placeholder="Seu e-mail"
-              placeholderTextColor="#888"
+              placeholderTextColor="#666"
               style={styles.input}
               value={email}
               onChangeText={setEmail}
@@ -97,12 +107,11 @@ export default function LoginScreen() {
             />
           </View>
 
-          {/* SENHA */}
           <View style={styles.inputContainer}>
             <Ionicons name="lock-closed-outline" size={18} color="#D4AF37" />
             <TextInput
               placeholder="Sua senha"
-              placeholderTextColor="#888"
+              placeholderTextColor="#666"
               style={styles.input}
               secureTextEntry={secure}
               value={password}
@@ -111,13 +120,12 @@ export default function LoginScreen() {
             <TouchableOpacity onPress={() => setSecure(!secure)}>
               <Ionicons
                 name={secure ? "eye-outline" : "eye-off-outline"}
-                size={18}
-                color="#888"
+                size={20}
+                color="#666"
               />
             </TouchableOpacity>
           </View>
 
-          {/* BOTÃO */}
           <TouchableOpacity
             style={styles.buttonWrapper}
             onPress={handleLogin}
@@ -125,16 +133,23 @@ export default function LoginScreen() {
             disabled={loading}
           >
             <LinearGradient
-              colors={["#F7B500", "#D4AF37"]}
+              colors={["#F7B500", "#D4AF37", "#B8960C"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
               style={styles.button}
             >
               {loading ? (
                 <ActivityIndicator color="#000" />
               ) : (
-                <Text style={styles.buttonText}>Entrar</Text>
+                <>
+                  <Ionicons name="shield-checkmark" size={18} color="#000" style={{ marginRight: 8 }} />
+                  <Text style={styles.buttonText}>Entrar</Text>
+                </>
               )}
             </LinearGradient>
           </TouchableOpacity>
+
+          <Text style={styles.footerText}>Auditoria de Seguranca Residencial</Text>
         </Animated.View>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -146,61 +161,117 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: 30,
+    paddingHorizontal: 32,
+  },
+  logoSection: {
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  logoGlow: {
+    width: 160,
+    height: 160,
+    borderRadius: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#D4AF37",
+    shadowOpacity: 0.35,
+    shadowRadius: 25,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 15,
+    marginBottom: 16,
   },
   logo: {
-    width: 110,
-    height: 110,
-    alignSelf: "center",
-    marginBottom: 30,
-    borderRadius: 24,
+    width: 150,
+    height: 150,
+    borderRadius: 30,
+  },
+  brandName: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#D4AF37",
+    letterSpacing: 4,
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  taglineLine: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  taglineDash: {
+    width: 20,
+    height: 1,
+    backgroundColor: "#D4AF3766",
+  },
+  tagline: {
+    fontSize: 12,
+    color: "#D4AF37AA",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#1F293744",
+    marginVertical: 24,
+    marginHorizontal: 20,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "700",
     color: "#FFFFFF",
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 14,
-    color: "#AAAAAA",
+    fontSize: 13,
+    color: "#888",
     textAlign: "center",
-    marginBottom: 35,
+    marginBottom: 28,
+    marginTop: 4,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#141A2A",
+    backgroundColor: "#0D1321",
     borderRadius: 14,
-    paddingHorizontal: 15,
-    paddingVertical: 14,
-    marginBottom: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: "#1F2937",
+    borderColor: "#1A2236",
   },
   input: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 12,
     color: "#FFFFFF",
-    fontSize: 14,
+    fontSize: 15,
   },
   buttonWrapper: {
-    marginTop: 10,
-    borderRadius: 16,
+    marginTop: 14,
+    borderRadius: 14,
     shadowColor: "#F7B500",
-    shadowOpacity: 0.6,
-    shadowRadius: 15,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 10,
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 12,
   },
   button: {
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   buttonText: {
     fontSize: 16,
     fontWeight: "700",
     color: "#000",
+  },
+  footerText: {
+    fontSize: 11,
+    color: "#555",
+    textAlign: "center",
+    marginTop: 28,
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
 });
