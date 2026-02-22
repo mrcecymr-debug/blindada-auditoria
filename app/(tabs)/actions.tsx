@@ -102,13 +102,17 @@ export default function ActionsScreen() {
   const insets = useSafeAreaInsets();
   const { answers, answeredCount } = useAudit();
   const scrollRef = useRef<ScrollView>(null);
-  const sectionYRef = useRef<Record<string, number>>({});
+  const sectionPositions = useRef<Record<string, number>>({});
 
   const scrollToSection = (key: string) => {
-    const y = sectionYRef.current[key];
+    const y = sectionPositions.current[key];
     if (y !== undefined && scrollRef.current) {
       scrollRef.current.scrollTo({ y, animated: true });
     }
+  };
+
+  const handleSectionLayout = (key: string, event: any) => {
+    sectionPositions.current[key] = event.nativeEvent.layout.y;
   };
 
   const actionItems = React.useMemo(() => generateActionItems(answers), [answers]);
@@ -208,7 +212,7 @@ export default function ActionsScreen() {
         {priority1.length > 0 && (
           <View
             style={styles.prioritySection}
-            onLayout={(e) => { sectionYRef.current['p1'] = e.nativeEvent.layout.y; }}
+            onLayout={(e) => handleSectionLayout('p1', e)}
           >
             <View style={styles.sectionHeader}>
               <View style={[styles.sectionDot, { backgroundColor: Colors.danger }]} />
@@ -223,7 +227,7 @@ export default function ActionsScreen() {
         {priority2.length > 0 && (
           <View
             style={styles.prioritySection}
-            onLayout={(e) => { sectionYRef.current['p2'] = e.nativeEvent.layout.y; }}
+            onLayout={(e) => handleSectionLayout('p2', e)}
           >
             <View style={styles.sectionHeader}>
               <View style={[styles.sectionDot, { backgroundColor: Colors.warning }]} />
@@ -238,7 +242,7 @@ export default function ActionsScreen() {
         {priority3.length > 0 && (
           <View
             style={styles.prioritySection}
-            onLayout={(e) => { sectionYRef.current['p3'] = e.nativeEvent.layout.y; }}
+            onLayout={(e) => handleSectionLayout('p3', e)}
           >
             <View style={styles.sectionHeader}>
               <View style={[styles.sectionDot, { backgroundColor: Colors.info }]} />
