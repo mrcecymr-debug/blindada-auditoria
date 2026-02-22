@@ -14,7 +14,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   const [session, setSession] = useState<any | undefined>(undefined);
-  const [initialLoad, setInitialLoad] = useState(true);
+  const [isReady, setIsReady] = useState(false);
   const router = useRouter();
   const prevLoggedIn = useRef<boolean | null>(null);
 
@@ -26,12 +26,7 @@ function RootLayoutNav() {
       if (isMounted) {
         prevLoggedIn.current = !!data.session;
         setSession(data.session);
-        setInitialLoad(false);
-        if (data.session) {
-          router.replace("/(tabs)");
-        } else {
-          router.replace("/login");
-        }
+        setIsReady(true);
       }
     };
 
@@ -43,11 +38,13 @@ function RootLayoutNav() {
       if (!isMounted) return;
       const isLoggedIn = !!newSession;
       if (prevLoggedIn.current !== null && prevLoggedIn.current !== isLoggedIn) {
-        if (isLoggedIn) {
-          router.replace("/(tabs)");
-        } else {
-          router.replace("/login");
-        }
+        setTimeout(() => {
+          if (isLoggedIn) {
+            router.replace("/(tabs)");
+          } else {
+            router.replace("/login");
+          }
+        }, 100);
       }
       prevLoggedIn.current = isLoggedIn;
       setSession(newSession);
@@ -59,9 +56,14 @@ function RootLayoutNav() {
     };
   }, []);
 
-  if (session === undefined && initialLoad) {
-    return null;
-  }
+  useEffect(() => {
+    if (!isReady) return;
+    if (session) {
+      router.replace("/(tabs)");
+    } else {
+      router.replace("/login");
+    }
+  }, [isReady]);
 
   return (
     <Stack screenOptions={{ headerShown: false }} />
