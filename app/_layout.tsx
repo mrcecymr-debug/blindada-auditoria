@@ -1,7 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { StatusBar } from "expo-status-bar";
@@ -16,6 +16,7 @@ function RootLayoutNav() {
   const [session, setSession] = useState<any | undefined>(undefined);
   const [initialLoad, setInitialLoad] = useState(true);
   const router = useRouter();
+  const prevLoggedIn = useRef<boolean | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -23,8 +24,14 @@ function RootLayoutNav() {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (isMounted) {
+        prevLoggedIn.current = !!data.session;
         setSession(data.session);
         setInitialLoad(false);
+        if (data.session) {
+          router.replace("/(tabs)");
+        } else {
+          router.replace("/login");
+        }
       }
     };
 
@@ -34,18 +41,16 @@ function RootLayoutNav() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!isMounted) return;
-      setSession((prev: any) => {
-        const wasLoggedIn = !!prev;
-        const isLoggedIn = !!newSession;
-        if (wasLoggedIn !== isLoggedIn) {
-          if (isLoggedIn) {
-            router.replace("/(tabs)");
-          } else {
-            router.replace("/login");
-          }
+      const isLoggedIn = !!newSession;
+      if (prevLoggedIn.current !== null && prevLoggedIn.current !== isLoggedIn) {
+        if (isLoggedIn) {
+          router.replace("/(tabs)");
+        } else {
+          router.replace("/login");
         }
-        return newSession;
-      });
+      }
+      prevLoggedIn.current = isLoggedIn;
+      setSession(newSession);
     });
 
     return () => {
