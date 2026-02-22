@@ -149,7 +149,11 @@ export default function LoginScreen() {
             </LinearGradient>
           </TouchableOpacity>
 
-          <Text style={styles.footerText}>MR Eng - Seguranca Residencial</Text>
+          <View style={styles.footerLine}>
+            <View style={styles.taglineDash} />
+            <Text style={styles.footerText}>MR Eng - Seguranca Residencial</Text>
+            <View style={styles.taglineDash} />
+          </View>
         </Animated.View>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -266,12 +270,18 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#000",
   },
-  footerText: {
-    fontSize: 11,
-    color: "#555",
-    textAlign: "center",
+  footerLine: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
     marginTop: 28,
-    letterSpacing: 1,
+  },
+  footerText: {
+    fontSize: 12,
+    color: "#D4AF37AA",
+    textAlign: "center",
+    letterSpacing: 2,
     textTransform: "uppercase",
   },
 });
