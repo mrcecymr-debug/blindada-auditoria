@@ -82,7 +82,7 @@ export default function LoginScreen() {
             <Text style={styles.brandName}>CASA BLINDADA</Text>
             <View style={styles.taglineLine}>
               <View style={styles.taglineDash} />
-              <Text style={styles.tagline}>Seguranca e estrategia</Text>
+              <Text style={styles.tagline}>Seguranca Residencial</Text>
               <View style={styles.taglineDash} />
             </View>
           </View>
@@ -151,7 +151,7 @@ export default function LoginScreen() {
 
           <View style={styles.footerSection}>
             <Text style={styles.footerBrand}>MR ENG</Text>
-            <Text style={styles.footerSub}>Seguranca Residencial</Text>
+            <Text style={styles.footerSub}>Seguranca e estrategia</Text>
           </View>
         </Animated.View>
       </KeyboardAvoidingView>
