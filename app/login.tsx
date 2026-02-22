@@ -15,6 +15,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
+import { registerSessionToken, validateSession } from "@/lib/session-guard";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -24,9 +25,14 @@ export default function LoginScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (data.session) {
-        router.replace("/(tabs)");
+        const valid = await validateSession();
+        if (valid) {
+          router.replace("/(tabs)");
+        } else {
+          await supabase.auth.signOut();
+        }
       }
     });
   }, []);
@@ -41,13 +47,15 @@ export default function LoginScreen() {
       password,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       alert("Email ou senha incorretos.");
-    } else {
-      router.replace("/(tabs)");
+      return;
     }
+
+    await registerSessionToken();
+    setLoading(false);
+    router.replace("/(tabs)");
   };
 
   return (
