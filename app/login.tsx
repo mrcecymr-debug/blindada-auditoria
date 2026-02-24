@@ -27,6 +27,7 @@ export default function LoginScreen() {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState<{ text: string; type: "error" | "success" } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -64,8 +65,10 @@ export default function LoginScreen() {
   };
 
   const handleForgotPassword = async () => {
+    setResetMessage(null);
+
     if (!resetEmail) {
-      Alert.alert("Atenção", "Digite seu e-mail para redefinir a senha.");
+      setResetMessage({ text: "Digite seu e-mail para redefinir a senha.", type: "error" });
       return;
     }
 
@@ -86,7 +89,7 @@ export default function LoginScreen() {
 
       if (!checkData.exists) {
         setResetLoading(false);
-        Alert.alert("E-mail não cadastrado", "Este e-mail não está registrado no sistema. Verifique o endereço digitado.");
+        setResetMessage({ text: "E-mail não cadastrado. Verifique o endereço digitado.", type: "error" });
         return;
       }
 
@@ -96,18 +99,14 @@ export default function LoginScreen() {
       setResetLoading(false);
 
       if (error) {
-        Alert.alert("Erro", "Não foi possível enviar o e-mail. Tente novamente mais tarde.");
+        setResetMessage({ text: "Não foi possível enviar o e-mail. Tente novamente mais tarde.", type: "error" });
       } else {
-        Alert.alert(
-          "E-mail enviado",
-          "Verifique sua caixa de entrada (e a pasta de spam) para redefinir sua senha.",
-          [{ text: "OK", onPress: () => setShowForgotModal(false) }]
-        );
+        setResetMessage({ text: "E-mail enviado! Verifique sua caixa de entrada (e a pasta de spam) para redefinir sua senha.", type: "success" });
         setResetEmail("");
       }
     } catch {
       setResetLoading(false);
-      Alert.alert("Erro", "Não foi possível conectar ao servidor. Tente novamente.");
+      setResetMessage({ text: "Não foi possível conectar ao servidor. Tente novamente.", type: "error" });
     }
   };
 
@@ -205,6 +204,7 @@ export default function LoginScreen() {
           <TouchableOpacity
             onPress={() => {
               setResetEmail(email);
+              setResetMessage(null);
               setShowForgotModal(true);
             }}
             style={styles.forgotButton}
@@ -232,6 +232,20 @@ export default function LoginScreen() {
                 <Text style={styles.modalSubtitle}>
                   Digite seu e-mail e enviaremos um link para criar uma nova senha.
                 </Text>
+
+                {resetMessage && (
+                  <View style={[styles.resetMessageBox, resetMessage.type === "error" ? styles.resetMessageError : styles.resetMessageSuccess]}>
+                    <Ionicons
+                      name={resetMessage.type === "error" ? "alert-circle" : "checkmark-circle"}
+                      size={18}
+                      color={resetMessage.type === "error" ? "#FF6B6B" : "#4CAF50"}
+                      style={{ marginRight: 8, marginTop: 1 }}
+                    />
+                    <Text style={[styles.resetMessageText, resetMessage.type === "error" ? styles.resetMessageTextError : styles.resetMessageTextSuccess]}>
+                      {resetMessage.text}
+                    </Text>
+                  </View>
+                )}
 
                 <View style={styles.modalInputContainer}>
                   <Ionicons name="mail-outline" size={18} color="#D4AF37" />
@@ -453,6 +467,34 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     color: "#000",
+  },
+  resetMessageBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 16,
+  },
+  resetMessageError: {
+    backgroundColor: "rgba(255, 107, 107, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 107, 107, 0.3)",
+  },
+  resetMessageSuccess: {
+    backgroundColor: "rgba(76, 175, 80, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(76, 175, 80, 0.3)",
+  },
+  resetMessageText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  resetMessageTextError: {
+    color: "#FF6B6B",
+  },
+  resetMessageTextSuccess: {
+    color: "#4CAF50",
   },
   footerSection: {
     alignItems: "center",
