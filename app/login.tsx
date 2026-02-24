@@ -93,13 +93,17 @@ export default function LoginScreen() {
         return;
       }
 
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: "https://guczydknusnhpooaxvtb.supabase.co/auth/v1/verify",
+      const resetRes = await fetch(`${apiBase}/api/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail }),
       });
+
+      const resetData = await resetRes.json();
       setResetLoading(false);
 
-      if (error) {
-        setResetMessage({ text: "Não foi possível enviar o e-mail. Tente novamente mais tarde.", type: "error" });
+      if (!resetData.success) {
+        setResetMessage({ text: resetData.message || "Não foi possível enviar o e-mail. Tente novamente mais tarde.", type: "error" });
       } else {
         setResetMessage({ text: "E-mail enviado! Verifique sua caixa de entrada (e a pasta de spam) para redefinir sua senha.", type: "success" });
         setResetEmail("");
