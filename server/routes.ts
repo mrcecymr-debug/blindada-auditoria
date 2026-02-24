@@ -10,6 +10,8 @@ const supabaseAdmin = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
+const resetCooldowns = new Map<string, number>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/check-email", async (req, res) => {
     const { email } = req.body;
@@ -81,38 +83,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json({ success: false, message: "E-mail não cadastrado." });
     }
 
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-    let tempPassword = "";
-    for (let i = 0; i < 10; i++) {
-      tempPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    const now = Date.now();
+    const lastReset = resetCooldowns.get(trimmedEmail) || 0;
+    const cooldownMs = 65000;
+    const remaining = cooldownMs - (now - lastReset);
+
+    if (remaining > 0) {
+      const seconds = Math.ceil(remaining / 1000);
+      return res.json({
+        success: false,
+        message: `Aguarde ${seconds} segundos antes de solicitar novamente.`,
+      });
     }
 
-    const updateRes = await fetch(
-      `${SUPABASE_URL}/auth/v1/admin/users/${user.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${serviceKey}`,
-          "apikey": serviceKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          password: tempPassword,
-        }),
-      }
-    );
+    resetCooldowns.set(trimmedEmail, now);
 
-    if (!updateRes.ok) {
-      const errText = await updateRes.text();
-      console.error("update password error:", updateRes.status, errText);
-      return res.status(500).json({ success: false, message: "Erro ao redefinir senha." });
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      type: "recovery",
+      email: trimmedEmail,
+    });
+
+    if (linkError || !linkData) {
+      console.error("generate link error:", linkError?.message);
+      resetCooldowns.delete(trimmedEmail);
+      return res.status(500).json({ success: false, message: "Erro ao gerar link de redefinição." });
     }
 
-    console.log(`reset-password: senha redefinida para "${trimmedEmail}"`);
+    const actionLink = linkData.properties?.action_link;
+
+    if (!actionLink) {
+      resetCooldowns.delete(trimmedEmail);
+      return res.status(500).json({ success: false, message: "Erro ao gerar link de redefinição." });
+    }
+
+    console.log(`reset-password: link gerado para "${trimmedEmail}": ${actionLink}`);
     return res.json({
       success: true,
-      tempPassword,
-      message: "Senha redefinida com sucesso!",
+      recoveryLink: actionLink,
+      maskedEmail: trimmedEmail.replace(/(.{2})(.*)(@.*)/, "$1***$3"),
+      message: "Link de redefinição gerado com sucesso.",
     });
   });
 

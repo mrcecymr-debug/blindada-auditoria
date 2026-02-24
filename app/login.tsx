@@ -11,6 +11,7 @@ import {
   Image,
   Modal,
   Alert,
+  Linking,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -28,6 +29,7 @@ export default function LoginScreen() {
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
   const [resetMessage, setResetMessage] = useState<{ text: string; type: "error" | "success" } | null>(null);
+  const [recoveryLink, setRecoveryLink] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -66,6 +68,7 @@ export default function LoginScreen() {
 
   const handleForgotPassword = async () => {
     setResetMessage(null);
+    setRecoveryLink(null);
 
     if (!resetEmail) {
       setResetMessage({ text: "Digite seu e-mail para redefinir a senha.", type: "error" });
@@ -103,12 +106,13 @@ export default function LoginScreen() {
       setResetLoading(false);
 
       if (!resetData.success) {
-        setResetMessage({ text: resetData.message || "Não foi possível redefinir a senha. Tente novamente.", type: "error" });
+        setResetMessage({ text: resetData.message, type: "error" });
       } else {
         setResetMessage({
-          text: `Sua nova senha temporária é:\n\n${resetData.tempPassword}\n\nAnote-a e use para fazer login. Recomendamos trocar a senha depois.`,
+          text: `Um link de redefinição foi gerado para ${resetData.maskedEmail || resetEmail}. Clique no botão abaixo para criar sua nova senha.`,
           type: "success",
         });
+        setRecoveryLink(resetData.recoveryLink);
         setResetEmail("");
       }
     } catch {
@@ -212,6 +216,7 @@ export default function LoginScreen() {
             onPress={() => {
               setResetEmail(email);
               setResetMessage(null);
+              setRecoveryLink(null);
               setShowForgotModal(true);
             }}
             style={styles.forgotButton}
@@ -237,7 +242,7 @@ export default function LoginScreen() {
                 <Ionicons name="mail-unread-outline" size={40} color="#D4AF37" style={{ alignSelf: "center", marginBottom: 12 }} />
                 <Text style={styles.modalTitle}>Redefinir Senha</Text>
                 <Text style={styles.modalSubtitle}>
-                  Digite seu e-mail para receber uma nova senha temporária.
+                  Digite seu e-mail e enviaremos um link seguro para redefinir sua senha.
                 </Text>
 
                 {resetMessage && (
@@ -281,15 +286,34 @@ export default function LoginScreen() {
                     {resetLoading ? (
                       <ActivityIndicator color="#000" />
                     ) : (
-                      <Text style={styles.modalButtonText}>Redefinir Senha</Text>
+                      <Text style={styles.modalButtonText}>Enviar Link</Text>
                     )}
                   </LinearGradient>
                 </TouchableOpacity>
+
+                {recoveryLink && (
+                  <TouchableOpacity
+                    onPress={() => Linking.openURL(recoveryLink)}
+                    activeOpacity={0.85}
+                    style={{ marginTop: 12 }}
+                  >
+                    <LinearGradient
+                      colors={["#4CAF50", "#388E3C"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.modalButton}
+                    >
+                      <Ionicons name="key-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
+                      <Text style={[styles.modalButtonText, { color: "#FFF" }]}>Criar Nova Senha</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                )}
 
                 <TouchableOpacity
                   onPress={() => {
                     setShowForgotModal(false);
                     setResetMessage(null);
+                    setRecoveryLink(null);
                     setResetEmail("");
                   }}
                   style={styles.backToLoginButton}
@@ -481,6 +505,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   modalButtonText: {
     fontSize: 15,
