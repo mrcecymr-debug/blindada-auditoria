@@ -15,18 +15,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ exists: false, message: "E-mail não informado." });
     }
 
-    const { data: allUsers, error } = await supabaseAdmin.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
+    const trimmedEmail = email.trim().toLowerCase();
 
-    if (error) {
+    const supabaseUrl = "https://guczydknusnhpooaxvtb.supabase.co";
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
+    const response = await fetch(
+      `${supabaseUrl}/auth/v1/admin/users?page=1&per_page=50`,
+      {
+        headers: {
+          "Authorization": `Bearer ${serviceKey}`,
+          "apikey": serviceKey,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Supabase admin API error:", response.status, await response.text());
       return res.status(500).json({ exists: false, message: "Erro ao verificar e-mail." });
     }
 
-    const userExists = allUsers?.users?.some(
-      (u) => u.email?.toLowerCase() === email.toLowerCase()
+    const data = await response.json();
+    const users = data.users || data || [];
+
+    const userExists = Array.isArray(users) && users.some(
+      (u: { email?: string }) => u.email?.toLowerCase() === trimmedEmail
     );
+
+    console.log(`check-email: "${trimmedEmail}" -> exists: ${userExists}`);
 
     return res.json({ exists: !!userExists });
   });
