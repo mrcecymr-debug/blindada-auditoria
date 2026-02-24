@@ -70,20 +70,44 @@ export default function LoginScreen() {
     }
 
     setResetLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: "https://guczydknusnhpooaxvtb.supabase.co/auth/v1/verify",
-    });
-    setResetLoading(false);
 
-    if (error) {
-      Alert.alert("Erro", "Não foi possível enviar o e-mail. Verifique o endereço e tente novamente.");
-    } else {
-      Alert.alert(
-        "E-mail enviado",
-        "Verifique sua caixa de entrada (e a pasta de spam) para redefinir sua senha.",
-        [{ text: "OK", onPress: () => setShowForgotModal(false) }]
-      );
-      setResetEmail("");
+    try {
+      const apiBase = process.env.EXPO_PUBLIC_DOMAIN
+        ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
+        : "http://localhost:5000";
+
+      const checkRes = await fetch(`${apiBase}/api/check-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+
+      const checkData = await checkRes.json();
+
+      if (!checkData.exists) {
+        setResetLoading(false);
+        Alert.alert("E-mail não cadastrado", "Este e-mail não está registrado no sistema. Verifique o endereço digitado.");
+        return;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: "https://guczydknusnhpooaxvtb.supabase.co/auth/v1/verify",
+      });
+      setResetLoading(false);
+
+      if (error) {
+        Alert.alert("Erro", "Não foi possível enviar o e-mail. Tente novamente mais tarde.");
+      } else {
+        Alert.alert(
+          "E-mail enviado",
+          "Verifique sua caixa de entrada (e a pasta de spam) para redefinir sua senha.",
+          [{ text: "OK", onPress: () => setShowForgotModal(false) }]
+        );
+        setResetEmail("");
+      }
+    } catch {
+      setResetLoading(false);
+      Alert.alert("Erro", "Não foi possível conectar ao servidor. Tente novamente.");
     }
   };
 
