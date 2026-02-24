@@ -2,8 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "node:http";
 import { createClient } from "@supabase/supabase-js";
 
+const SUPABASE_URL = "https://guczydknusnhpooaxvtb.supabase.co";
+
 const supabaseAdmin = createClient(
-  "https://guczydknusnhpooaxvtb.supabase.co",
+  SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
@@ -17,11 +19,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const trimmedEmail = email.trim().toLowerCase();
 
-    const supabaseUrl = "https://guczydknusnhpooaxvtb.supabase.co";
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
     const response = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users?page=1&per_page=50`,
+      `${SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=50`,
       {
         headers: {
           "Authorization": `Bearer ${serviceKey}`,
@@ -54,11 +55,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const trimmedEmail = email.trim().toLowerCase();
-    const supabaseUrl = "https://guczydknusnhpooaxvtb.supabase.co";
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
     const usersRes = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users?page=1&per_page=50`,
+      `${SUPABASE_URL}/auth/v1/admin/users?page=1&per_page=50`,
       {
         headers: {
           "Authorization": `Bearer ${serviceKey}`,
@@ -74,42 +74,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const usersData = await usersRes.json();
     const users = usersData.users || usersData || [];
     const user = Array.isArray(users) && users.find(
-      (u: { email?: string }) => u.email?.toLowerCase() === trimmedEmail
+      (u: { email?: string; id?: string }) => u.email?.toLowerCase() === trimmedEmail
     );
 
     if (!user) {
       return res.json({ success: false, message: "E-mail não cadastrado." });
     }
 
-    const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1Y3p5ZGtudXNuaHBvb2F4dnRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMzM0NTgsImV4cCI6MjA4NjkwOTQ1OH0.1LbtGWDL79v04gogWdWTw118TdncwpPEXIxzjYKlLME";
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    let tempPassword = "";
+    for (let i = 0; i < 10; i++) {
+      tempPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
 
-    const recoveryRes = await fetch(
-      `${supabaseUrl}/auth/v1/recover`,
+    const updateRes = await fetch(
+      `${SUPABASE_URL}/auth/v1/admin/users/${user.id}`,
       {
-        method: "POST",
+        method: "PUT",
         headers: {
-          "apikey": anonKey,
+          "Authorization": `Bearer ${serviceKey}`,
+          "apikey": serviceKey,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: trimmedEmail,
+          password: tempPassword,
         }),
       }
     );
 
-    if (!recoveryRes.ok) {
-      const errText = await recoveryRes.text();
-      console.error("recovery error:", recoveryRes.status, errText);
-
-      if (recoveryRes.status === 429) {
-        return res.json({ success: false, message: "Aguarde alguns segundos antes de tentar novamente." });
-      }
-
-      return res.status(500).json({ success: false, message: "Erro ao enviar e-mail de redefinição." });
+    if (!updateRes.ok) {
+      const errText = await updateRes.text();
+      console.error("update password error:", updateRes.status, errText);
+      return res.status(500).json({ success: false, message: "Erro ao redefinir senha." });
     }
 
-    console.log(`reset-password: email de recuperação enviado para "${trimmedEmail}"`);
-    return res.json({ success: true, message: "E-mail de redefinição enviado com sucesso." });
+    console.log(`reset-password: senha redefinida para "${trimmedEmail}"`);
+    return res.json({
+      success: true,
+      tempPassword,
+      message: "Senha redefinida com sucesso!",
+    });
   });
 
   const httpServer = createServer(app);

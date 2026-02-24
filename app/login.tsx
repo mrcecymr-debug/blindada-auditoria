@@ -103,9 +103,12 @@ export default function LoginScreen() {
       setResetLoading(false);
 
       if (!resetData.success) {
-        setResetMessage({ text: resetData.message || "Não foi possível enviar o e-mail. Tente novamente mais tarde.", type: "error" });
+        setResetMessage({ text: resetData.message || "Não foi possível redefinir a senha. Tente novamente.", type: "error" });
       } else {
-        setResetMessage({ text: "E-mail enviado! Verifique sua caixa de entrada (e a pasta de spam) para redefinir sua senha.", type: "success" });
+        setResetMessage({
+          text: `Sua nova senha temporária é:\n\n${resetData.tempPassword}\n\nAnote-a e use para fazer login. Recomendamos trocar a senha depois.`,
+          type: "success",
+        });
         setResetEmail("");
       }
     } catch {
@@ -234,7 +237,7 @@ export default function LoginScreen() {
                 <Ionicons name="mail-unread-outline" size={40} color="#D4AF37" style={{ alignSelf: "center", marginBottom: 12 }} />
                 <Text style={styles.modalTitle}>Redefinir Senha</Text>
                 <Text style={styles.modalSubtitle}>
-                  Digite seu e-mail e enviaremos um link para criar uma nova senha.
+                  Digite seu e-mail para receber uma nova senha temporária.
                 </Text>
 
                 {resetMessage && (
@@ -278,7 +281,7 @@ export default function LoginScreen() {
                     {resetLoading ? (
                       <ActivityIndicator color="#000" />
                     ) : (
-                      <Text style={styles.modalButtonText}>Enviar Link</Text>
+                      <Text style={styles.modalButtonText}>Redefinir Senha</Text>
                     )}
                   </LinearGradient>
                 </TouchableOpacity>
