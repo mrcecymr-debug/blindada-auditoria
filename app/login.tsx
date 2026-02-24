@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Modal,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -22,6 +24,9 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -56,6 +61,30 @@ export default function LoginScreen() {
     await registerSessionToken();
     setLoading(false);
     router.replace("/(tabs)");
+  };
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      Alert.alert("Atenção", "Digite seu e-mail para redefinir a senha.");
+      return;
+    }
+
+    setResetLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: "https://guczydknusnhpooaxvtb.supabase.co/auth/v1/verify",
+    });
+    setResetLoading(false);
+
+    if (error) {
+      Alert.alert("Erro", "Não foi possível enviar o e-mail. Verifique o endereço e tente novamente.");
+    } else {
+      Alert.alert(
+        "E-mail enviado",
+        "Verifique sua caixa de entrada (e a pasta de spam) para redefinir sua senha.",
+        [{ text: "OK", onPress: () => setShowForgotModal(false) }]
+      );
+      setResetEmail("");
+    }
   };
 
   return (
@@ -148,6 +177,72 @@ export default function LoginScreen() {
               )}
             </LinearGradient>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              setResetEmail(email);
+              setShowForgotModal(true);
+            }}
+            style={styles.forgotButton}
+          >
+            <Text style={styles.forgotText}>Esqueci minha senha</Text>
+          </TouchableOpacity>
+
+          <Modal
+            visible={showForgotModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowForgotModal(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <TouchableOpacity
+                  style={styles.modalClose}
+                  onPress={() => setShowForgotModal(false)}
+                >
+                  <Ionicons name="close" size={22} color="#888" />
+                </TouchableOpacity>
+
+                <Ionicons name="mail-unread-outline" size={40} color="#D4AF37" style={{ alignSelf: "center", marginBottom: 12 }} />
+                <Text style={styles.modalTitle}>Redefinir Senha</Text>
+                <Text style={styles.modalSubtitle}>
+                  Digite seu e-mail e enviaremos um link para criar uma nova senha.
+                </Text>
+
+                <View style={styles.modalInputContainer}>
+                  <Ionicons name="mail-outline" size={18} color="#D4AF37" />
+                  <TextInput
+                    placeholder="Seu e-mail"
+                    placeholderTextColor="#666"
+                    style={styles.input}
+                    value={resetEmail}
+                    onChangeText={setResetEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                  />
+                </View>
+
+                <TouchableOpacity
+                  onPress={handleForgotPassword}
+                  activeOpacity={0.85}
+                  disabled={resetLoading}
+                >
+                  <LinearGradient
+                    colors={["#F7B500", "#D4AF37", "#B8960C"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.modalButton}
+                  >
+                    {resetLoading ? (
+                      <ActivityIndicator color="#000" />
+                    ) : (
+                      <Text style={styles.modalButtonText}>Enviar Link</Text>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
 
           <View style={styles.footerSection}>
             <Text style={styles.footerBrand}>MR ENG</Text>
@@ -266,6 +361,72 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
+  },
+  forgotButton: {
+    alignSelf: "center",
+    marginTop: 16,
+  },
+  forgotText: {
+    color: "#D4AF37AA",
+    fontSize: 13,
+    textDecorationLine: "underline",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: "#0D1321",
+    borderRadius: 20,
+    padding: 28,
+    width: "100%",
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: "#1A2236",
+  },
+  modalClose: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    zIndex: 1,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginBottom: 6,
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    color: "#888",
+    textAlign: "center",
+    marginBottom: 22,
+    lineHeight: 18,
+  },
+  modalInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#070A12",
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: "#1A2236",
+  },
+  modalButton: {
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  modalButtonText: {
+    fontSize: 15,
     fontWeight: "700",
     color: "#000",
   },
