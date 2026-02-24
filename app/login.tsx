@@ -278,6 +278,18 @@ export default function LoginScreen() {
                     )}
                   </LinearGradient>
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowForgotModal(false);
+                    setResetMessage(null);
+                    setResetEmail("");
+                  }}
+                  style={styles.backToLoginButton}
+                >
+                  <Ionicons name="arrow-back" size={16} color="#D4AF37AA" style={{ marginRight: 6 }} />
+                  <Text style={styles.backToLoginText}>Voltar ao Login</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </Modal>
@@ -495,6 +507,18 @@ const styles = StyleSheet.create({
   },
   resetMessageTextSuccess: {
     color: "#4CAF50",
+  },
+  backToLoginButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 18,
+    paddingVertical: 8,
+  },
+  backToLoginText: {
+    color: "#D4AF37AA",
+    fontSize: 14,
+    textDecorationLine: "underline",
   },
   footerSection: {
     alignItems: "center",
