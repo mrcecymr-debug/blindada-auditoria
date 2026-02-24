@@ -9,9 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
-  Modal,
-  Alert,
-  Linking,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -25,11 +22,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
-  const [showForgotModal, setShowForgotModal] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetLoading, setResetLoading] = useState(false);
-  const [resetMessage, setResetMessage] = useState<{ text: string; type: "error" | "success" } | null>(null);
-  const [recoveryLink, setRecoveryLink] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -64,61 +56,6 @@ export default function LoginScreen() {
     await registerSessionToken();
     setLoading(false);
     router.replace("/(tabs)");
-  };
-
-  const handleForgotPassword = async () => {
-    setResetMessage(null);
-    setRecoveryLink(null);
-
-    if (!resetEmail) {
-      setResetMessage({ text: "Digite seu e-mail para redefinir a senha.", type: "error" });
-      return;
-    }
-
-    setResetLoading(true);
-
-    try {
-      const apiBase = process.env.EXPO_PUBLIC_DOMAIN
-        ? `https://${process.env.EXPO_PUBLIC_DOMAIN}`
-        : "http://localhost:5000";
-
-      const checkRes = await fetch(`${apiBase}/api/check-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: resetEmail }),
-      });
-
-      const checkData = await checkRes.json();
-
-      if (!checkData.exists) {
-        setResetLoading(false);
-        setResetMessage({ text: "E-mail não cadastrado. Verifique o endereço digitado.", type: "error" });
-        return;
-      }
-
-      const resetRes = await fetch(`${apiBase}/api/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: resetEmail }),
-      });
-
-      const resetData = await resetRes.json();
-      setResetLoading(false);
-
-      if (!resetData.success) {
-        setResetMessage({ text: resetData.message, type: "error" });
-      } else {
-        setResetMessage({
-          text: `Um link de redefinição foi gerado para ${resetData.maskedEmail || resetEmail}. Clique no botão abaixo para criar sua nova senha.`,
-          type: "success",
-        });
-        setRecoveryLink(resetData.recoveryLink);
-        setResetEmail("");
-      }
-    } catch {
-      setResetLoading(false);
-      setResetMessage({ text: "Não foi possível conectar ao servidor. Tente novamente.", type: "error" });
-    }
   };
 
   return (
@@ -211,119 +148,6 @@ export default function LoginScreen() {
               )}
             </LinearGradient>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              setResetEmail(email);
-              setResetMessage(null);
-              setRecoveryLink(null);
-              setShowForgotModal(true);
-            }}
-            style={styles.forgotButton}
-          >
-            <Text style={styles.forgotText}>Esqueci minha senha</Text>
-          </TouchableOpacity>
-
-          <Modal
-            visible={showForgotModal}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setShowForgotModal(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <TouchableOpacity
-                  style={styles.modalClose}
-                  onPress={() => setShowForgotModal(false)}
-                >
-                  <Ionicons name="close" size={22} color="#888" />
-                </TouchableOpacity>
-
-                <Ionicons name="mail-unread-outline" size={40} color="#D4AF37" style={{ alignSelf: "center", marginBottom: 12 }} />
-                <Text style={styles.modalTitle}>Redefinir Senha</Text>
-                <Text style={styles.modalSubtitle}>
-                  Digite seu e-mail e enviaremos um link seguro para redefinir sua senha.
-                </Text>
-
-                {resetMessage && (
-                  <View style={[styles.resetMessageBox, resetMessage.type === "error" ? styles.resetMessageError : styles.resetMessageSuccess]}>
-                    <Ionicons
-                      name={resetMessage.type === "error" ? "alert-circle" : "checkmark-circle"}
-                      size={18}
-                      color={resetMessage.type === "error" ? "#FF6B6B" : "#4CAF50"}
-                      style={{ marginRight: 8, marginTop: 1 }}
-                    />
-                    <Text style={[styles.resetMessageText, resetMessage.type === "error" ? styles.resetMessageTextError : styles.resetMessageTextSuccess]}>
-                      {resetMessage.text}
-                    </Text>
-                  </View>
-                )}
-
-                <View style={styles.modalInputContainer}>
-                  <Ionicons name="mail-outline" size={18} color="#D4AF37" />
-                  <TextInput
-                    placeholder="Seu e-mail"
-                    placeholderTextColor="#666"
-                    style={styles.input}
-                    value={resetEmail}
-                    onChangeText={setResetEmail}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                  />
-                </View>
-
-                <TouchableOpacity
-                  onPress={handleForgotPassword}
-                  activeOpacity={0.85}
-                  disabled={resetLoading}
-                >
-                  <LinearGradient
-                    colors={["#F7B500", "#D4AF37", "#B8960C"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalButton}
-                  >
-                    {resetLoading ? (
-                      <ActivityIndicator color="#000" />
-                    ) : (
-                      <Text style={styles.modalButtonText}>Enviar Link</Text>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
-
-                {recoveryLink && (
-                  <TouchableOpacity
-                    onPress={() => Linking.openURL(recoveryLink)}
-                    activeOpacity={0.85}
-                    style={{ marginTop: 12 }}
-                  >
-                    <LinearGradient
-                      colors={["#4CAF50", "#388E3C"]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.modalButton}
-                    >
-                      <Ionicons name="key-outline" size={18} color="#FFF" style={{ marginRight: 8 }} />
-                      <Text style={[styles.modalButtonText, { color: "#FFF" }]}>Criar Nova Senha</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                )}
-
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowForgotModal(false);
-                    setResetMessage(null);
-                    setRecoveryLink(null);
-                    setResetEmail("");
-                  }}
-                  style={styles.backToLoginButton}
-                >
-                  <Ionicons name="arrow-back" size={16} color="#D4AF37AA" style={{ marginRight: 6 }} />
-                  <Text style={styles.backToLoginText}>Voltar ao Login</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
 
           <View style={styles.footerSection}>
             <Text style={styles.footerBrand}>MR ENG</Text>
@@ -444,114 +268,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#000",
-  },
-  forgotButton: {
-    alignSelf: "center",
-    marginTop: 16,
-  },
-  forgotText: {
-    color: "#D4AF37AA",
-    fontSize: 13,
-    textDecorationLine: "underline",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.75)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  modalContent: {
-    backgroundColor: "#0D1321",
-    borderRadius: 20,
-    padding: 28,
-    width: "100%",
-    maxWidth: 400,
-    borderWidth: 1,
-    borderColor: "#1A2236",
-  },
-  modalClose: {
-    position: "absolute",
-    top: 14,
-    right: 14,
-    zIndex: 1,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    textAlign: "center",
-    marginBottom: 6,
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    color: "#888",
-    textAlign: "center",
-    marginBottom: 22,
-    lineHeight: 18,
-  },
-  modalInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#070A12",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: "#1A2236",
-  },
-  modalButton: {
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  modalButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#000",
-  },
-  resetMessageBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 16,
-  },
-  resetMessageError: {
-    backgroundColor: "rgba(255, 107, 107, 0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 107, 107, 0.3)",
-  },
-  resetMessageSuccess: {
-    backgroundColor: "rgba(76, 175, 80, 0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(76, 175, 80, 0.3)",
-  },
-  resetMessageText: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  resetMessageTextError: {
-    color: "#FF6B6B",
-  },
-  resetMessageTextSuccess: {
-    color: "#4CAF50",
-  },
-  backToLoginButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 18,
-    paddingVertical: 8,
-  },
-  backToLoginText: {
-    color: "#D4AF37AA",
-    fontSize: 14,
-    textDecorationLine: "underline",
   },
   footerSection: {
     alignItems: "center",
