@@ -2,7 +2,7 @@
 
 ## Overview
 
-Casa Blindada MR@ is a home security audit mobile application built with Expo (React Native). It allows users to conduct structured security assessments of residential properties by answering categorized questions across five security domains (Perimeter & Structure, Lighting & Visibility, Access Control, Electronic Systems, and Human Factors). The app calculates security scores, generates dashboards with visual analytics, provides prioritized action items for improving security, allows users to save/load audit reports, and shows score evolution history across saved audits.
+Casa Blindada MR@ is a home security audit mobile application built with Expo (React Native). It allows users to conduct structured security assessments of residential properties by answering categorized questions across five security domains (Perimeter & Structure, Lighting & Visibility, Access Control, Electronic Systems, and Human Factors). The app calculates security scores, generates dashboards with visual analytics, provides prioritized action items for improving security, allows users to save/load audit reports, shows score evolution history across saved audits, and generates professional A4 PDF reports with full audit data, SVG charts, and MR ENG branding.
 
 The project follows a full-stack architecture with an Express backend server and an Expo/React Native frontend, designed to run on iOS, Android, and web platforms.
 

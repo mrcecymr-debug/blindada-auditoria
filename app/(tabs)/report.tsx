@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Pressable, Platform,
-  Modal, TextInput, FlatList, Image, Alert,
+  Modal, TextInput, FlatList, Image, Alert, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import Colors from '@/constants/colors';
 import { useAudit, SavedAudit } from '@/lib/audit-context';
 import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS, generateActionItems, getTopVulnerabilities } from '@/lib/audit-data';
+import { generateFullReportHTML } from '@/lib/pdf-report';
 
 function SaveModal({ visible, onClose, onSave }: {
   visible: boolean; onClose: () => void; onSave: (name: string) => void;
@@ -99,6 +102,42 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
 
   const answeredQuestions = QUESTIONS.filter(q => audit.answers[q.code]?.answer);
 
+  const [generatingPDF, setGeneratingPDF] = useState(false);
+
+  const handleGeneratePDF = async () => {
+    try {
+      setGeneratingPDF(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const html = generateFullReportHTML(audit, allAudits);
+
+      if (Platform.OS === 'web') {
+        await Print.printAsync({ html });
+        setGeneratingPDF(false);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        const { uri } = await Print.printToFileAsync({
+          html,
+          base64: false,
+        });
+        setGeneratingPDF(false);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        const canShare = await Sharing.isAvailableAsync();
+        if (canShare) {
+          await Sharing.shareAsync(uri, {
+            mimeType: 'application/pdf',
+            dialogTitle: `Relatorio - ${audit.name}`,
+            UTI: 'com.adobe.pdf',
+          });
+        } else {
+          Alert.alert('PDF Gerado', 'O relatorio foi salvo com sucesso.');
+        }
+      }
+    } catch (error) {
+      setGeneratingPDF(false);
+      Alert.alert('Erro', 'Nao foi possivel gerar o PDF. Tente novamente.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -115,6 +154,17 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
               {date.toLocaleDateString('pt-BR')} - {audit.answeredCount}/{audit.totalCount} respostas
             </Text>
           </View>
+          <Pressable
+            onPress={handleGeneratePDF}
+            disabled={generatingPDF}
+            style={styles.pdfButton}
+          >
+            {generatingPDF ? (
+              <ActivityIndicator size="small" color={Colors.accent} />
+            ) : (
+              <Ionicons name="document-text-outline" size={20} color={Colors.accent} />
+            )}
+          </Pressable>
         </View>
       </LinearGradient>
 
@@ -762,6 +812,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceLight,
     justifyContent: 'center', alignItems: 'center',
     marginRight: 12,
+  },
+  pdfButton: {
+    width: 40, height: 40, borderRadius: 12,
+    backgroundColor: Colors.accent + '18',
+    justifyContent: 'center', alignItems: 'center',
+    marginLeft: 10,
   },
   scrollView: { flex: 1 },
   scrollContent: { padding: 16, gap: 16 },
