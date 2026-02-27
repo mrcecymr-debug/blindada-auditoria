@@ -69,13 +69,26 @@ function SaveModal({ visible, onClose, onSave }: {
   );
 }
 
-function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => void }) {
+function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClose: () => void; allAudits: SavedAudit[] }) {
   const insets = useSafeAreaInsets();
   const score = calculateScore(audit.answers);
   const date = new Date(audit.date);
   const dynamicActions = React.useMemo(() => generateActionItems(audit.answers), [audit.answers]);
 
   const vulnerabilities = React.useMemo(() => getTopVulnerabilities(audit.answers, 5), [audit.answers]);
+
+  const evolutionData = React.useMemo(() => {
+    return [...allAudits]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((a) => ({
+        id: a.id,
+        name: a.name,
+        date: new Date(a.date),
+        percentage: a.percentage,
+        classification: a.classification,
+        isCurrent: a.id === audit.id,
+      }));
+  }, [allAudits, audit.id]);
 
   const timeline = [
     { week: 'Semana 1', days: 'Dias 1-7', task: 'Fechaduras + sensores porta/janela' },
@@ -346,6 +359,110 @@ function ReportDetail({ audit, onClose }: { audit: SavedAudit; onClose: () => vo
           </View>
         </Animated.View>
 
+        {evolutionData.length >= 2 && (
+          <Animated.View entering={FadeInDown.delay(700).duration(400)}>
+            <View style={styles.section}>
+              <Text style={styles.sectionNumber}>07</Text>
+              <Text style={styles.sectionTitle}>Evolucao do Lar</Text>
+              <Text style={styles.evolutionSubtitle}>
+                Historico de pontuacoes de todas as auditorias salvas
+              </Text>
+
+              <View style={styles.evolutionChart}>
+                {evolutionData.map((item, idx) => {
+                  const barHeight = Math.max(8, (item.percentage / 100) * 120);
+                  const barColor = item.percentage >= 80 ? Colors.riskColors.excelente
+                    : item.percentage >= 60 ? Colors.riskColors.bom
+                    : item.percentage >= 40 ? Colors.riskColors.moderado
+                    : item.percentage >= 20 ? Colors.riskColors.atencao
+                    : Colors.riskColors.critico;
+                  return (
+                    <View key={item.id} style={styles.evolutionBarContainer}>
+                      <Text style={[styles.evolutionBarValue, { color: barColor }]}>
+                        {item.percentage}
+                      </Text>
+                      <View style={styles.evolutionBarTrack}>
+                        <View style={[
+                          styles.evolutionBar,
+                          {
+                            height: barHeight,
+                            backgroundColor: barColor,
+                            opacity: item.isCurrent ? 1 : 0.6,
+                          },
+                        ]} />
+                      </View>
+                      <Text style={[
+                        styles.evolutionBarDate,
+                        item.isCurrent && { color: Colors.accent, fontWeight: '700' as const },
+                      ]}>
+                        {item.date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                      </Text>
+                      {item.isCurrent && (
+                        <View style={styles.evolutionCurrentDot} />
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+
+              <View style={styles.evolutionTimeline}>
+                {evolutionData.map((item, idx) => {
+                  const scoreColor = item.percentage >= 80 ? Colors.riskColors.excelente
+                    : item.percentage >= 60 ? Colors.riskColors.bom
+                    : item.percentage >= 40 ? Colors.riskColors.moderado
+                    : item.percentage >= 20 ? Colors.riskColors.atencao
+                    : Colors.riskColors.critico;
+                  const prevPercentage = idx > 0 ? evolutionData[idx - 1].percentage : null;
+                  const diff = prevPercentage !== null ? item.percentage - prevPercentage : null;
+                  return (
+                    <View key={item.id} style={[
+                      styles.evolutionRow,
+                      item.isCurrent && styles.evolutionRowCurrent,
+                    ]}>
+                      <View style={styles.evolutionTimelineLeft}>
+                        <View style={[styles.evolutionDot, { backgroundColor: scoreColor }]} />
+                        {idx < evolutionData.length - 1 && <View style={styles.evolutionConnector} />}
+                      </View>
+                      <View style={styles.evolutionContent}>
+                        <View style={styles.evolutionRowHeader}>
+                          <Text style={styles.evolutionDate}>
+                            {item.date.toLocaleDateString('pt-BR')}
+                          </Text>
+                          <View style={styles.evolutionScoreRow}>
+                            <Text style={[styles.evolutionScore, { color: scoreColor }]}>
+                              {item.percentage}/100
+                            </Text>
+                            {diff !== null && (
+                              <View style={[styles.evolutionDiffBadge, {
+                                backgroundColor: diff > 0 ? Colors.success + '20' : diff < 0 ? Colors.danger + '20' : Colors.textMuted + '20',
+                              }]}>
+                                <Ionicons
+                                  name={diff > 0 ? 'arrow-up' : diff < 0 ? 'arrow-down' : 'remove'}
+                                  size={10}
+                                  color={diff > 0 ? Colors.success : diff < 0 ? Colors.danger : Colors.textMuted}
+                                />
+                                <Text style={[styles.evolutionDiffText, {
+                                  color: diff > 0 ? Colors.success : diff < 0 ? Colors.danger : Colors.textMuted,
+                                }]}>
+                                  {diff > 0 ? '+' : ''}{diff}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        </View>
+                        <Text style={styles.evolutionName} numberOfLines={1}>{item.name}</Text>
+                        <Text style={[styles.evolutionClassification, { color: scoreColor }]}>
+                          {item.classification}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </Animated.View>
+        )}
+
         <View style={styles.footer}>
           <Image
             source={require('@/assets/images/logo-casa-blindada.jpg')}
@@ -494,7 +611,7 @@ export default function ReportScreen() {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   if (viewingAudit) {
-    return <ReportDetail audit={viewingAudit} onClose={() => setViewingAudit(null)} />;
+    return <ReportDetail audit={viewingAudit} onClose={() => setViewingAudit(null)} allAudits={savedAudits} />;
   }
 
   return (
@@ -1104,5 +1221,128 @@ const styles = StyleSheet.create({
   reportPriorityCountText: {
     fontSize: 12,
     fontWeight: '700' as const,
+  },
+  evolutionSubtitle: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    marginBottom: 16,
+  },
+  evolutionChart: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 24,
+    paddingHorizontal: 4,
+    minHeight: 160,
+  },
+  evolutionBarContainer: {
+    alignItems: 'center',
+    flex: 1,
+    maxWidth: 50,
+  },
+  evolutionBarValue: {
+    fontSize: 11,
+    fontWeight: '700' as const,
+    marginBottom: 4,
+  },
+  evolutionBarTrack: {
+    width: '100%',
+    height: 120,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  evolutionBar: {
+    width: '70%',
+    borderRadius: 4,
+    minHeight: 8,
+  },
+  evolutionBarDate: {
+    fontSize: 9,
+    color: Colors.textMuted,
+    marginTop: 6,
+    textAlign: 'center' as const,
+  },
+  evolutionCurrentDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.accent,
+    marginTop: 4,
+  },
+  evolutionTimeline: {
+    gap: 0,
+  },
+  evolutionRow: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+  },
+  evolutionRowCurrent: {
+    backgroundColor: Colors.accent + '10',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.accent + '30',
+  },
+  evolutionTimelineLeft: {
+    width: 24,
+    alignItems: 'center',
+  },
+  evolutionDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginTop: 4,
+  },
+  evolutionConnector: {
+    width: 2,
+    flex: 1,
+    backgroundColor: Colors.border,
+    marginTop: 4,
+  },
+  evolutionContent: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  evolutionRowHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  evolutionDate: {
+    fontSize: 13,
+    color: Colors.text,
+    fontWeight: '600' as const,
+  },
+  evolutionScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  evolutionScore: {
+    fontSize: 15,
+    fontWeight: '700' as const,
+  },
+  evolutionDiffBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    gap: 2,
+  },
+  evolutionDiffText: {
+    fontSize: 10,
+    fontWeight: '700' as const,
+  },
+  evolutionName: {
+    fontSize: 12,
+    color: Colors.textMuted,
+  },
+  evolutionClassification: {
+    fontSize: 11,
+    fontWeight: '600' as const,
+    marginTop: 2,
   },
 });
