@@ -111,7 +111,16 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
       const html = generateFullReportHTML(audit, allAudits);
 
       if (Platform.OS === 'web') {
-        await Print.printAsync({ html });
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(html);
+          printWindow.document.close();
+          printWindow.onload = () => {
+            setTimeout(() => {
+              printWindow.print();
+            }, 500);
+          };
+        }
         setGeneratingPDF(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
