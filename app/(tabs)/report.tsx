@@ -112,19 +112,35 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
       const html = generateFullReportHTML(audit, allAudits, isWeb ? 'browser' : 'webkit');
 
       if (isWeb) {
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-          printWindow.document.write(html);
-          printWindow.document.close();
-          printWindow.onload = () => {
+        const blob = new Blob([html], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.top = '-10000px';
+        iframe.style.left = '-10000px';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = 'none';
+        document.body.appendChild(iframe);
+        iframe.src = blobUrl;
+        iframe.onload = () => {
+          setTimeout(() => {
+            try {
+              iframe.contentWindow?.print();
+            } catch (e) {
+              const link = document.createElement('a');
+              link.href = blobUrl;
+              link.download = `Relatorio_${audit.name.replace(/\s+/g, '_')}.html`;
+              link.click();
+            }
             setTimeout(() => {
-              printWindow.print();
-            }, 500);
-          };
-        }
+              document.body.removeChild(iframe);
+              URL.revokeObjectURL(blobUrl);
+            }, 1000);
+          }, 500);
+        };
         setGeneratingPDF(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTimeout(() => onClose(), 300);
       } else {
         const { uri } = await Print.printToFileAsync({
           html,
