@@ -699,6 +699,11 @@ export default function ReportScreen() {
         style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
       >
         <View style={styles.headerRow}>
+          <Image
+            source={require('@/assets/images/logo-casa-blindada.jpg')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Relatorios</Text>
             <Text style={styles.headerSubtitle}>{savedAudits.length} levantamento{savedAudits.length !== 1 ? 's' : ''} salvo{savedAudits.length !== 1 ? 's' : ''}</Text>
@@ -818,17 +823,25 @@ export default function ReportScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+    gap: 12,
+    marginTop: 6,
   },
-  headerTitle: { fontSize: 28, fontWeight: '700' as const, color: Colors.text },
-  headerSubtitle: { fontSize: 14, color: Colors.textSecondary, marginTop: 4 },
+  logoImage: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: Colors.accent + '40',
+  },
+  headerTitle: { fontSize: 22, fontWeight: '700' as const, color: Colors.text },
+  headerSubtitle: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
   headerButtons: { flexDirection: 'row', gap: 8 },
   clearButton: {
     width: 44, height: 44, borderRadius: 12,

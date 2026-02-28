@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  StyleSheet, Text, View, ScrollView, Platform,
+  StyleSheet, Text, View, ScrollView, Platform, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -82,11 +82,20 @@ export default function DashboardScreen() {
         colors={[Colors.primary, Colors.background]}
         style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
       >
-        <Text style={styles.headerTitle}>Painel de Risco</Text>
-        <Text style={styles.headerSubtitle}>
-          {answeredCount === 0 ? 'Responda o levantamento para ver os resultados' :
-            `Baseado em ${answeredCount} de ${totalCount} respostas`}
-        </Text>
+        <View style={styles.logoRow}>
+          <Image
+            source={require('@/assets/images/logo-casa-blindada.jpg')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle}>Painel de Risco</Text>
+            <Text style={styles.headerSubtitle}>
+              {answeredCount === 0 ? 'Responda o levantamento para ver os resultados' :
+                `Baseado em ${answeredCount} de ${totalCount} respostas`}
+            </Text>
+          </View>
+        </View>
       </LinearGradient>
 
       <ScrollView
@@ -149,11 +158,24 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
-  headerTitle: { fontSize: 28, fontWeight: '700' as const, color: Colors.text, marginTop: 12 },
-  headerSubtitle: { fontSize: 14, color: Colors.textSecondary, marginTop: 4 },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 6,
+  },
+  logoImage: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: Colors.accent + '40',
+  },
+  headerTitle: { fontSize: 22, fontWeight: '700' as const, color: Colors.text },
+  headerSubtitle: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
   scrollView: { flex: 1 },
   scrollContent: { padding: 16, gap: 16 },
   gaugeContainer: {},
