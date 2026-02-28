@@ -138,8 +138,11 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
             dialogTitle: `Relatorio - ${audit.name}`,
             UTI: 'com.adobe.pdf',
           });
+          onClose();
         } else {
-          Alert.alert('PDF Gerado', 'O relatorio foi salvo com sucesso.');
+          Alert.alert('PDF Gerado', 'O relatorio foi salvo com sucesso.', [
+            { text: 'OK', onPress: () => onClose() },
+          ]);
         }
       }
     } catch (error) {
