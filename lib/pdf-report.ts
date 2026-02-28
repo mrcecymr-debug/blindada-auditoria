@@ -287,7 +287,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
 <style>
   @page {
     size: A4;
-    margin: ${target === 'webkit' ? '28mm 16mm 24mm 16mm' : '18mm 16mm 20mm 16mm'};
+    margin: ${target === 'webkit' ? '28mm 18mm 24mm 18mm' : '18mm 18mm 20mm 18mm'};
     ${target === 'webkit' ? `
     @top-center {
       content: element(page-header);
@@ -308,6 +308,8 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     font-size: 12px;
     line-height: 1.5;
+    max-width: 170mm;
+    margin: 0 auto;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
