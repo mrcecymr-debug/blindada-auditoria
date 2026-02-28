@@ -18,6 +18,11 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-title" content="Casa Blindada" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#060E1A" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/icon.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/assets/images/icon.png" />
+        <link rel="apple-touch-icon" sizes="120x120" href="/assets/images/icon.png" />
+        <link rel="apple-touch-icon" href="/assets/images/icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/assets/images/icon.png" />
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: `
           html, body {
