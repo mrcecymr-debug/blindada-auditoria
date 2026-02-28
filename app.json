@@ -27,7 +27,12 @@
       }
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "backgroundColor": "#060E1A",
+      "themeColor": "#060E1A",
+      "name": "Casa Blindada MR@",
+      "shortName": "Casa Blindada",
+      "description": "Sistema de Auditoria de Seguranca Residencial"
     },
     "plugins": [
       [
