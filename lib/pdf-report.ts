@@ -19,45 +19,30 @@ function getScoreColor(pct: number): string {
   return '#FF4757';
 }
 
-function generateCategoryRadarSVG(categories: { category: string; percentage: number; categoryKey: string }[]): string {
-  const cx = 140, cy = 140, r = 110;
-  const n = categories.length;
-  const angles = categories.map((_, i) => (Math.PI * 2 * i) / n - Math.PI / 2);
+function generateCategoryBarsSVG(categories: { category: string; percentage: number; categoryKey: string }[]): string {
+  const barH = 22;
+  const gap = 10;
+  const labelW = 130;
+  const barMaxW = 180;
+  const pctW = 45;
+  const totalW = labelW + barMaxW + pctW + 10;
+  const totalH = categories.length * (barH + gap) + gap;
 
-  const gridLines = [0.25, 0.5, 0.75, 1].map(level => {
-    const pts = angles.map(a => `${cx + r * level * Math.cos(a)},${cy + r * level * Math.sin(a)}`).join(' ');
-    return `<polygon points="${pts}" fill="none" stroke="#1E3452" stroke-width="0.5" opacity="0.6"/>`;
-  }).join('');
-
-  const axisLines = angles.map(a =>
-    `<line x1="${cx}" y1="${cy}" x2="${cx + r * Math.cos(a)}" y2="${cy + r * Math.sin(a)}" stroke="#1E3452" stroke-width="0.5" opacity="0.4"/>`
-  ).join('');
-
-  const dataPts = categories.map((cat, i) => {
-    const pct = cat.percentage / 100;
-    return `${cx + r * pct * Math.cos(angles[i])},${cy + r * pct * Math.sin(angles[i])}`;
-  }).join(' ');
-
-  const labels = categories.map((cat, i) => {
-    const labelR = r + 28;
-    const x = cx + labelR * Math.cos(angles[i]);
-    const y = cy + labelR * Math.sin(angles[i]);
+  const bars = categories.map((cat, i) => {
+    const y = gap + i * (barH + gap);
     const color = getCategoryColor(cat.categoryKey);
-    const anchor = Math.abs(Math.cos(angles[i])) < 0.1 ? 'middle' : Math.cos(angles[i]) > 0 ? 'start' : 'end';
-    return `<text x="${x}" y="${y}" fill="${color}" font-size="10" font-weight="600" text-anchor="${anchor}" dominant-baseline="middle">${cat.percentage}%</text>`;
+    const fillW = Math.max(2, (cat.percentage / 100) * barMaxW);
+    const shortName = cat.category.length > 18 ? cat.category.substring(0, 18) + '...' : cat.category;
+    return `
+      <text x="${labelW - 6}" y="${y + barH / 2 + 4}" fill="#E0E6ED" font-size="10" font-weight="500" text-anchor="end">${shortName}</text>
+      <rect x="${labelW}" y="${y}" width="${barMaxW}" height="${barH}" rx="4" fill="#1E3452" opacity="0.5"/>
+      <rect x="${labelW}" y="${y}" width="${fillW}" height="${barH}" rx="4" fill="${color}"/>
+      <text x="${labelW + barMaxW + 8}" y="${y + barH / 2 + 4}" fill="${color}" font-size="11" font-weight="700">${cat.percentage}%</text>
+    `;
   }).join('');
 
-  const dots = categories.map((cat, i) => {
-    const pct = cat.percentage / 100;
-    const x = cx + r * pct * Math.cos(angles[i]);
-    const y = cy + r * pct * Math.sin(angles[i]);
-    return `<circle cx="${x}" cy="${y}" r="4" fill="${getCategoryColor(cat.categoryKey)}" stroke="#060E1A" stroke-width="2"/>`;
-  }).join('');
-
-  return `<svg width="280" height="280" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
-    ${gridLines}${axisLines}
-    <polygon points="${dataPts}" fill="#00C6AE" fill-opacity="0.15" stroke="#00C6AE" stroke-width="2"/>
-    ${dots}${labels}
+  return `<svg width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg">
+    ${bars}
   </svg>`;
 }
 
@@ -145,7 +130,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
       </div>`;
   }).join('');
 
-  const radarSVG = generateCategoryRadarSVG(score.categories);
+  const barsSVG = generateCategoryBarsSVG(score.categories);
 
   const topVulns = getTopVulnerabilities(audit.answers, 5);
   const vulnsHTML = topVulns.length === 0
@@ -945,7 +930,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
         <div class="score-pts">${score.totalScore} de ${score.maxScore} pontos possiveis</div>
       </div>
       <div class="score-radar">
-        ${radarSVG}
+        ${barsSVG}
       </div>
     </div>
   </div>
