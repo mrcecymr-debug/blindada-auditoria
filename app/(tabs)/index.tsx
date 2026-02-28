@@ -531,6 +531,31 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
   );
 }
 
+function getProgressColor(progress: number): string {
+  if (progress >= 1) return Colors.accent;
+  if (progress >= 0.75) return Colors.success;
+  if (progress >= 0.5) return '#FFD93D';
+  if (progress >= 0.25) return Colors.warning;
+  return Colors.danger;
+}
+
+function getProgressGradient(progress: number): [string, string] {
+  if (progress >= 1) return ['#00C6AE', '#2ED573'];
+  if (progress >= 0.75) return ['#2ED573', '#00C6AE'];
+  if (progress >= 0.5) return ['#FFD93D', '#2ED573'];
+  if (progress >= 0.25) return ['#FF9F43', '#FFD93D'];
+  return ['#FF4757', '#FF9F43'];
+}
+
+function getProgressLabel(progress: number): string {
+  if (progress >= 1) return 'Completo';
+  if (progress >= 0.75) return 'Quase la';
+  if (progress >= 0.5) return 'Bom andamento';
+  if (progress >= 0.25) return 'Em progresso';
+  if (progress > 0) return 'Iniciado';
+  return 'Nao iniciado';
+}
+
   export default function SurveyScreen() {
     const insets = useSafeAreaInsets();
 
@@ -593,15 +618,34 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
         <View style={styles.headerContent}>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Levantamento</Text>
-            <Text style={styles.headerSubtitle}>{answeredCount} de {totalCount} perguntas</Text>
           </View>
           <View style={styles.scoreCircle}>
             <Text style={styles.scoreText}>{score.percentage}%</Text>
           </View>
         </View>
-        <View style={styles.headerProgress}>
-          <View style={[styles.headerProgressBar, { backgroundColor: Colors.border }]}>
-            <View style={[styles.headerProgressFill, { width: `${progress * 100}%` }]} />
+
+        <View style={styles.progressSection}>
+          <View style={styles.progressLabelRow}>
+            <Text style={styles.progressLabel}>Progresso da Auditoria</Text>
+            <Text style={[styles.progressPct, { color: getProgressColor(progress) }]}>
+              {Math.round(progress * 100)}%
+            </Text>
+          </View>
+          <View style={styles.progressTrack}>
+            <LinearGradient
+              colors={getProgressGradient(progress)}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.progressFillBar, { width: `${Math.max(progress * 100, 1)}%` }]}
+            />
+          </View>
+          <View style={styles.progressInfoRow}>
+            <Text style={styles.progressInfoText}>
+              {answeredCount} de {totalCount} perguntas
+            </Text>
+            <Text style={[styles.progressStatusText, { color: getProgressColor(progress) }]}>
+              {getProgressLabel(progress)}
+            </Text>
           </View>
         </View>
       </LinearGradient>
@@ -711,11 +755,54 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: Colors.accent,
   },
   scoreText: { fontSize: 16, fontWeight: '700' as const, color: Colors.accent },
-  headerProgress: { marginTop: 12 },
-  headerProgressBar: { height: 4, borderRadius: 2 },
-  headerProgressFill: {
-    height: 4, borderRadius: 2,
-    backgroundColor: Colors.accent,
+  progressSection: {
+    marginTop: 14,
+    backgroundColor: Colors.card,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  progressLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressLabel: {
+    fontSize: 11,
+    fontWeight: '600' as const,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  progressPct: {
+    fontSize: 16,
+    fontWeight: '800' as const,
+  },
+  progressTrack: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.border,
+    overflow: 'hidden',
+  },
+  progressFillBar: {
+    height: 10,
+    borderRadius: 5,
+  },
+  progressInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  progressInfoText: {
+    fontSize: 11,
+    color: Colors.textMuted,
+  },
+  progressStatusText: {
+    fontSize: 11,
+    fontWeight: '700' as const,
   },
   scrollView: { flex: 1 },
   scrollContent: { padding: 16, gap: 12 },
