@@ -124,6 +124,7 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
         }
         setGeneratingPDF(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTimeout(() => onClose(), 300);
       } else {
         const { uri } = await Print.printToFileAsync({
           html,
@@ -138,12 +139,10 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
             dialogTitle: `Relatorio - ${audit.name}`,
             UTI: 'com.adobe.pdf',
           });
-          onClose();
         } else {
-          Alert.alert('PDF Gerado', 'O relatorio foi salvo com sucesso.', [
-            { text: 'OK', onPress: () => onClose() },
-          ]);
+          Alert.alert('PDF Gerado', 'O relatorio foi salvo com sucesso.');
         }
+        setTimeout(() => onClose(), 500);
       }
     } catch (error) {
       setGeneratingPDF(false);
