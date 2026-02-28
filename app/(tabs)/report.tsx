@@ -108,9 +108,10 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
     try {
       setGeneratingPDF(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const html = generateFullReportHTML(audit, allAudits);
+      const isWeb = Platform.OS === 'web';
+      const html = generateFullReportHTML(audit, allAudits, isWeb ? 'browser' : 'webkit');
 
-      if (Platform.OS === 'web') {
+      if (isWeb) {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
           printWindow.document.write(html);

@@ -112,7 +112,7 @@ function generateEvolutionChartSVG(audits: { date: string; percentage: number; i
   </svg>`;
 }
 
-export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[]): string {
+export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[], target: 'webkit' | 'browser' = 'webkit'): string {
   const score = calculateScore(audit.answers);
   const scoreColor = getScoreColor(score.percentage);
 
@@ -285,7 +285,22 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+  @page {
+    size: A4;
+    margin: ${target === 'webkit' ? '28mm 16mm 24mm 16mm' : '18mm 16mm 20mm 16mm'};
+    ${target === 'webkit' ? `
+    @top-center {
+      content: element(page-header);
+    }
+    @bottom-center {
+      content: element(page-footer);
+    }` : ''}
+  }
+  ${target === 'webkit' ? `
+  @page:first {
+    margin-top: 16mm;
+    @top-center { content: none; }
+  }` : ''}
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     background: #060E1A;
@@ -298,7 +313,64 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
   }
   .page-break { page-break-before: always; }
 
-  /* ===== HEADER ===== */
+  /* ===== RUNNING HEADER (every page except first) ===== */
+  .running-header {
+    ${target === 'webkit' ? 'position: running(page-header);' : 'display: none;'}
+    width: 100%;
+    ${target === 'webkit' ? 'display: flex;' : ''}
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 6px 0;
+    border-bottom: 1px solid #1E3452;
+    background: #060E1A;
+  }
+  .running-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .running-header-logo {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .running-header-brand {
+    font-size: 10px;
+    font-weight: 700;
+    color: #D4AF37;
+    letter-spacing: 2px;
+  }
+  .running-header-right {
+    font-size: 9px;
+    color: #5A6B7D;
+  }
+
+  /* ===== RUNNING FOOTER (every page) ===== */
+  .running-footer {
+    ${target === 'webkit' ? 'position: running(page-footer);' : 'display: none;'}
+    width: 100%;
+    ${target === 'webkit' ? 'display: flex;' : ''}
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0 0 0;
+    border-top: 1px solid #1E3452;
+    background: #060E1A;
+  }
+  .running-footer-left {
+    font-size: 9px;
+    color: #5A6B7D;
+  }
+  .running-footer-center {
+    font-size: 9px;
+    color: #5A6B7D;
+  }
+  .running-footer-right {
+    font-size: 9px;
+    color: #D4AF37;
+    font-weight: 700;
+  }
+
+  /* ===== COVER HEADER ===== */
   .report-header {
     background: linear-gradient(135deg, #0A1628 0%, #132136 50%, #0A1628 100%);
     border: 1px solid #1E3452;
@@ -349,6 +421,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     display: flex;
     gap: 10px;
     margin-bottom: 28px;
+    page-break-inside: avoid;
   }
   .meta-card {
     flex: 1;
@@ -374,6 +447,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
   /* ===== SECTIONS ===== */
   .section {
     margin-bottom: 26px;
+    page-break-inside: auto;
   }
   .section-header {
     display: flex;
@@ -382,6 +456,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     margin-bottom: 14px;
     padding-bottom: 8px;
     border-bottom: 1px solid #1E3452;
+    page-break-after: avoid;
   }
   .section-num {
     font-size: 11px;
@@ -403,6 +478,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     display: flex;
     gap: 20px;
     align-items: stretch;
+    page-break-inside: avoid;
   }
   .score-main {
     flex: 1;
@@ -465,6 +541,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     border: 1px solid #1E3452;
     border-radius: 8px;
     margin-bottom: 6px;
+    page-break-inside: avoid;
   }
   .cat-left { display: flex; align-items: center; gap: 10px; }
   .cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -485,11 +562,16 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     margin-top: 12px;
     font-size: 12px;
     font-weight: 700;
+    page-break-after: avoid;
   }
   .ans-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 4px;
+    page-break-inside: auto;
+  }
+  .ans-table tr {
+    page-break-inside: avoid;
   }
   .ans-table th {
     font-size: 9px;
@@ -521,6 +603,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     border-radius: 8px;
     margin-bottom: 6px;
     gap: 12px;
+    page-break-inside: avoid;
   }
   .vuln-num {
     width: 26px; height: 26px;
@@ -595,6 +678,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     border-radius: 10px;
     padding: 14px 16px;
     margin-bottom: 8px;
+    page-break-inside: avoid;
   }
   .action-header {
     display: flex;
@@ -675,6 +759,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     display: flex;
     gap: 12px;
     padding: 8px 0;
+    page-break-inside: avoid;
   }
   .evo-current {
     background: #00C6AE10;
@@ -721,6 +806,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     display: flex;
     gap: 10px;
     margin-bottom: 16px;
+    page-break-inside: avoid;
   }
   .summary-card {
     flex: 1;
@@ -749,9 +835,60 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
   .footer-mr { color: #D4AF37; font-weight: 700; }
 
   /* ===== SCORE RING SVG ===== */
+
+  /* ===== PRINT TABLE WRAPPER (fallback for browser repeated header/footer) ===== */
+  ${target === 'browser' ? `
+  .print-table { display: table; width: 100%; }
+  .print-thead { display: table-header-group; }
+  .print-tbody { display: table-row-group; }
+  .print-tfoot { display: table-footer-group; }
+  .print-row { display: table-row; }
+  .print-cell { display: table-cell; }
+  ` : `
+  .print-table, .print-thead, .print-tbody, .print-tfoot, .print-row, .print-cell {
+    display: block;
+  }
+  .print-thead, .print-tfoot { display: none; }
+  `}
 </style>
 </head>
 <body>
+
+  <!-- Running header (CSS running elements for expo-print / WebKit) -->
+  <div class="running-header">
+    <div class="running-header-left">
+      <img src="data:image/jpeg;base64,${LOGO_BASE64}" class="running-header-logo" alt="" />
+      <span class="running-header-brand">CASA BLINDADA</span>
+    </div>
+    <div class="running-header-right">${escapeHtml(audit.name)} | ${auditCode} | ${dateFormatted}</div>
+  </div>
+
+  <!-- Running footer (CSS running elements for expo-print / WebKit) -->
+  <div class="running-footer">
+    <div class="running-footer-left">Casa Blindada Auditoria v3.0</div>
+    <div class="running-footer-center">${dateFormatted} ${timeFormatted}</div>
+    <div class="running-footer-right">MR ENG - Seguranca Estrategica</div>
+  </div>
+
+  <!-- Table wrapper for browser print fallback (thead/tfoot repeat on each page) -->
+  <table class="print-table">
+    <thead class="print-thead"><tr><td class="print-cell">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 6px 0;border-bottom:1px solid #1E3452;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <img src="data:image/jpeg;base64,${LOGO_BASE64}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" alt="" />
+          <span style="font-size:10px;font-weight:700;color:#D4AF37;letter-spacing:2px;">CASA BLINDADA</span>
+        </div>
+        <span style="font-size:9px;color:#5A6B7D;">${escapeHtml(audit.name)} | ${auditCode} | ${dateFormatted}</span>
+      </div>
+    </td></tr></thead>
+    <tfoot class="print-tfoot"><tr><td class="print-cell">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0 0 0;border-top:1px solid #1E3452;margin-top:8px;">
+        <span style="font-size:9px;color:#5A6B7D;">Casa Blindada Auditoria v3.0</span>
+        <span style="font-size:9px;color:#5A6B7D;">${dateFormatted} ${timeFormatted}</span>
+        <span style="font-size:9px;color:#D4AF37;font-weight:700;">MR ENG - Seguranca Estrategica</span>
+      </div>
+    </td></tr></tfoot>
+    <tbody class="print-tbody"><tr><td class="print-cell">
 
   <!-- ======= COVER / HEADER ======= -->
   <div class="report-header">
@@ -893,21 +1030,8 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
   </div>
   ` : ''}
 
-  <!-- ======= FOOTER ======= -->
-  <div class="report-footer">
-    <div class="footer-left">
-      <img src="data:image/jpeg;base64,${LOGO_BASE64}" class="footer-logo" alt="Logo" />
-      <div>
-        <div class="footer-brand">Casa Blindada Auditoria v3.0</div>
-        <div class="footer-brand">Documento gerado automaticamente</div>
-      </div>
-    </div>
-    <div class="footer-right">
-      <div class="footer-mr">MR ENG</div>
-      <div>Seguranca Estrategica</div>
-      <div>${dateFormatted} ${timeFormatted}</div>
-    </div>
-  </div>
+    </td></tr></tbody>
+  </table>
 
 </body>
 </html>`;
