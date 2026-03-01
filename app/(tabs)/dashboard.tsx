@@ -156,7 +156,7 @@ export default function DashboardScreen() {
           <FlowNavHint
             nextTab="/actions"
             nextLabel="Ações"
-            message="Próximo passo: veja as ações recomendadas para melhorar sua segurança."
+            message="Veja as ações recomendadas para melhorar sua segurança."
           />
         )}
       </ScrollView>

@@ -731,7 +731,7 @@ function getScoreColor(percentage: number): string {
               <FlowNavHint
                 nextTab="/dashboard"
                 nextLabel="Painel"
-                message="Próximo passo: veja seus resultados no Painel de Risco."
+                message="Veja seus resultados no Painel de Risco."
               />
             </View>
           </View>
@@ -741,7 +741,7 @@ function getScoreColor(percentage: number): string {
             <FlowNavHint
               nextTab="/dashboard"
               nextLabel="Painel"
-              message="Acompanhe seus resultados parciais no Painel."
+              message="Acompanhe seus resultados parciais no Painel de Risco."
             />
           </View>
         )}

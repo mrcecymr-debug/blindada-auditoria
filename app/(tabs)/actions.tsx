@@ -268,7 +268,7 @@ export default function ActionsScreen() {
           <FlowNavHint
             nextTab="/report"
             nextLabel="Relatório"
-            message="Próximo passo: gere seu relatório profissional completo."
+            message="Gere seu relatório profissional completo."
           />
         )}
       </ScrollView>
