@@ -14,7 +14,7 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
-import { QUESTIONS, CATEGORIES, getCategoryColor, AuditQuestion } from '@/lib/audit-data';
+import { QUESTIONS, CATEGORIES, getCategoryColor, AuditQuestion, calculateScore } from '@/lib/audit-data';
 
 type GuideItem = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -378,15 +378,14 @@ const guideStyles = StyleSheet.create({
   closeBtnText: { fontSize: 16, fontWeight: '600' as const, color: '#fff' },
 });
 
-function CategorySection({ categoryKey, label, icon, questions }: {
-  categoryKey: string; label: string; icon: string; questions: AuditQuestion[];
+function CategorySection({ categoryKey, label, icon, questions, categoryPercentage }: {
+  categoryKey: string; label: string; icon: string; questions: AuditQuestion[]; categoryPercentage: number;
 }) {
   const { answers, setAnswer, setObservation } = useAudit();
   const [expanded, setExpanded] = useState(false);
   const color = getCategoryColor(categoryKey);
   const answered = questions.filter(q => answers[q.code]?.answer).length;
-  const catScore = getCategoryScorePercent(questions, answers);
-  const isLowScore = answered > 0 && catScore < 40;
+  const isLowScore = answered > 0 && categoryPercentage < 40;
 
   return (
     <View style={styles.categoryContainer}>
@@ -412,8 +411,8 @@ function CategorySection({ categoryKey, label, icon, questions }: {
         </View>
         <View style={styles.categoryRight}>
           {answered > 0 ? (
-            <View style={[styles.categoryScoreBadge, { backgroundColor: getScoreColor(catScore) + '20' }]}>
-              <Text style={[styles.categoryScoreText, { color: getScoreColor(catScore) }]}>{catScore}%</Text>
+            <View style={[styles.categoryScoreBadge, { backgroundColor: getScoreColor(categoryPercentage) + '20' }]}>
+              <Text style={[styles.categoryScoreText, { color: getScoreColor(categoryPercentage) }]}>{categoryPercentage}%</Text>
             </View>
           ) : (
             <Text style={styles.categoryPendingText}>--</Text>
@@ -571,19 +570,6 @@ function getScoreColor(percentage: number): string {
   return Colors.danger || '#FF4757';
 }
 
-function getCategoryScorePercent(questions: AuditQuestion[], answers: Record<string, any>): number {
-  let maxPts = 0;
-  let gotPts = 0;
-  for (const q of questions) {
-    maxPts += q.weight * 4;
-    const a = answers[q.code];
-    if (a?.answer) {
-      const idx = q.options.indexOf(a.answer);
-      if (idx >= 0) gotPts += q.weight * idx;
-    }
-  }
-  return maxPts > 0 ? Math.round((gotPts / maxPts) * 100) : 0;
-}
 
   export default function SurveyScreen() {
     const insets = useSafeAreaInsets();
@@ -597,6 +583,14 @@ function getCategoryScorePercent(questions: AuditQuestion[], answers: Record<str
   const { answeredCount, totalCount, score } = useAudit();
   const [showGuide, setShowGuide] = useState(false);
   const progress = totalCount > 0 ? answeredCount / totalCount : 0;
+
+  const categoryScoreMap = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const cat of score.categories) {
+      map[cat.categoryKey] = cat.percentage;
+    }
+    return map;
+  }, [score.categories]);
 
   const groupedQuestions = CATEGORIES.map(cat => ({
     ...cat,
@@ -693,6 +687,7 @@ function getCategoryScorePercent(questions: AuditQuestion[], answers: Record<str
             label={cat.label}
             icon={cat.icon}
             questions={cat.questions}
+            categoryPercentage={categoryScoreMap[cat.key] || 0}
           />
         ))}
       </ScrollView>
