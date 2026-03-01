@@ -697,7 +697,7 @@ export default function ReportScreen() {
 
   const trashButton = answeredCount > 0 ? (
     <Pressable onPress={() => setShowClearConfirm(true)} style={styles.clearButton}>
-      <Ionicons name="trash-outline" size={20} color={Colors.danger} />
+      <Ionicons name="trash-outline" size={20} color={Colors.warning} />
     </Pressable>
   ) : null;
 
@@ -849,9 +849,9 @@ const styles = StyleSheet.create({
   headerButtons: { flexDirection: 'row', gap: 8 },
   clearButton: {
     width: 38, height: 38, borderRadius: 10,
-    backgroundColor: Colors.danger + '15',
+    backgroundColor: Colors.warning + '15',
     borderWidth: 1,
-    borderColor: Colors.danger + '30',
+    borderColor: Colors.warning + '30',
     justifyContent: 'center', alignItems: 'center',
   },
   backButton: {
