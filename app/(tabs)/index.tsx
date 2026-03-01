@@ -410,13 +410,6 @@ function CategorySection({ categoryKey, label, icon, questions, categoryPercenta
           </View>
         </View>
         <View style={styles.categoryRight}>
-          {answered > 0 ? (
-            <View style={[styles.categoryScoreBadge, { backgroundColor: getScoreColor(categoryPercentage) + '20' }]}>
-              <Text style={[styles.categoryScoreText, { color: getScoreColor(categoryPercentage) }]}>{categoryPercentage}%</Text>
-            </View>
-          ) : (
-            <Text style={styles.categoryPendingText}>--</Text>
-          )}
           <Ionicons
             name={expanded ? 'chevron-up' : 'chevron-down'}
             size={20}
