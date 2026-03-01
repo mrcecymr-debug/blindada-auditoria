@@ -607,7 +607,7 @@ function getCategoryScorePercent(questions: AuditQuestion[], answers: Record<str
     <View style={styles.container}>
       <LinearGradient
         colors={[Colors.primary, Colors.background]}
-        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
+        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 44 : insets.top }]}
       >
         <View style={styles.logoRow}>
           <View style={styles.logoContainer}>
