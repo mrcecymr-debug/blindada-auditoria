@@ -9,6 +9,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
 import { CATEGORIES, getStatusColor, getCategoryColor } from '@/lib/audit-data';
+import FlowNavHint from '@/components/FlowNavHint';
 
 function ScoreGauge({ percentage, classification }: { percentage: number; classification: string }) {
   const getColor = () => {
@@ -149,6 +150,14 @@ export default function DashboardScreen() {
             <Text style={styles.emptyText}>Nenhuma resposta registrada</Text>
             <Text style={styles.emptySubtext}>Preencha o diagnostico na aba anterior</Text>
           </View>
+        )}
+
+        {answeredCount > 0 && (
+          <FlowNavHint
+            nextTab="/actions"
+            nextLabel="Ações"
+            message="Próximo passo: veja as ações recomendadas para melhorar sua segurança."
+          />
         )}
       </ScrollView>
     </View>

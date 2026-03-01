@@ -12,7 +12,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeIn, useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import FlowNavHint from '@/components/FlowNavHint';
 import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
 import { QUESTIONS, CATEGORIES, getCategoryColor, AuditQuestion, calculateScore } from '@/lib/audit-data';
@@ -574,6 +575,7 @@ function getScoreColor(percentage: number): string {
     };
 
 
+  const router = useRouter();
   const { answeredCount, totalCount, score } = useAudit();
   const [showGuide, setShowGuide] = useState(false);
   const progress = totalCount > 0 ? answeredCount / totalCount : 0;
@@ -711,7 +713,7 @@ function getScoreColor(percentage: number): string {
         ))}
         {progress >= 1 && !returnedAfterComplete && (
           <Animated.View entering={FadeInDown.duration(400)} style={styles.completeBannerWrap}>
-            <Pressable style={styles.nextStepBanner}>
+            <Pressable style={styles.nextStepBanner} onPress={() => router.push('/dashboard' as any)}>
               <Animated.View style={arrowAnimStyle}>
                 <Ionicons name="arrow-forward-circle" size={24} color="#2ED573" />
               </Animated.View>
@@ -720,12 +722,28 @@ function getScoreColor(percentage: number): string {
           </Animated.View>
         )}
         {progress >= 1 && returnedAfterComplete && (
-          <Animated.View entering={FadeIn.duration(400)} style={styles.completeBannerWrap}>
+          <View style={styles.completeBannerWrap}>
             <View style={styles.editHintBanner}>
               <Ionicons name="create-outline" size={20} color={Colors.accent} />
               <Text style={styles.editHintText}>Se você preencheu algo errado, não se preocupe, altere agora e o sistema faz o resto.</Text>
             </View>
-          </Animated.View>
+            <View style={{ marginTop: 10 }}>
+              <FlowNavHint
+                nextTab="/dashboard"
+                nextLabel="Painel"
+                message="Próximo passo: veja seus resultados no Painel de Risco."
+              />
+            </View>
+          </View>
+        )}
+        {progress > 0 && progress < 1 && (
+          <View style={styles.completeBannerWrap}>
+            <FlowNavHint
+              nextTab="/dashboard"
+              nextLabel="Painel"
+              message="Acompanhe seus resultados parciais no Painel."
+            />
+          </View>
         )}
       </ScrollView>
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />

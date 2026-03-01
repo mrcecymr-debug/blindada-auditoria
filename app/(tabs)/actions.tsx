@@ -9,6 +9,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import Colors from '@/constants/colors';
 import { generateActionItems, ActionItem } from '@/lib/audit-data';
 import { useAudit } from '@/lib/audit-context';
+import FlowNavHint from '@/components/FlowNavHint';
 
 function PriorityBadge({ priority }: { priority: number }) {
   const colors = {
@@ -261,6 +262,14 @@ export default function ActionsScreen() {
               <ActionCard key={`p3-${idx}`} item={item} index={idx + priority1.length + priority2.length} />
             ))}
           </View>
+        )}
+
+        {hasActions && (
+          <FlowNavHint
+            nextTab="/report"
+            nextLabel="Relatório"
+            message="Próximo passo: gere seu relatório profissional completo."
+          />
         )}
       </ScrollView>
     </View>
