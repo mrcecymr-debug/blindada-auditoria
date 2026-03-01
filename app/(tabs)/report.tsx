@@ -711,7 +711,7 @@ export default function ReportScreen() {
           <View style={styles.headerButtons}>
             {answeredCount > 0 && (
               <Pressable onPress={() => setShowClearConfirm(true)} style={styles.clearButton}>
-                <Ionicons name="refresh-outline" size={20} color={Colors.warning} />
+                <Ionicons name="trash-outline" size={20} color={Colors.danger} />
               </Pressable>
             )}
           </View>
@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
   headerButtons: { flexDirection: 'row', gap: 8 },
   clearButton: {
     width: 44, height: 44, borderRadius: 12,
-    backgroundColor: Colors.warning + '15',
+    backgroundColor: Colors.danger + '15',
     justifyContent: 'center', alignItems: 'center',
   },
   backButton: {
