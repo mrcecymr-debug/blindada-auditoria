@@ -10,15 +10,14 @@ import Animated, {
   withTiming,
   FadeIn,
 } from 'react-native-reanimated';
-import Colors from '@/constants/colors';
 
 type FlowNavHintProps = {
   nextTab: string;
   nextLabel: string;
-  message: string;
+  message?: string;
 };
 
-export default function FlowNavHint({ nextTab, nextLabel, message }: FlowNavHintProps) {
+export default function FlowNavHint({ nextTab, nextLabel }: FlowNavHintProps) {
   const router = useRouter();
   const translateX = useSharedValue(0);
 
@@ -38,15 +37,14 @@ export default function FlowNavHint({ nextTab, nextLabel, message }: FlowNavHint
   }));
 
   return (
-    <Animated.View entering={FadeIn.duration(400)}>
+    <Animated.View entering={FadeIn.duration(400)} style={styles.wrapper}>
       <Pressable
-        style={styles.container}
+        style={({ pressed }) => [styles.button, pressed && { opacity: 0.7 }]}
         onPress={() => router.push(nextTab as any)}
       >
-        <Text style={styles.message}>{message}</Text>
-        <Animated.View style={[styles.navRow, arrowStyle]}>
-          <Text style={styles.navLabel}>{nextLabel}</Text>
-          <Ionicons name="arrow-forward" size={18} color="#2ED573" />
+        <Animated.View style={[styles.inner, arrowStyle]}>
+          <Text style={styles.label}>{nextLabel}</Text>
+          <Ionicons name="arrow-forward" size={16} color="#2ED573" />
         </Animated.View>
       </Pressable>
     </Animated.View>
@@ -54,38 +52,24 @@ export default function FlowNavHint({ nextTab, nextLabel, message }: FlowNavHint
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
+  wrapper: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#2ED573' + '10',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: '#2ED573' + '25',
-    gap: 8,
-    alignSelf: 'center',
-    maxWidth: 300,
   },
-  message: {
-    flex: 1,
-    fontSize: 11,
-    color: Colors.textSecondary,
-    fontWeight: '500' as const,
-    lineHeight: 15,
-  },
-  navRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
+  button: {
     backgroundColor: '#2ED573' + '18',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 16,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#2ED573' + '30',
   },
-  navLabel: {
-    fontSize: 11,
+  inner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  label: {
+    fontSize: 13,
     fontWeight: '700' as const,
     color: '#2ED573',
   },
