@@ -13,7 +13,7 @@ function NativeTabLayout() {
     <NativeTabs>
       <NativeTabs.Trigger name="index">
         <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
-        <Label>Levantamento</Label>
+        <Label>Diagnostico</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="dashboard">
         <Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
@@ -67,7 +67,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Levantamento",
+          title: "Diagnostico",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="clipboard-outline" size={size} color={color} />
           ),

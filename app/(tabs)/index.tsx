@@ -38,7 +38,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
     items: [
       {
         icon: 'clipboard-outline',
-        title: 'Passo 1 - Levantamento',
+        title: 'Passo 1 - Diagnostico',
         description: 'Responda as perguntas de cada categoria de seguranca. Toque na categoria para expandir e selecione a opcao que melhor descreve seu imovel. Quanto mais perguntas responder, mais precisa sera a analise.',
       },
       {
@@ -54,7 +54,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
       {
         icon: 'document-text-outline',
         title: 'Passo 4 - Relatorio',
-        description: 'Salve o levantamento para criar um relatorio completo. Voce pode baixar o PDF da auditoria ou do plano de acao, e compartilhar via WhatsApp ou outras plataformas.',
+        description: 'Salve o diagnostico para criar um relatorio completo. Voce pode baixar o PDF da auditoria ou do plano de acao, e compartilhar via WhatsApp ou outras plataformas.',
       },
     ],
   },
@@ -108,7 +108,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
       {
         icon: 'refresh-outline',
         title: 'Atualizacao em Tempo Real',
-        description: 'O painel atualiza automaticamente conforme voce muda as respostas na aba Levantamento. Nenhuma acao adicional necessaria.',
+        description: 'O painel atualiza automaticamente conforme voce muda as respostas na aba Diagnostico. Nenhuma acao adicional necessaria.',
       },
     ],
   },
@@ -147,7 +147,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
       {
         icon: 'save-outline',
         title: 'Salvar Auditoria',
-        description: 'Na aba Relatorio, toque em "Salvar Levantamento Atual" para guardar o estado atual. De um nome unico para cada auditoria.',
+        description: 'Na aba Relatorio, toque em "Salvar Diagnostico Atual" para guardar o estado atual. De um nome unico para cada auditoria.',
       },
       {
         icon: 'document-attach-outline',
@@ -179,12 +179,12 @@ const GUIDE_SECTIONS: GuideSection[] = [
       {
         icon: 'create-outline',
         title: 'Campo de Observacao',
-        description: 'Cada pergunta do Levantamento possui um campo de observacao. Use para anotar detalhes do imovel, medidas, fotos de referencia ou qualquer informacao extra.',
+        description: 'Cada pergunta do Diagnostico possui um campo de observacao. Use para anotar detalhes do imovel, medidas, fotos de referencia ou qualquer informacao extra.',
       },
       {
         icon: 'log-out-outline',
         title: 'Sair da Conta',
-        description: 'O botao de sair fica no canto superior direito da tela de Levantamento. Ao sair, seus dados locais sao preservados para o proximo acesso.',
+        description: 'O botao de sair fica no canto superior direito da tela de Diagnostico. Ao sair, seus dados locais sao preservados para o proximo acesso.',
       },
       {
         icon: 'phone-portrait-outline',
@@ -201,7 +201,7 @@ const GUIDE_SECTIONS: GuideSection[] = [
       {
         icon: 'bulb-outline',
         title: 'Dica',
-        description: 'Voce pode alterar qualquer resposta a qualquer momento na aba Levantamento. O painel e as acoes serao atualizados automaticamente, porem voce devera SALVAR um NOVO relatorio com um nome diferente para essas suas NOVAS alteracoes. Use o campo de observacao em cada pergunta do Levantamento para anotar detalhes extras.',
+        description: 'Voce pode alterar qualquer resposta a qualquer momento na aba Diagnostico. O painel e as acoes serao atualizados automaticamente, porem voce devera SALVAR um NOVO relatorio com um nome diferente para essas suas NOVAS alteracoes. Use o campo de observacao em cada pergunta do Diagnostico para anotar detalhes extras.',
         highlight: true,
       },
     ],
@@ -385,6 +385,8 @@ function CategorySection({ categoryKey, label, icon, questions }: {
   const [expanded, setExpanded] = useState(false);
   const color = getCategoryColor(categoryKey);
   const answered = questions.filter(q => answers[q.code]?.answer).length;
+  const catScore = getCategoryScorePercent(questions, answers);
+  const isLowScore = answered > 0 && catScore < 40;
 
   return (
     <View style={styles.categoryContainer}>
@@ -393,7 +395,11 @@ function CategorySection({ categoryKey, label, icon, questions }: {
           setExpanded(!expanded);
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }}
-        style={[styles.categoryHeader, { borderLeftColor: color }]}
+        style={[
+          styles.categoryHeader,
+          { borderLeftColor: color },
+          isLowScore && styles.categoryHeaderAlert,
+        ]}
       >
         <View style={styles.categoryLeft}>
           <View style={[styles.categoryIcon, { backgroundColor: color + '20' }]}>
@@ -405,12 +411,13 @@ function CategorySection({ categoryKey, label, icon, questions }: {
           </View>
         </View>
         <View style={styles.categoryRight}>
-          <View style={[styles.progressBar, { backgroundColor: Colors.border }]}>
-            <View style={[styles.progressFill, {
-              width: `${(answered / questions.length) * 100}%`,
-              backgroundColor: color,
-            }]} />
-          </View>
+          {answered > 0 ? (
+            <View style={[styles.categoryScoreBadge, { backgroundColor: getScoreColor(catScore) + '20' }]}>
+              <Text style={[styles.categoryScoreText, { color: getScoreColor(catScore) }]}>{catScore}%</Text>
+            </View>
+          ) : (
+            <Text style={styles.categoryPendingText}>--</Text>
+          )}
           <Ionicons
             name={expanded ? 'chevron-up' : 'chevron-down'}
             size={20}
@@ -556,6 +563,28 @@ function getProgressLabel(progress: number): string {
   return 'Nao iniciado';
 }
 
+function getScoreColor(percentage: number): string {
+  if (percentage >= 80) return Colors.riskColors?.excelente || '#2ED573';
+  if (percentage >= 60) return Colors.riskColors?.bom || '#00C6AE';
+  if (percentage >= 40) return '#FFD93D';
+  if (percentage >= 20) return Colors.warning || '#FF9F43';
+  return Colors.danger || '#FF4757';
+}
+
+function getCategoryScorePercent(questions: AuditQuestion[], answers: Record<string, any>): number {
+  let maxPts = 0;
+  let gotPts = 0;
+  for (const q of questions) {
+    maxPts += q.weight * 4;
+    const a = answers[q.code];
+    if (a?.answer) {
+      const idx = q.options.indexOf(a.answer);
+      if (idx >= 0) gotPts += q.weight * idx;
+    }
+  }
+  return maxPts > 0 ? Math.round((gotPts / maxPts) * 100) : 0;
+}
+
   export default function SurveyScreen() {
     const insets = useSafeAreaInsets();
 
@@ -599,53 +628,45 @@ function getProgressLabel(progress: number): string {
                 setShowGuide(true);
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }}
-              style={({ pressed }) => [styles.headerActionBtn, styles.helpBtn, pressed && { opacity: 0.7 }]}
+              style={({ pressed }) => [styles.headerIconBtn, styles.helpIconBtn, pressed && { opacity: 0.7 }]}
             >
-              <Ionicons name="help-circle" size={16} color={Colors.accent} />
-              <Text style={styles.helpBtnText}>Ajuda</Text>
+              <Ionicons name="help-circle" size={20} color={Colors.accent} />
             </Pressable>
 
             <Pressable
               onPress={handleLogout}
-              style={({ pressed }) => [styles.headerActionBtn, styles.logoutBtn, pressed && { opacity: 0.7 }]}
+              style={({ pressed }) => [styles.headerIconBtn, styles.logoutIconBtn, pressed && { opacity: 0.7 }]}
             >
-              <Ionicons name="log-out-outline" size={16} color="#FF6B6B" />
-              <Text style={styles.logoutBtnText}>Sair</Text>
+              <Ionicons name="log-out-outline" size={20} color="#FF6B6B" />
             </Pressable>
           </View>
         </View>
 
         <View style={styles.headerContent}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>Levantamento</Text>
+          <View style={styles.headerTitleRow}>
+            <Text style={styles.headerTitle}>Diagnostico</Text>
+            <View style={styles.progressInline}>
+              <View style={styles.progressTrackInline}>
+                <LinearGradient
+                  colors={getProgressGradient(progress)}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.progressFillInline, { width: `${Math.max(progress * 100, 1)}%` }]}
+                />
+              </View>
+              <Text style={[styles.progressInlineText, { color: getProgressColor(progress) }]}>
+                {answeredCount}/{totalCount}
+              </Text>
+            </View>
           </View>
-          <View style={styles.scoreCircle}>
-            <Text style={styles.scoreText}>{score.percentage}%</Text>
-          </View>
-        </View>
-
-        <View style={styles.progressSection}>
-          <View style={styles.progressLabelRow}>
-            <Text style={styles.progressLabel}>Progresso da Auditoria</Text>
-            <Text style={[styles.progressPct, { color: getProgressColor(progress) }]}>
-              {Math.round(progress * 100)}%
-            </Text>
-          </View>
-          <View style={styles.progressTrack}>
-            <LinearGradient
-              colors={getProgressGradient(progress)}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.progressFillBar, { width: `${Math.max(progress * 100, 1)}%` }]}
-            />
-          </View>
-          <View style={styles.progressInfoRow}>
-            <Text style={styles.progressInfoText}>
-              {answeredCount} de {totalCount} perguntas
-            </Text>
-            <Text style={[styles.progressStatusText, { color: getProgressColor(progress) }]}>
-              {getProgressLabel(progress)}
-            </Text>
+          <View style={styles.scoreRow}>
+            <View style={styles.scoreCard}>
+              <Text style={styles.scoreLabel}>Nota de Seguranca</Text>
+              <Text style={[styles.scoreBigText, { color: getScoreColor(score.percentage) }]}>{score.percentage}%</Text>
+            </View>
+            <View style={[styles.scoreClassBadge, { backgroundColor: getScoreColor(score.percentage) + '20', borderColor: getScoreColor(score.percentage) + '40' }]}>
+              <Text style={[styles.scoreClassText, { color: getScoreColor(score.percentage) }]}>{score.classification}</Text>
+            </View>
           </View>
         </View>
       </LinearGradient>
@@ -657,6 +678,14 @@ function getProgressLabel(progress: number): string {
         }]}
         showsVerticalScrollIndicator={false}
       >
+        {progress >= 1 && (
+          <Animated.View entering={FadeInDown.duration(400)}>
+            <Pressable style={styles.nextStepBanner}>
+              <Ionicons name="arrow-forward-circle" size={22} color={Colors.accent} />
+              <Text style={styles.nextStepText}>Diagnostico completo! Veja o Painel de Risco e as Acoes recomendadas.</Text>
+            </Pressable>
+          </Animated.View>
+        )}
         {groupedQuestions.map((cat) => (
           <CategorySection
             key={cat.key}
@@ -712,100 +741,106 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  headerActionBtn: {
-    flexDirection: 'row',
+  headerIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 7,
   },
-  helpBtn: {
+  helpIconBtn: {
     backgroundColor: Colors.accent + '15',
     borderWidth: 1,
     borderColor: Colors.accent + '30',
   },
-  helpBtnText: {
-    color: Colors.accent,
-    fontSize: 11,
-    fontWeight: '600' as const,
-  },
-  logoutBtn: {
+  logoutIconBtn: {
     backgroundColor: '#FF6B6B15',
     borderWidth: 1,
     borderColor: '#FF6B6B30',
   },
-  logoutBtnText: {
-    color: '#FF6B6B',
-    fontSize: 11,
-    fontWeight: '600' as const,
-  },
   headerContent: {
+    marginTop: 6,
+  },
+  headerTitleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
-  headerTitle: { fontSize: 22, fontWeight: '700' as const, color: Colors.text },
-  headerSubtitle: { fontSize: 13, color: Colors.textSecondary, marginTop: 2 },
-  scoreCircle: {
-    width: 46, height: 46, borderRadius: 23,
-    backgroundColor: Colors.accent + '20',
-    justifyContent: 'center', alignItems: 'center',
-    borderWidth: 2, borderColor: Colors.accent,
+  headerTitle: { fontSize: 20, fontWeight: '700' as const, color: Colors.text },
+  progressInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  scoreText: { fontSize: 14, fontWeight: '700' as const, color: Colors.accent },
-  progressSection: {
-    marginTop: 8,
+  progressTrackInline: {
+    width: 60,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.border,
+    overflow: 'hidden',
+  },
+  progressFillInline: {
+    height: 6,
+    borderRadius: 3,
+  },
+  progressInlineText: {
+    fontSize: 11,
+    fontWeight: '700' as const,
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: Colors.card,
     borderRadius: 10,
     padding: 10,
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  progressLabelRow: {
+  scoreCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    gap: 8,
   },
-  progressLabel: {
-    fontSize: 10,
-    fontWeight: '600' as const,
+  scoreLabel: {
+    fontSize: 12,
     color: Colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    fontWeight: '500' as const,
   },
-  progressPct: {
-    fontSize: 14,
+  scoreBigText: {
+    fontSize: 22,
     fontWeight: '800' as const,
   },
-  progressTrack: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.border,
-    overflow: 'hidden',
+  scoreClassBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
   },
-  progressFillBar: {
-    height: 8,
-    borderRadius: 4,
-  },
-  progressInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  progressInfoText: {
-    fontSize: 10,
-    color: Colors.textMuted,
-  },
-  progressStatusText: {
-    fontSize: 10,
+  scoreClassText: {
+    fontSize: 11,
     fontWeight: '700' as const,
+    textTransform: 'uppercase',
   },
   scrollView: { flex: 1 },
   scrollContent: { padding: 12, gap: 10 },
+  nextStepBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: Colors.accent + '12',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.accent + '30',
+  },
+  nextStepText: {
+    flex: 1,
+    fontSize: 12,
+    color: Colors.accent,
+    fontWeight: '600' as const,
+  },
   categoryContainer: { borderRadius: 14, overflow: 'hidden' },
   categoryHeader: {
     flexDirection: 'row',
@@ -816,6 +851,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderLeftWidth: 4,
   },
+  categoryHeaderAlert: {
+    borderWidth: 1,
+    borderColor: '#FF475740',
+    backgroundColor: Colors.surface,
+  },
   categoryLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   categoryIcon: {
     width: 36, height: 36, borderRadius: 10,
@@ -824,9 +864,21 @@ const styles = StyleSheet.create({
   categoryInfo: { marginLeft: 10, flex: 1 },
   categoryTitle: { fontSize: 14, fontWeight: '600' as const, color: Colors.text },
   categoryCount: { fontSize: 11, color: Colors.textSecondary, marginTop: 1 },
-  categoryRight: { alignItems: 'flex-end', gap: 8 },
-  progressBar: { width: 60, height: 4, borderRadius: 2 },
-  progressFill: { height: 4, borderRadius: 2 },
+  categoryRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  categoryScoreBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  categoryScoreText: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+  },
+  categoryPendingText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    fontWeight: '600' as const,
+  },
   questionsContainer: { paddingHorizontal: 8, paddingTop: 8, gap: 8 },
   questionCard: {
     backgroundColor: Colors.card,

@@ -139,8 +139,8 @@ export default function ActionsScreen() {
             <Text style={styles.headerTitle}>Plano de Acao</Text>
             <Text style={styles.headerSubtitle}>
               {hasActions
-                ? `${actionItems.length} acoes identificadas no levantamento`
-                : 'Recomendacoes baseadas no seu levantamento'}
+                ? `${actionItems.length} acoes identificadas no diagnostico`
+                : 'Recomendacoes baseadas no seu diagnostico'}
             </Text>
           </View>
         </View>
@@ -162,12 +162,12 @@ export default function ActionsScreen() {
               </View>
               <Text style={styles.emptyTitle}>
                 {answeredCount === 0
-                  ? 'Nenhum levantamento realizado'
+                  ? 'Nenhum diagnostico realizado'
                   : 'Nenhuma vulnerabilidade critica encontrada'}
               </Text>
               <Text style={styles.emptySubtitle}>
                 {answeredCount === 0
-                  ? 'Responda as perguntas na aba "Levantamento" para receber recomendacoes personalizadas de seguranca.'
+                  ? 'Responda as perguntas na aba "Diagnostico" para receber recomendacoes personalizadas de seguranca.'
                   : 'Com base nas suas respostas, sua residencia esta com boa seguranca. Continue monitorando regularmente.'}
               </Text>
             </View>

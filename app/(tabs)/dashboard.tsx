@@ -91,7 +91,7 @@ export default function DashboardScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Painel de Risco</Text>
             <Text style={styles.headerSubtitle}>
-              {answeredCount === 0 ? 'Responda o levantamento para ver os resultados' :
+              {answeredCount === 0 ? 'Responda o diagnostico para ver os resultados' :
                 `Baseado em ${answeredCount} de ${totalCount} respostas`}
             </Text>
           </View>
@@ -147,7 +147,7 @@ export default function DashboardScreen() {
           <View style={styles.emptyState}>
             <Ionicons name="clipboard-outline" size={48} color={Colors.textMuted} />
             <Text style={styles.emptyText}>Nenhuma resposta registrada</Text>
-            <Text style={styles.emptySubtext}>Preencha o levantamento de campo na aba anterior</Text>
+            <Text style={styles.emptySubtext}>Preencha o diagnostico na aba anterior</Text>
           </View>
         )}
       </ScrollView>

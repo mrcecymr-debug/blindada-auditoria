@@ -15,7 +15,7 @@ Preferred communication style: Simple, everyday language.
 ### Frontend (Expo / React Native)
 
 - **Framework**: Expo SDK 54 with React Native 0.81, using the new architecture (`newArchEnabled: true`)
-- **Routing**: expo-router v6 with file-based routing and typed routes. The app uses a tab-based navigation layout with four tabs: Levantamento (Survey), Painel (Dashboard), Ações (Actions), and Relatório (Report)
+- **Routing**: expo-router v6 with file-based routing and typed routes. The app uses a tab-based navigation layout with four tabs: Diagnóstico (Diagnostic/Survey), Painel (Dashboard), Ações (Actions), and Relatório (Report)
 - **State Management**: React Context API (`AuditProvider` in `lib/audit-context.tsx`) for audit state, with `@tanstack/react-query` available for server-state management
 - **Persistence**: `@react-native-async-storage/async-storage` for local storage of audit answers and saved audits — the app works primarily offline with local data
 - **UI Components**: Custom components using React Native primitives, `expo-linear-gradient`, `expo-blur`, `react-native-reanimated` for animations, and `@expo/vector-icons` (Ionicons) for icons
@@ -43,7 +43,7 @@ Preferred communication style: Simple, everyday language.
 1. **Offline-first architecture**: Audit data lives in AsyncStorage on the device. This was chosen because security audits happen on-site where connectivity may be unreliable
 2. **Shared schema directory**: `shared/` contains types and schemas used by both frontend and backend, ensuring type consistency
 3. **Audit engine in `lib/audit-data.ts`**: Contains all question definitions, scoring logic, category definitions, and action items as static data — no server dependency needed for the core functionality
-4. **Tab-based UX flow**: The four tabs represent the natural workflow: Survey → Dashboard → Actions → Report
+4. **Tab-based UX flow**: The four tabs represent the natural workflow: Diagnóstico → Painel → Ações → Relatório
 
 ### Build & Development
 

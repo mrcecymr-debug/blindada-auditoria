@@ -24,7 +24,7 @@ function SaveModal({ visible, onClose, onSave }: {
   const handleSave = () => {
     const trimmed = name.trim();
     if (!trimmed) {
-      Alert.alert('Nome obrigatorio', 'Digite um nome para identificar este levantamento.');
+      Alert.alert('Nome obrigatorio', 'Digite um nome para identificar este diagnostico.');
       return;
     }
     onSave(trimmed);
@@ -37,7 +37,7 @@ function SaveModal({ visible, onClose, onSave }: {
       <Pressable style={styles.modalOverlay} onPress={onClose}>
         <Pressable style={styles.saveModal}>
           <View style={styles.saveModalHandle} />
-          <Text style={styles.saveModalTitle}>Salvar Levantamento</Text>
+          <Text style={styles.saveModalTitle}>Salvar Diagnostico</Text>
           <Text style={styles.saveModalSubtitle}>
             Dê um nome para identificar esta auditoria
           </Text>
@@ -311,7 +311,7 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
             {vulnerabilities.length === 0 ? (
               <View style={{ padding: 20, alignItems: 'center' }}>
                 <Ionicons name="checkmark-circle-outline" size={40} color={Colors.success} />
-                <Text style={{ color: Colors.text, fontSize: 14, textAlign: 'center', marginTop: 10 }}>Nenhuma vulnerabilidade identificada. Responda o levantamento para gerar a analise.</Text>
+                <Text style={{ color: Colors.text, fontSize: 14, textAlign: 'center', marginTop: 10 }}>Nenhuma vulnerabilidade identificada. Responda o diagnostico para gerar a analise.</Text>
               </View>
             ) : (
               vulnerabilities.map((v, idx) => (
@@ -357,7 +357,7 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
             {dynamicActions.length === 0 && (
               <View style={{ padding: 20, alignItems: 'center' }}>
                 <Ionicons name="checkmark-circle-outline" size={40} color={Colors.success} />
-                <Text style={{ color: Colors.text, fontSize: 14, textAlign: 'center', marginTop: 10 }}>Nenhuma vulnerabilidade critica identificada com base nas respostas do levantamento.</Text>
+                <Text style={{ color: Colors.text, fontSize: 14, textAlign: 'center', marginTop: 10 }}>Nenhuma vulnerabilidade critica identificada com base nas respostas do diagnostico.</Text>
               </View>
             )}
             {(() => {
@@ -642,7 +642,7 @@ function SavedAuditCard({ audit, onView, onDelete, onLoad, index }: {
 
       <ConfirmModal
         visible={showDeleteConfirm}
-        title="Excluir Levantamento"
+        title="Excluir Diagnostico"
         message={`Deseja excluir "${audit.name}"? Esta acao nao pode ser desfeita.`}
         confirmText="Excluir"
         confirmColor={Colors.danger}
@@ -654,7 +654,7 @@ function SavedAuditCard({ audit, onView, onDelete, onLoad, index }: {
       />
       <ConfirmModal
         visible={showLoadConfirm}
-        title="Carregar Levantamento"
+        title="Carregar Diagnostico"
         message={`Deseja carregar as respostas de "${audit.name}" no formulario atual? As respostas atuais serao substituidas.`}
         confirmText="Carregar"
         confirmColor={Colors.accent}
@@ -706,7 +706,7 @@ export default function ReportScreen() {
           />
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Relatorios</Text>
-            <Text style={styles.headerSubtitle}>{savedAudits.length} levantamento{savedAudits.length !== 1 ? 's' : ''} salvo{savedAudits.length !== 1 ? 's' : ''}</Text>
+            <Text style={styles.headerSubtitle}>{savedAudits.length} diagnostico{savedAudits.length !== 1 ? 's' : ''} salvo{savedAudits.length !== 1 ? 's' : ''}</Text>
           </View>
           <View style={styles.headerButtons}>
             {answeredCount > 0 && (
@@ -729,7 +729,7 @@ export default function ReportScreen() {
           <Pressable
             onPress={() => {
               if (answeredCount === 0) {
-                Alert.alert('Sem respostas', 'Responda pelo menos uma pergunta no levantamento antes de salvar.');
+                Alert.alert('Sem respostas', 'Responda pelo menos uma pergunta no diagnostico antes de salvar.');
                 return;
               }
               setShowSaveModal(true);
@@ -745,7 +745,7 @@ export default function ReportScreen() {
             >
               <Ionicons name="save-outline" size={22} color="#fff" />
               <View style={styles.saveButtonText}>
-                <Text style={styles.saveButtonTitle}>Salvar Levantamento Atual</Text>
+                <Text style={styles.saveButtonTitle}>Salvar Diagnostico Atual</Text>
                 <Text style={styles.saveButtonSubtitle}>
                   {answeredCount} de {totalCount} perguntas respondidas - {score.percentage}%
                 </Text>
@@ -759,7 +759,7 @@ export default function ReportScreen() {
           <View style={styles.listSection}>
             <View style={styles.listHeader}>
               <Ionicons name="folder-open-outline" size={18} color={Colors.textSecondary} />
-              <Text style={styles.listTitle}>Levantamentos Salvos</Text>
+              <Text style={styles.listTitle}>Diagnosticos Salvos</Text>
             </View>
             {savedAudits.map((audit, idx) => (
               <SavedAuditCard
@@ -780,9 +780,9 @@ export default function ReportScreen() {
               <View style={styles.emptyIconContainer}>
                 <Ionicons name="document-outline" size={48} color={Colors.textMuted} />
               </View>
-              <Text style={styles.emptyTitle}>Nenhum levantamento salvo</Text>
+              <Text style={styles.emptyTitle}>Nenhum diagnostico salvo</Text>
               <Text style={styles.emptySubtitle}>
-                Preencha o formulario de levantamento e salve para consultar depois
+                Preencha o formulario de diagnostico e salve para consultar depois
               </Text>
             </View>
           </Animated.View>
@@ -799,15 +799,15 @@ export default function ReportScreen() {
         <View style={[styles.modalOverlay, { justifyContent: 'center' }]}>
           <View style={styles.successToast}>
             <Ionicons name="checkmark-circle" size={40} color={Colors.success} />
-            <Text style={styles.successToastText}>Levantamento salvo!</Text>
+            <Text style={styles.successToastText}>Diagnostico salvo!</Text>
           </View>
         </View>
       </Modal>
 
       <ConfirmModal
         visible={showClearConfirm}
-        title="Limpar Levantamento Atual"
-        message="Deseja apagar todas as respostas do formulario atual? Os levantamentos salvos nao serao afetados."
+        title="Limpar Diagnostico Atual"
+        message="Deseja apagar todas as respostas do formulario atual? Os diagnosticos salvos nao serao afetados."
         confirmText="Limpar"
         confirmColor={Colors.warning}
         onConfirm={() => {
