@@ -470,16 +470,20 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 12, gap: 10 },
   completeBannerWrap: {
     marginTop: 16,
+    alignItems: 'center',
   },
   nextStepBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     backgroundColor: '#2ED573' + '15',
     borderRadius: 12,
-    padding: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#2ED573' + '40',
+    alignSelf: 'center',
+    maxWidth: 280,
   },
   nextStepText: {
     flex: 1,
