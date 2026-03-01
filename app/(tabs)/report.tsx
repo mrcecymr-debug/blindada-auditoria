@@ -14,6 +14,8 @@ import Colors from '@/constants/colors';
 import { useAudit, SavedAudit } from '@/lib/audit-context';
 import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS, generateActionItems, getTopVulnerabilities } from '@/lib/audit-data';
 import { generateFullReportHTML } from '@/lib/pdf-report';
+import HeaderActions from '@/components/HeaderActions';
+import GuideModal from '@/components/GuideModal';
 
 function SaveModal({ visible, onClose, onSave }: {
   visible: boolean; onClose: () => void; onSave: (name: string) => void;
@@ -687,16 +689,23 @@ export default function ReportScreen() {
   };
 
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   if (viewingAudit) {
     return <ReportDetail audit={viewingAudit} onClose={() => setViewingAudit(null)} allAudits={savedAudits} />;
   }
 
+  const trashButton = answeredCount > 0 ? (
+    <Pressable onPress={() => setShowClearConfirm(true)} style={styles.clearButton}>
+      <Ionicons name="trash-outline" size={20} color={Colors.danger} />
+    </Pressable>
+  ) : null;
+
   return (
     <View style={styles.container}>
       <LinearGradient
         colors={[Colors.primary, Colors.background]}
-        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
+        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 44 : insets.top }]}
       >
         <View style={styles.headerRow}>
           <Image
@@ -708,15 +717,10 @@ export default function ReportScreen() {
             <Text style={styles.headerTitle}>Relatorios</Text>
             <Text style={styles.headerSubtitle}>{savedAudits.length} diagnostico{savedAudits.length !== 1 ? 's' : ''} salvo{savedAudits.length !== 1 ? 's' : ''}</Text>
           </View>
-          <View style={styles.headerButtons}>
-            {answeredCount > 0 && (
-              <Pressable onPress={() => setShowClearConfirm(true)} style={styles.clearButton}>
-                <Ionicons name="trash-outline" size={20} color={Colors.danger} />
-              </Pressable>
-            )}
-          </View>
+          <HeaderActions onShowGuide={() => setShowGuide(true)} extraButtons={trashButton} />
         </View>
       </LinearGradient>
+      <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
 
       <ScrollView
         style={styles.scrollView}
@@ -844,8 +848,10 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
   headerButtons: { flexDirection: 'row', gap: 8 },
   clearButton: {
-    width: 44, height: 44, borderRadius: 12,
+    width: 38, height: 38, borderRadius: 10,
     backgroundColor: Colors.danger + '15',
+    borderWidth: 1,
+    borderColor: Colors.danger + '30',
     justifyContent: 'center', alignItems: 'center',
   },
   backButton: {

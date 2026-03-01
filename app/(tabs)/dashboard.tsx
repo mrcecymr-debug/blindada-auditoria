@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Platform, Image,
 } from 'react-native';
@@ -10,6 +10,8 @@ import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
 import { CATEGORIES, getStatusColor, getCategoryColor } from '@/lib/audit-data';
 import FlowNavHint from '@/components/FlowNavHint';
+import HeaderActions from '@/components/HeaderActions';
+import GuideModal from '@/components/GuideModal';
 
 function ScoreGauge({ percentage, classification }: { percentage: number; classification: string }) {
   const getColor = () => {
@@ -76,12 +78,13 @@ function CategoryBar({ category, percentage, status, categoryKey, index }: {
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { score, answeredCount, totalCount } = useAudit();
+  const [showGuide, setShowGuide] = useState(false);
 
   return (
     <View style={styles.container}>
       <LinearGradient
         colors={[Colors.primary, Colors.background]}
-        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
+        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 44 : insets.top }]}
       >
         <View style={styles.logoRow}>
           <Image
@@ -96,8 +99,10 @@ export default function DashboardScreen() {
                 `Baseado em ${answeredCount} de ${totalCount} respostas`}
             </Text>
           </View>
+          <HeaderActions onShowGuide={() => setShowGuide(true)} />
         </View>
       </LinearGradient>
+      <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
 
       <ScrollView
         style={styles.scrollView}

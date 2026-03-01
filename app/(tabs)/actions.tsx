@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Platform, Pressable, Image,
 } from 'react-native';
@@ -10,6 +10,8 @@ import Colors from '@/constants/colors';
 import { generateActionItems, ActionItem } from '@/lib/audit-data';
 import { useAudit } from '@/lib/audit-context';
 import FlowNavHint from '@/components/FlowNavHint';
+import HeaderActions from '@/components/HeaderActions';
+import GuideModal from '@/components/GuideModal';
 
 function PriorityBadge({ priority }: { priority: number }) {
   const colors = {
@@ -104,6 +106,7 @@ export default function ActionsScreen() {
   const { answers, answeredCount } = useAudit();
   const scrollRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
+  const [showGuide, setShowGuide] = useState(false);
 
   const scrollToSection = (key: string) => {
     const y = sectionPositions.current[key];
@@ -128,7 +131,7 @@ export default function ActionsScreen() {
     <View style={styles.container}>
       <LinearGradient
         colors={[Colors.primary, Colors.background]}
-        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
+        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 44 : insets.top }]}
       >
         <View style={styles.logoRow}>
           <Image
@@ -144,8 +147,10 @@ export default function ActionsScreen() {
                 : 'Recomendacoes baseadas no seu diagnostico'}
             </Text>
           </View>
+          <HeaderActions onShowGuide={() => setShowGuide(true)} />
         </View>
       </LinearGradient>
+      <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
 
       <ScrollView
         ref={scrollRef}
