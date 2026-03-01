@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Pressable, Modal,
   FlatList, TextInput, Platform, Image,
@@ -11,7 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn, useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import { useFocusEffect } from 'expo-router';
 import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
 import { QUESTIONS, CATEGORIES, getCategoryColor, AuditQuestion, calculateScore } from '@/lib/audit-data';
@@ -577,6 +578,39 @@ function getScoreColor(percentage: number): string {
   const [showGuide, setShowGuide] = useState(false);
   const progress = totalCount > 0 ? answeredCount / totalCount : 0;
 
+  const hasLeftTab = useRef(false);
+  const [returnedAfterComplete, setReturnedAfterComplete] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (hasLeftTab.current && progress >= 1) {
+        setReturnedAfterComplete(true);
+      }
+      return () => {
+        if (progress >= 1) {
+          hasLeftTab.current = true;
+        }
+      };
+    }, [progress])
+  );
+
+  const arrowOpacity = useSharedValue(1);
+  useEffect(() => {
+    if (progress >= 1 && !returnedAfterComplete) {
+      arrowOpacity.value = withRepeat(
+        withSequence(
+          withTiming(0.2, { duration: 500 }),
+          withTiming(1, { duration: 500 })
+        ),
+        -1,
+        false
+      );
+    }
+  }, [progress, returnedAfterComplete]);
+  const arrowAnimStyle = useAnimatedStyle(() => ({
+    opacity: arrowOpacity.value,
+  }));
+
   const categoryScoreMap = React.useMemo(() => {
     const map: Record<string, number> = {};
     for (const cat of score.categories) {
@@ -665,14 +699,6 @@ function getScoreColor(percentage: number): string {
         }]}
         showsVerticalScrollIndicator={false}
       >
-        {progress >= 1 && (
-          <Animated.View entering={FadeInDown.duration(400)}>
-            <Pressable style={styles.nextStepBanner}>
-              <Ionicons name="arrow-forward-circle" size={22} color={Colors.accent} />
-              <Text style={styles.nextStepText}>Diagnostico completo! Veja o Painel de Risco e as Acoes recomendadas.</Text>
-            </Pressable>
-          </Animated.View>
-        )}
         {groupedQuestions.map((cat) => (
           <CategorySection
             key={cat.key}
@@ -683,6 +709,24 @@ function getScoreColor(percentage: number): string {
             categoryPercentage={categoryScoreMap[cat.key] || 0}
           />
         ))}
+        {progress >= 1 && !returnedAfterComplete && (
+          <Animated.View entering={FadeInDown.duration(400)} style={styles.completeBannerWrap}>
+            <Pressable style={styles.nextStepBanner}>
+              <Animated.View style={arrowAnimStyle}>
+                <Ionicons name="arrow-forward-circle" size={24} color="#2ED573" />
+              </Animated.View>
+              <Text style={styles.nextStepText}>Diagnóstico completo! Veja o Painel de Risco e as Ações recomendadas.</Text>
+            </Pressable>
+          </Animated.View>
+        )}
+        {progress >= 1 && returnedAfterComplete && (
+          <Animated.View entering={FadeIn.duration(400)} style={styles.completeBannerWrap}>
+            <View style={styles.editHintBanner}>
+              <Ionicons name="create-outline" size={20} color={Colors.accent} />
+              <Text style={styles.editHintText}>Se você preencheu algo errado, não se preocupe, altere agora e o sistema faz o resto.</Text>
+            </View>
+          </Animated.View>
+        )}
       </ScrollView>
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
     </View>
@@ -813,21 +857,40 @@ const styles = StyleSheet.create({
   },
   scrollView: { flex: 1 },
   scrollContent: { padding: 12, gap: 10 },
+  completeBannerWrap: {
+    marginTop: 16,
+  },
   nextStepBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#2ED573' + '15',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#2ED573' + '40',
+  },
+  nextStepText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#2ED573',
+    fontWeight: '600' as const,
+  },
+  editHintBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     backgroundColor: Colors.accent + '12',
     borderRadius: 12,
-    padding: 12,
+    padding: 14,
     borderWidth: 1,
     borderColor: Colors.accent + '30',
   },
-  nextStepText: {
+  editHintText: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 13,
     color: Colors.accent,
-    fontWeight: '600' as const,
+    fontWeight: '500' as const,
   },
   categoryContainer: { borderRadius: 14, overflow: 'hidden' },
   categoryHeader: {
