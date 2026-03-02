@@ -340,7 +340,7 @@ function getScoreColor(percentage: number): string {
           <View style={styles.completeBannerWrap}>
             <View style={styles.editHintBanner}>
               <Ionicons name="create-outline" size={20} color={Colors.accent} />
-              <Text style={styles.editHintText}>Se você preencheu algo errado, não se preocupe, altere agora e o sistema faz o resto.</Text>
+              <Text style={styles.editHintText}>Se preencheu algo errado, não se preocupe, altere agora e o sistema faz o restante por você.</Text>
             </View>
             <View style={{ marginTop: 10 }}>
               <FlowNavHint
