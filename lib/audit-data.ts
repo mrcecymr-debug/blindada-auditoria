@@ -120,7 +120,7 @@ export const QUESTIONS: AuditQuestion[] = [
   {
     code: 'A04', category: 'Controle de Acesso', categoryKey: 'acesso',
     question: 'Porta de servico/fundos', weight: 7,
-    options: ['Nao existe', 'Madeira basica', 'Metal simples', 'Gradeada', 'Gradeada + porta', 'Outro (especificar)'],
+    options: ['Nao existe', 'Madeira oca', 'Madeira semi-macica', 'Madeira macica', 'Aco/Metal', 'Blindada nivel I', 'Blindada nivel II', 'Blindada nivel III', 'Blindada nivel IV+', 'PVC reforcado', 'Vidro temperado', 'Vidro laminado+metal', 'Aluminio reforcado', 'Porta cofre', 'Outro (especificar)'],
   },
   {
     code: 'A05', category: 'Controle de Acesso', categoryKey: 'acesso',
@@ -376,10 +376,10 @@ const UPGRADE_MAP: Record<string, DynamicUpgrade> = {
     vulnerability: 'Porta de servico/fundos vulneravel',
     priority: 2, category: 'ACESSO', impact: '+12%',
     tiers: [
-      { maxIndex: 1, priority: 1, solution: 'Instalar porta metalica com fechadura tetra', product: 'Porta metalica / Fechadura tetra', investment: 'R$ 400-800', installation: 'Profissional' },
-      { maxIndex: 2, priority: 2, solution: 'Instalar grade de protecao reforçada', product: 'Grade tubular 25mm', investment: 'R$ 300-600', installation: 'Profissional' },
-      { maxIndex: 3, priority: 3, solution: 'Instalar porta gradeada + porta interna com fechadura', product: 'Grade + Porta metal + Fechadura', investment: 'R$ 600-1.200', installation: 'Profissional' },
-      { maxIndex: 99, priority: 3, solution: 'Reforcar com porta gradeada dupla + sensor de abertura', product: 'Grade dupla + Sensor alarme', investment: 'R$ 800-1.500', installation: 'Profissional' },
+      { maxIndex: 1, priority: 1, solution: 'Instalar porta de madeira macica com fechadura tetra', product: 'Porta macica cedro/angelim + Fechadura tetra', investment: 'R$ 800-2.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 3, priority: 1, solution: 'Substituir por porta de aco ou blindada nivel I', product: 'Porta aco / Blindada nivel I', investment: 'R$ 2.000-4.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 5, priority: 3, solution: 'Atualizar para porta blindada nivel II ou III', product: 'Porta blindada nivel II-III', investment: 'R$ 3.000-6.000', installation: 'Profissional 1 dia' },
+      { maxIndex: 99, priority: 3, solution: 'Instalar porta blindada nivel IV+ ou porta cofre', product: 'Porta blindada IV+ / Porta cofre', investment: 'R$ 5.000-15.000', installation: 'Profissional 1-2 dias' },
     ],
   },
   'A05': {
