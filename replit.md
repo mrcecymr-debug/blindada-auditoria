@@ -93,7 +93,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Planned Features (Not Yet Implemented)
 
-- **PWA (Progressive Web App)**: Transform the web app into an installable PWA for iOS and Android. Requires: manifest.json, Service Worker, iOS meta tags (apple-mobile-web-app-capable), icons (192x192, 512x512). Works on custom domain (mrserver.com.br) with HTTPS. iOS limitations: push notifications only on iOS 16.4+, no Bluetooth/NFC access.
+- **PWA (Progressive Web App)**: IMPLEMENTED. Files: `public/manifest.json`, `public/sw.js`, `public/pwa-icon-192.png`, `public/pwa-icon-512.png`, `public/apple-touch-icon.png`. Custom HTML via `app/+html.tsx`. Service Worker registration in `lib/register-sw.ts`. Express serves `public/` and `dist/` directories. Icons also copied to `dist/` for production. iOS meta tags included (apple-mobile-web-app-capable, apple-touch-icon).
 - **Recuperação de senha**: Supabase email reset (botão "Esqueceu a senha?" na tela de login)
 - **Fotos nas observações**: Até 3 fotos por pergunta usando expo-image-picker
 - **Hotmart webhook**: Criar usuário automaticamente quando venda for realizada

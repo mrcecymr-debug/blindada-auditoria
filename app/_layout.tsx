@@ -11,8 +11,10 @@ import { queryClient } from "@/lib/query-client";
 import { AuditProvider } from "@/lib/audit-context";
 import { supabase } from "@/lib/supabase";
 import { validateSession, clearSessionToken } from "@/lib/session-guard";
+import { registerServiceWorker } from "@/lib/register-sw";
 
 SplashScreen.preventAutoHideAsync();
+registerServiceWorker();
 
 function RootLayoutNav() {
   const router = useRouter();
