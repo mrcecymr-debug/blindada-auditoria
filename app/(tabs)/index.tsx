@@ -351,15 +351,6 @@ function getScoreColor(percentage: number): string {
             </View>
           </View>
         )}
-        {progress > 0 && progress < 1 && (
-          <View style={styles.completeBannerWrap}>
-            <FlowNavHint
-              nextTab="/dashboard"
-              nextLabel="Painel"
-              message="Acompanhe seus resultados parciais no Painel de Risco."
-            />
-          </View>
-        )}
       </ScrollView>
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
     </View>
