@@ -85,3 +85,16 @@ Preferred communication style: Simple, everyday language.
 - **drizzle-kit**: Database migration tooling
 - **babel-preset-expo**: Babel configuration for Expo
 - **patch-package**: Post-install patching
+
+### Shared Components
+- **HeaderActions** (`components/HeaderActions.tsx`): Shared header buttons (Ajuda + Sair) used across all 4 tabs
+- **GuideModal** (`components/GuideModal.tsx`): Central de Ajuda modal, extracted from index.tsx for reuse
+- **FlowNavHint** (`components/FlowNavHint.tsx`): Navigation hint buttons guiding user flow between tabs
+
+## Planned Features (Not Yet Implemented)
+
+- **PWA (Progressive Web App)**: Transform the web app into an installable PWA for iOS and Android. Requires: manifest.json, Service Worker, iOS meta tags (apple-mobile-web-app-capable), icons (192x192, 512x512). Works on custom domain (mrserver.com.br) with HTTPS. iOS limitations: push notifications only on iOS 16.4+, no Bluetooth/NFC access.
+- **Recuperação de senha**: Supabase email reset (botão "Esqueceu a senha?" na tela de login)
+- **Fotos nas observações**: Até 3 fotos por pergunta usando expo-image-picker
+- **Hotmart webhook**: Criar usuário automaticamente quando venda for realizada
+- **IA para preços**: Integração com OpenAI para preços dinâmicos nas ações recomendadas
