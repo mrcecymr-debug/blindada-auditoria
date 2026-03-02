@@ -15,7 +15,7 @@ import HeaderActions from '@/components/HeaderActions';
 import GuideModal from '@/components/GuideModal';
 import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
-import { QUESTIONS, CATEGORIES, getCategoryColor, AuditQuestion, calculateScore } from '@/lib/audit-data';
+import { QUESTIONS, CATEGORIES, getCategoryColor, AuditQuestion, calculateScore, OPTION_HINTS } from '@/lib/audit-data';
 
 
 function CategorySection({ categoryKey, label, icon, questions, categoryPercentage }: {
@@ -138,27 +138,35 @@ function QuestionItem({ question, index }: { question: AuditQuestion; index: num
               <FlatList
                 data={question.options}
                 keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <Pressable
-                    onPress={() => {
-                      setAnswer(question.code, item);
-                      setShowPicker(false);
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    }}
-                    style={[
-                      styles.optionItem,
-                      answer?.answer === item && styles.optionItemSelected,
-                    ]}
-                  >
-                    <Text style={[
-                      styles.optionText,
-                      answer?.answer === item && styles.optionTextSelected,
-                    ]}>{item}</Text>
-                    {answer?.answer === item && (
-                      <Ionicons name="checkmark-circle" size={20} color={Colors.accent} />
-                    )}
-                  </Pressable>
-                )}
+                renderItem={({ item }) => {
+                  const hint = OPTION_HINTS[question.code]?.[item] || (item === 'Outro (especificar)' ? 'Use o campo de observacao para detalhar' : undefined);
+                  return (
+                    <Pressable
+                      onPress={() => {
+                        setAnswer(question.code, item);
+                        setShowPicker(false);
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      }}
+                      style={[
+                        styles.optionItem,
+                        answer?.answer === item && styles.optionItemSelected,
+                      ]}
+                    >
+                      <View style={styles.optionContent}>
+                        <Text style={[
+                          styles.optionText,
+                          answer?.answer === item && styles.optionTextSelected,
+                        ]}>{item}</Text>
+                        {hint ? (
+                          <Text style={styles.optionHint}>{hint}</Text>
+                        ) : null}
+                      </View>
+                      {answer?.answer === item && (
+                        <Ionicons name="checkmark-circle" size={20} color={Colors.accent} />
+                      )}
+                    </Pressable>
+                  );
+                }}
                 style={styles.optionsList}
                 showsVerticalScrollIndicator={false}
               />
@@ -623,6 +631,8 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   optionItemSelected: { backgroundColor: Colors.accent + '15' },
+  optionContent: { flex: 1, marginRight: 8 },
   optionText: { fontSize: 15, color: Colors.text },
   optionTextSelected: { color: Colors.accent, fontWeight: '600' as const },
+  optionHint: { fontSize: 12, color: Colors.textMuted, marginTop: 2, lineHeight: 16 },
 });
