@@ -172,7 +172,7 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
     <View style={styles.container}>
       <LinearGradient
         colors={[Colors.primary, Colors.background]}
-        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 67 : insets.top }]}
+        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 20 : insets.top }]}
       >
         <View style={styles.headerRow}>
           <Pressable onPress={onClose} style={styles.backButton}>
@@ -201,7 +201,7 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[styles.scrollContent, {
-          paddingBottom: Platform.OS === 'web' ? 34 + 84 : 100,
+          paddingBottom: Platform.OS === 'web' ? 70 : 100,
         }]}
         showsVerticalScrollIndicator={false}
       >
@@ -705,7 +705,7 @@ export default function ReportScreen() {
     <View style={styles.container}>
       <LinearGradient
         colors={[Colors.primary, Colors.background]}
-        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 44 : insets.top }]}
+        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 20 : insets.top }]}
       >
         <View style={styles.headerRow}>
           <Image
@@ -725,7 +725,7 @@ export default function ReportScreen() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[styles.scrollContent, {
-          paddingBottom: Platform.OS === 'web' ? 34 + 84 : 100,
+          paddingBottom: Platform.OS === 'web' ? 70 : 100,
         }]}
         showsVerticalScrollIndicator={false}
       >

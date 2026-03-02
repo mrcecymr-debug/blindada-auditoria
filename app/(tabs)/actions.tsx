@@ -131,7 +131,7 @@ export default function ActionsScreen() {
     <View style={styles.container}>
       <LinearGradient
         colors={[Colors.primary, Colors.background]}
-        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 44 : insets.top }]}
+        style={[styles.header, { paddingTop: Platform.OS === 'web' ? 20 : insets.top }]}
       >
         <View style={styles.logoRow}>
           <Image
@@ -156,7 +156,7 @@ export default function ActionsScreen() {
         ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={[styles.scrollContent, {
-          paddingBottom: Platform.OS === 'web' ? 34 + 84 : 100,
+          paddingBottom: Platform.OS === 'web' ? 70 : 100,
         }]}
         showsVerticalScrollIndicator={false}
       >
