@@ -53,7 +53,8 @@ export default async function handler(
   }
 
   const event = req.body?.event;
-  if (event !== "PURCHASE_APPROVED") {
+  const validEvents = ["PURCHASE_APPROVED", "PURCHASE_COMPLETE"];
+  if (!validEvents.includes(event)) {
     console.log(`[Hotmart Webhook] Ignoring event: ${event}`);
     res.status(200).json({ status: "ignored", event });
     return;
