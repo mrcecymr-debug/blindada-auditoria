@@ -69,7 +69,6 @@ export default async function handler(
 
   const email = buyerData.email.toLowerCase().trim();
   const name = buyerData.name || email.split("@")[0];
-  const password = generatePassword();
 
   console.log(`[Hotmart Webhook] Creating user for: ${email}`);
 
@@ -87,32 +86,30 @@ export default async function handler(
       return;
     }
 
-    const { data: newUser, error: createError } =
-      await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: {
+    const { data: inviteData, error: inviteError } =
+      await supabase.auth.admin.inviteUserByEmail(email, {
+        data: {
           full_name: name,
           source: "hotmart",
           purchase_date: new Date().toISOString(),
         },
+        redirectTo: "https://www.mrserver.com.br/login",
       });
 
-    if (createError) {
-      console.error("[Hotmart Webhook] Error creating user:", createError);
-      res.status(500).json({ error: "Failed to create user" });
+    if (inviteError) {
+      console.error("[Hotmart Webhook] Error inviting user:", inviteError);
+      res.status(500).json({ error: "Failed to invite user" });
       return;
     }
 
     console.log(
-      `[Hotmart Webhook] User created: ${email} (ID: ${newUser.user.id})`,
+      `[Hotmart Webhook] User invited: ${email} (ID: ${inviteData.user.id})`,
     );
 
     res.status(200).json({
-      status: "user_created",
+      status: "user_invited",
       email,
-      userId: newUser.user.id,
+      userId: inviteData.user.id,
     });
   } catch (err) {
     console.error("[Hotmart Webhook] Unexpected error:", err);
