@@ -16,13 +16,11 @@ import { registerServiceWorker } from "@/lib/register-sw";
 SplashScreen.preventAutoHideAsync();
 registerServiceWorker();
 
-function checkUrlForInvite(): boolean {
+function isInviteUrl(): boolean {
   if (Platform.OS !== 'web') return false;
   try {
     const hash = window.location.hash;
-    if (hash && hash.includes('type=invite')) {
-      return true;
-    }
+    return !!(hash && hash.includes('type=invite'));
   } catch {}
   return false;
 }
@@ -31,24 +29,23 @@ function RootLayoutNav() {
   const router = useRouter();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const handledInvite = useRef(false);
+  const isInviteFlow = useRef(isInviteUrl());
 
   useEffect(() => {
-    if (Platform.OS === 'web' && checkUrlForInvite() && !handledInvite.current) {
-      handledInvite.current = true;
-      setTimeout(() => {
-        router.replace("/set-password");
-      }, 1500);
-    }
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (event === 'SIGNED_OUT') {
         router.replace("/login");
       }
+      if (event === 'SIGNED_IN' && isInviteFlow.current && !handledInvite.current && newSession) {
+        handledInvite.current = true;
+        router.replace("/set-password");
+      }
     });
 
     const checkSession = async () => {
+      if (isInviteFlow.current) return;
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
       const valid = await validateSession();
