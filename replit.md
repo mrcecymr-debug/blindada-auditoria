@@ -4,11 +4,11 @@
 
 Casa Blindada MR@ is a home security audit mobile application built with Expo (React Native). It allows users to conduct structured security assessments of residential properties by answering categorized questions across five security domains (Perimeter & Structure, Lighting & Visibility, Access Control, Electronic Systems, and Human Factors). The app calculates security scores, generates dashboards with visual analytics, provides prioritized action items for improving security, allows users to save/load audit reports, shows score evolution history across saved audits, and generates professional A4 PDF reports with full audit data, SVG charts, and MR ENG branding.
 
-The project follows a full-stack architecture with an Express backend server and an Expo/React Native frontend, designed to run on iOS, Android, and web platforms.
+The project follows a full-stack architecture with an Express backend server and an Expo/React Native frontend, designed to run on iOS, Android, and web platforms. Production hosting is on **Vercel** via GitHub integration, with the domain **www.mrserver.com.br**.
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+Preferred communication style: Simple, everyday language. Portuguese (Brazilian).
 
 ## System Architecture
 
@@ -21,46 +21,88 @@ Preferred communication style: Simple, everyday language.
 - **UI Components**: Custom components using React Native primitives, `expo-linear-gradient`, `expo-blur`, `react-native-reanimated` for animations, and `@expo/vector-icons` (Ionicons) for icons
 - **Styling**: StyleSheet-based styling with a centralized color theme in `constants/colors.ts` using a dark theme (navy/teal color scheme)
 - **Platform Support**: iOS, Android, and Web. Uses platform-specific adaptations (e.g., `KeyboardAwareScrollViewCompat` for web vs native, native tabs on iOS 26+ with liquid glass)
+- **Option Hints**: Each diagnostic question option has a brief explanation (`OPTION_HINTS` in `lib/audit-data.ts`) shown below the option label in the picker modal
 
-### Backend (Express)
+### Backend (Express - Development)
 
 - **Framework**: Express v5 running on Node.js
-- **Location**: `server/` directory with `index.ts` (entry point), `routes.ts` (API route registration), and `storage.ts` (data storage layer)
-- **Storage**: Currently uses in-memory storage (`MemStorage` class) with a `Map`-based implementation. The storage interface (`IStorage`) is designed for easy swapping to a database-backed implementation
+- **Location**: `server/` directory with `index.ts` (entry point), `routes.ts` (API route registration), `hotmart-webhook.ts` (Hotmart webhook handler), and `storage.ts` (data storage layer)
+- **Storage**: Currently uses in-memory storage (`MemStorage` class) with a `Map`-based implementation
 - **CORS**: Dynamic CORS configuration supporting Replit domains and localhost for development
-- **Static Serving**: In production, serves the built Expo web bundle; in development, proxies to the Expo dev server
+- **Static Serving**: Serves `public/`, `dist/`, `static-build/`, and `assets/` directories
+
+### Vercel Serverless Functions (Production)
+
+- **Location**: `api/` directory at project root
+- **Hotmart Webhook**: `api/hotmart/webhook.ts` — Vercel serverless function that handles Hotmart purchase webhooks
+- **Config**: `vercel.json` with rewrite rules for API routes
+- **Environment Variables (Vercel)**: `HOTMART_HOTTOK`, `SUPABASE_SERVICE_ROLE_KEY`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_SUPABASE_URL`
 
 ### Database Layer
 
 - **ORM**: Drizzle ORM with PostgreSQL dialect
 - **Schema**: Defined in `shared/schema.ts` — currently contains a `users` table with id, username, and password fields
 - **Validation**: Uses `drizzle-zod` for schema-to-Zod validation schema generation
-- **Migrations**: Drizzle Kit configured for push-based migrations (`npm run db:push`)
-- **Note**: The database schema is minimal. The core audit data (questions, answers, scores) is currently handled entirely on the client side via AsyncStorage, not through the server/database. The `DATABASE_URL` environment variable is required for the Drizzle config but the server itself uses in-memory storage
+- **Note**: The core audit data (questions, answers, scores) is handled entirely on the client side via AsyncStorage, not through the server/database
+
+### Authentication
+
+- **Provider**: Supabase Auth (email/password)
+- **Frontend**: `lib/supabase.ts` with anon key, `lib/session-guard.ts` for single-session enforcement
+- **Session Control**: Only one active session per user — logging in on another device forces logout on the previous one
+- **SUPABASE_URL**: `https://guczydknusnhpooaxvtb.supabase.co`
+
+### Hotmart Integration (IMPLEMENTED)
+
+- **Webhook URL**: `https://www.mrserver.com.br/api/hotmart/webhook` (must include `www` — Vercel redirects non-www to www with 308)
+- **Flow**: Hotmart sale → webhook POST → validate hottok → invite user via Supabase → user receives email with link to set password → redirects to login
+- **Events handled**: `PURCHASE_APPROVED`, `PURCHASE_COMPLETE`
+- **User creation**: Uses `supabase.auth.admin.inviteUserByEmail()` — sends invitation email automatically
+- **Duplicate prevention**: Checks if user already exists before creating
+- **Files**: `api/hotmart/webhook.ts` (Vercel), `server/hotmart-webhook.ts` (Express dev)
+- **Secrets**: `HOTMART_HOTTOK` (webhook token), `SUPABASE_SERVICE_ROLE_KEY` (admin access)
+- **Product**: R$ 257,00 pagamento único, primeiros 1.000 acessos
+- **Email template**: Customized in Supabase Dashboard → Authentication → Email Templates → Invite User (branding CasaBlindada MR@)
+
+### PWA (IMPLEMENTED)
+
+- **Files**: `public/manifest.json`, `public/sw.js`, `public/pwa-icon-192.png`, `public/pwa-icon-512.png`, `public/apple-touch-icon.png`
+- **Custom HTML**: `app/+html.tsx` injects PWA meta tags at build time
+- **Service Worker**: `lib/register-sw.ts` — registers SW on web platform at app startup
+- **Express**: Serves `public/` directory for manifest, icons, and SW
+- **iOS meta tags**: apple-mobile-web-app-capable, apple-touch-icon, black-translucent status bar
+- **Install**: iPhone via Safari Share → "Add to Home Screen"; Android via Chrome menu → "Install app"
+- **Icon**: Golden shield with padlock, navy background, teal accent, MR ENG branding
 
 ### Key Design Decisions
 
-1. **Offline-first architecture**: Audit data lives in AsyncStorage on the device. This was chosen because security audits happen on-site where connectivity may be unreliable
-2. **Shared schema directory**: `shared/` contains types and schemas used by both frontend and backend, ensuring type consistency
-3. **Audit engine in `lib/audit-data.ts`**: Contains all question definitions, scoring logic, category definitions, and action items as static data — no server dependency needed for the core functionality
-4. **Tab-based UX flow**: The four tabs represent the natural workflow: Diagnóstico → Painel → Ações → Relatório
+1. **Offline-first architecture**: Audit data lives in AsyncStorage on the device
+2. **Shared schema directory**: `shared/` contains types and schemas used by both frontend and backend
+3. **Audit engine in `lib/audit-data.ts`**: Contains all question definitions, scoring logic, category definitions, option hints, and action items as static data
+4. **Tab-based UX flow**: Diagnóstico → Painel → Ações → Relatório
+5. **Dual deployment**: Vercel for production (serverless + static), Replit for development
+6. **Painel button**: Only appears after all 32 questions are answered (32/32)
 
 ### Build & Development
 
-- **Development**: Two processes run simultaneously — `expo:dev` for the Expo frontend and `server:dev` for the Express backend
-- **Production build**: `expo:static:build` creates a static web bundle, `server:build` bundles the server with esbuild, and `server:prod` serves everything
-- **TypeScript**: Strict mode enabled throughout, with path aliases `@/*` and `@shared/*`
+- **Development**: Two processes — `expo:dev` (port 8081) + `server:dev` (port 5000)
+- **Production**: Vercel via GitHub — auto-deploys on push to main
+- **TypeScript**: Strict mode, path aliases `@/*` and `@shared/*`
 
 ## External Dependencies
 
 ### Core Framework
 - **Expo SDK 54**: Mobile app framework with managed workflow
 - **React 19.1** / **React Native 0.81**: UI rendering
-- **Express 5**: Backend HTTP server
+- **Express 5**: Backend HTTP server (development)
+
+### Authentication & Users
+- **@supabase/supabase-js**: Supabase client for auth and user management
+- **Supabase Auth**: Email/password authentication with session management
 
 ### Database & ORM
-- **PostgreSQL**: Database (configured via `DATABASE_URL` environment variable)
-- **Drizzle ORM**: Type-safe SQL query builder and schema management
+- **PostgreSQL**: Database (configured via `DATABASE_URL`)
+- **Drizzle ORM**: Type-safe SQL query builder
 - **pg**: PostgreSQL client driver
 
 ### Data & State
@@ -91,10 +133,22 @@ Preferred communication style: Simple, everyday language.
 - **GuideModal** (`components/GuideModal.tsx`): Central de Ajuda modal, extracted from index.tsx for reuse
 - **FlowNavHint** (`components/FlowNavHint.tsx`): Navigation hint buttons guiding user flow between tabs
 
+### Key Data Files
+- **`lib/audit-data.ts`**: 32 questions, scoring logic, `OPTION_HINTS` (brief explanations for every option), action items, category definitions. `calculateScore()` is the SINGLE source of truth for all scoring
+- **`lib/audit-context.tsx`**: React Context for audit state management (answers, observations, saved audits)
+- **`lib/supabase.ts`**: Supabase client configuration
+- **`lib/session-guard.ts`**: Single-session enforcement logic
+- **`lib/register-sw.ts`**: PWA Service Worker registration
+
+## Design Constants
+- Background: `#060E1A` (dark navy)
+- Accent: `#00C6AE` (teal)
+- Gold: `#D4AF37`
+- Warning/delete: `#FF9F43` (orange)
+- Web paddingTop: 20px; tab bar height: 60px; content paddingBottom: 70px
+
 ## Planned Features (Not Yet Implemented)
 
-- **PWA (Progressive Web App)**: IMPLEMENTED. Files: `public/manifest.json`, `public/sw.js`, `public/pwa-icon-192.png`, `public/pwa-icon-512.png`, `public/apple-touch-icon.png`. Custom HTML via `app/+html.tsx`. Service Worker registration in `lib/register-sw.ts`. Express serves `public/` and `dist/` directories. Icons also copied to `dist/` for production. iOS meta tags included (apple-mobile-web-app-capable, apple-touch-icon).
 - **Recuperação de senha**: Supabase email reset (botão "Esqueceu a senha?" na tela de login)
 - **Fotos nas observações**: Até 3 fotos por pergunta usando expo-image-picker
-- **Hotmart webhook**: Criar usuário automaticamente quando venda for realizada
 - **IA para preços**: Integração com OpenAI para preços dinâmicos nas ações recomendadas
