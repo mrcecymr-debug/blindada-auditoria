@@ -1,0 +1,125 @@
+import type { Request, Response } from "express";
+import { createClient } from "@supabase/supabase-js";
+
+const SUPABASE_URL = "https://guczydknusnhpooaxvtb.supabase.co";
+
+function getSupabaseAdmin() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY not configured");
+  }
+  return createClient(SUPABASE_URL, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+function generatePassword(length = 12): string {
+  const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
+function validateHottok(req: Request): boolean {
+  const hottok = process.env.HOTMART_HOTTOK;
+  if (!hottok) return false;
+
+  const receivedToken =
+    req.body?.hottok || req.query?.hottok || req.headers["x-hotmart-hottok"];
+
+  return receivedToken === hottok;
+}
+
+export async function handleHotmartWebhook(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  console.log("[Hotmart Webhook] Received request");
+  console.log("[Hotmart Webhook] Body:", JSON.stringify(req.body, null, 2));
+
+  if (!validateHottok(req)) {
+    console.log("[Hotmart Webhook] Invalid hottok token");
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const event = req.body?.event;
+  if (event !== "PURCHASE_APPROVED") {
+    console.log(`[Hotmart Webhook] Ignoring event: ${event}`);
+    res.status(200).json({ status: "ignored", event });
+    return;
+  }
+
+  const buyerData = req.body?.data?.buyer;
+  if (!buyerData?.email) {
+    console.log("[Hotmart Webhook] No buyer email found");
+    res.status(400).json({ error: "No buyer email" });
+    return;
+  }
+
+  const email = buyerData.email.toLowerCase().trim();
+  const name = buyerData.name || email.split("@")[0];
+  const password = generatePassword();
+
+  console.log(`[Hotmart Webhook] Creating user for: ${email}`);
+
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const userExists = existingUsers?.users?.some(
+      (u) => u.email?.toLowerCase() === email,
+    );
+
+    if (userExists) {
+      console.log(`[Hotmart Webhook] User already exists: ${email}`);
+      res.status(200).json({ status: "user_already_exists", email });
+      return;
+    }
+
+    const { data: newUser, error: createError } =
+      await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: name,
+          source: "hotmart",
+          purchase_date: new Date().toISOString(),
+        },
+      });
+
+    if (createError) {
+      console.error("[Hotmart Webhook] Error creating user:", createError);
+      res.status(500).json({ error: "Failed to create user" });
+      return;
+    }
+
+    console.log(
+      `[Hotmart Webhook] User created successfully: ${email} (ID: ${newUser.user.id})`,
+    );
+
+    const { error: emailError } = await supabase.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
+
+    if (emailError) {
+      console.log(
+        `[Hotmart Webhook] Could not send magic link: ${emailError.message}`,
+      );
+    }
+
+    res.status(200).json({
+      status: "user_created",
+      email,
+      userId: newUser.user.id,
+    });
+  } catch (err) {
+    console.error("[Hotmart Webhook] Unexpected error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
