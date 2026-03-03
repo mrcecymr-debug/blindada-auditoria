@@ -2,7 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef } from "react";
-import { Alert, AppState } from "react-native";
+import { Alert, AppState, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { StatusBar } from "expo-status-bar";
@@ -16,11 +16,30 @@ import { registerServiceWorker } from "@/lib/register-sw";
 SplashScreen.preventAutoHideAsync();
 registerServiceWorker();
 
+function checkUrlForInvite(): boolean {
+  if (Platform.OS !== 'web') return false;
+  try {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=invite')) {
+      return true;
+    }
+  } catch {}
+  return false;
+}
+
 function RootLayoutNav() {
   const router = useRouter();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const handledInvite = useRef(false);
 
   useEffect(() => {
+    if (Platform.OS === 'web' && checkUrlForInvite() && !handledInvite.current) {
+      handledInvite.current = true;
+      setTimeout(() => {
+        router.replace("/set-password");
+      }, 1500);
+    }
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, newSession) => {
