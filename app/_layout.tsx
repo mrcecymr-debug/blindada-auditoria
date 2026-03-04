@@ -33,7 +33,8 @@ function RootLayoutNav() {
       if (event === 'SIGNED_OUT') {
         router.replace("/login");
       }
-      if (event === 'SIGNED_IN' && isInviteFlow.current && !handledInvite.current && newSession) {
+      if (isInviteFlow.current && !handledInvite.current && newSession &&
+          (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY')) {
         handledInvite.current = true;
         router.replace("/set-password");
       }

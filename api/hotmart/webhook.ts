@@ -13,6 +13,15 @@ function getSupabaseAdmin() {
   });
 }
 
+function generateTempPassword(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+  let password = "";
+  for (let i = 0; i < 16; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse,
@@ -76,30 +85,42 @@ export default async function handler(
       return;
     }
 
-    const { data: inviteData, error: inviteError } =
-      await supabase.auth.admin.inviteUserByEmail(email, {
-        data: {
+    const tempPassword = generateTempPassword();
+    const { data: newUser, error: createError } =
+      await supabase.auth.admin.createUser({
+        email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
           full_name: name,
           source: "hotmart",
           purchase_date: new Date().toISOString(),
+          needs_password_reset: true,
         },
-        redirectTo: "https://www.mrserver.com.br/login",
       });
 
-    if (inviteError) {
-      console.error("[Hotmart Webhook] Error inviting user:", inviteError);
-      res.status(500).json({ error: "Failed to invite user" });
+    if (createError) {
+      console.error("[Hotmart Webhook] Error creating user:", createError);
+      res.status(500).json({ error: "Failed to create user" });
       return;
     }
 
-    console.log(
-      `[Hotmart Webhook] User invited: ${email} (ID: ${inviteData.user.id})`,
-    );
+    console.log(`[Hotmart Webhook] User created: ${email} (ID: ${newUser.user.id})`);
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "https://www.mrserver.com.br",
+    });
+
+    if (resetError) {
+      console.log(`[Hotmart Webhook] Reset email warning: ${resetError.message}`);
+    } else {
+      console.log(`[Hotmart Webhook] Password reset email sent to: ${email}`);
+    }
 
     res.status(200).json({
-      status: "user_invited",
+      status: "user_created",
       email,
-      userId: inviteData.user.id,
+      userId: newUser.user.id,
     });
   } catch (err) {
     console.error("[Hotmart Webhook] Unexpected error:", err);

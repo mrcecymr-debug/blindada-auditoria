@@ -6,7 +6,7 @@ export function detectAndMarkInviteFlow(): boolean {
   if (Platform.OS !== 'web') return false;
   try {
     const hash = window.location.hash;
-    if (hash && hash.includes('type=invite')) {
+    if (hash && (hash.includes('type=invite') || hash.includes('type=recovery'))) {
       sessionStorage.setItem(INVITE_KEY, 'true');
       return true;
     }
