@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { registerSessionToken } from "@/lib/session-guard";
+import { clearInviteFlow } from "@/lib/invite-flow";
 
 export default function SetPasswordScreen() {
   const [password, setPassword] = useState("");
@@ -49,6 +50,7 @@ export default function SetPasswordScreen() {
       return;
     }
 
+    clearInviteFlow();
     await registerSessionToken();
     setLoading(false);
     alert("Senha criada com sucesso! Bem-vindo ao Casa Blindada!");

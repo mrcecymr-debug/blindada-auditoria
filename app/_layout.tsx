@@ -12,29 +12,24 @@ import { AuditProvider } from "@/lib/audit-context";
 import { supabase } from "@/lib/supabase";
 import { validateSession, clearSessionToken } from "@/lib/session-guard";
 import { registerServiceWorker } from "@/lib/register-sw";
+import { detectAndMarkInviteFlow, isInviteFlowActive } from "@/lib/invite-flow";
 
 SplashScreen.preventAutoHideAsync();
 registerServiceWorker();
-
-function isInviteUrl(): boolean {
-  if (Platform.OS !== 'web') return false;
-  try {
-    const hash = window.location.hash;
-    return !!(hash && hash.includes('type=invite'));
-  } catch {}
-  return false;
-}
 
 function RootLayoutNav() {
   const router = useRouter();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const handledInvite = useRef(false);
-  const isInviteFlow = useRef(isInviteUrl());
+  const isInviteFlow = useRef(detectAndMarkInviteFlow());
 
   useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (isInviteFlowActive() && event === 'SIGNED_OUT') {
+        return;
+      }
       if (event === 'SIGNED_OUT') {
         router.replace("/login");
       }
@@ -45,7 +40,7 @@ function RootLayoutNav() {
     });
 
     const checkSession = async () => {
-      if (isInviteFlow.current) return;
+      if (isInviteFlow.current || isInviteFlowActive()) return;
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
       const valid = await validateSession();

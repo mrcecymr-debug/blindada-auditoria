@@ -16,15 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { registerSessionToken, validateSession } from "@/lib/session-guard";
-
-function isInviteUrl(): boolean {
-  if (Platform.OS !== 'web') return false;
-  try {
-    const hash = window.location.hash;
-    return !!(hash && hash.includes('type=invite'));
-  } catch {}
-  return false;
-}
+import { isInviteFlowActive } from "@/lib/invite-flow";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -34,7 +26,7 @@ export default function LoginScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    if (isInviteUrl()) return;
+    if (isInviteFlowActive()) return;
 
     supabase.auth.getSession().then(async ({ data }) => {
       if (data.session) {
