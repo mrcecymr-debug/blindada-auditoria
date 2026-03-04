@@ -17,6 +17,15 @@ import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { registerSessionToken, validateSession } from "@/lib/session-guard";
 
+function isInviteUrl(): boolean {
+  if (Platform.OS !== 'web') return false;
+  try {
+    const hash = window.location.hash;
+    return !!(hash && hash.includes('type=invite'));
+  } catch {}
+  return false;
+}
+
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +34,8 @@ export default function LoginScreen() {
   const router = useRouter();
 
   useEffect(() => {
+    if (isInviteUrl()) return;
+
     supabase.auth.getSession().then(async ({ data }) => {
       if (data.session) {
         const valid = await validateSession();
