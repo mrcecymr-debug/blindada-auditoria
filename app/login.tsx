@@ -45,7 +45,7 @@ export default function LoginScreen() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -53,6 +53,13 @@ export default function LoginScreen() {
     if (error) {
       setLoading(false);
       alert("Email ou senha incorretos.");
+      return;
+    }
+
+    const needsReset = signInData.user?.user_metadata?.needs_password_reset;
+    if (needsReset) {
+      setLoading(false);
+      router.replace("/set-password");
       return;
     }
 

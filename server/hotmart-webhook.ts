@@ -24,12 +24,18 @@ function validateHottok(req: Request): boolean {
 }
 
 function generateTempPassword(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghjkmnpqrstuvwxyz";
+  const digits = "23456789";
   let password = "";
-  for (let i = 0; i < 16; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  password += upper.charAt(Math.floor(Math.random() * upper.length));
+  password += lower.charAt(Math.floor(Math.random() * lower.length));
+  password += digits.charAt(Math.floor(Math.random() * digits.length));
+  const all = upper + lower + digits;
+  for (let i = 0; i < 5; i++) {
+    password += all.charAt(Math.floor(Math.random() * all.length));
   }
-  return password;
+  return password.split('').sort(() => Math.random() - 0.5).join('');
 }
 
 export async function handleHotmartWebhook(
@@ -80,41 +86,42 @@ export async function handleHotmartWebhook(
     }
 
     const tempPassword = generateTempPassword();
-    const { data: newUser, error: createError } =
-      await supabase.auth.admin.createUser({
-        email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
+
+    const { data: inviteData, error: inviteError } =
+      await supabase.auth.admin.inviteUserByEmail(email, {
+        data: {
           full_name: name,
           source: "hotmart",
           purchase_date: new Date().toISOString(),
           needs_password_reset: true,
+          temp_password: tempPassword,
         },
       });
 
-    if (createError) {
-      console.error("[Hotmart Webhook] Error creating user:", createError);
+    if (inviteError) {
+      console.error("[Hotmart Webhook] Error inviting user:", inviteError);
       res.status(500).json({ error: "Failed to create user" });
       return;
     }
 
-    console.log(`[Hotmart Webhook] User created: ${email} (ID: ${newUser.user.id})`);
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      inviteData.user.id,
+      {
+        password: tempPassword,
+        email_confirm: true,
+      },
+    );
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://www.mrserver.com.br",
-    });
-
-    if (resetError) {
-      console.log(`[Hotmart Webhook] Reset email warning: ${resetError.message}`);
-    } else {
-      console.log(`[Hotmart Webhook] Password reset email sent to: ${email}`);
+    if (updateError) {
+      console.error("[Hotmart Webhook] Error setting password:", updateError);
     }
+
+    console.log(`[Hotmart Webhook] User created: ${email} (ID: ${inviteData.user.id})`);
 
     res.status(200).json({
       status: "user_created",
       email,
-      userId: newUser.user.id,
+      userId: inviteData.user.id,
     });
   } catch (err) {
     console.error("[Hotmart Webhook] Unexpected error:", err);

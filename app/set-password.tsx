@@ -42,7 +42,10 @@ export default function SetPasswordScreen() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await supabase.auth.updateUser({
+      password,
+      data: { needs_password_reset: false },
+    });
 
     if (error) {
       setLoading(false);
