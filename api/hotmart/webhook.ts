@@ -93,9 +93,12 @@ export default async function handler(
 
     const tempPassword = generateTempPassword();
 
-    const { data: inviteData, error: inviteError } =
-      await supabase.auth.admin.inviteUserByEmail(email, {
-        data: {
+    const { data: newUser, error: createError } =
+      await supabase.auth.admin.createUser({
+        email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
           full_name: name,
           source: "hotmart",
           purchase_date: new Date().toISOString(),
@@ -104,30 +107,27 @@ export default async function handler(
         },
       });
 
-    if (inviteError) {
-      console.error("[Hotmart Webhook] Error inviting user:", inviteError);
+    if (createError) {
+      console.error("[Hotmart Webhook] Error creating user:", createError);
       res.status(500).json({ error: "Failed to create user" });
       return;
     }
 
-    const { error: updateError } = await supabase.auth.admin.updateUserById(
-      inviteData.user.id,
-      {
-        password: tempPassword,
-        email_confirm: true,
-      },
-    );
+    console.log(`[Hotmart Webhook] User created with temp password: ${email} (ID: ${newUser.user.id})`);
 
-    if (updateError) {
-      console.error("[Hotmart Webhook] Error setting password:", updateError);
+    const { error: inviteError } =
+      await supabase.auth.admin.inviteUserByEmail(email);
+
+    if (inviteError) {
+      console.log(`[Hotmart Webhook] Invite email note: ${inviteError.message}`);
+    } else {
+      console.log(`[Hotmart Webhook] Invite email sent to: ${email}`);
     }
-
-    console.log(`[Hotmart Webhook] User created: ${email} (ID: ${inviteData.user.id})`);
 
     res.status(200).json({
       status: "user_created",
       email,
-      userId: inviteData.user.id,
+      userId: newUser.user.id,
     });
   } catch (err) {
     console.error("[Hotmart Webhook] Unexpected error:", err);
