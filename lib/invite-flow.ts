@@ -15,6 +15,13 @@ export function detectAndMarkInviteFlow(): boolean {
   return false;
 }
 
+export function markInviteFlow(): void {
+  if (Platform.OS !== 'web') return;
+  try {
+    sessionStorage.setItem(INVITE_KEY, 'true');
+  } catch {}
+}
+
 export function isInviteFlowActive(): boolean {
   if (Platform.OS !== 'web') return false;
   try {

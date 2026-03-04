@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { supabase } from "@/lib/supabase";
 import { registerSessionToken, validateSession } from "@/lib/session-guard";
-import { isInviteFlowActive } from "@/lib/invite-flow";
+import { isInviteFlowActive, markInviteFlow } from "@/lib/invite-flow";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -58,6 +58,7 @@ export default function LoginScreen() {
 
     const needsReset = signInData.user?.user_metadata?.needs_password_reset;
     if (needsReset) {
+      markInviteFlow();
       setLoading(false);
       router.replace("/set-password");
       return;
