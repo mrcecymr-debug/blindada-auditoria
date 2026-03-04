@@ -115,13 +115,15 @@ export default async function handler(
 
     console.log(`[Hotmart Webhook] User created with temp password: ${email} (ID: ${newUser.user.id})`);
 
-    const { error: inviteError } =
-      await supabase.auth.admin.inviteUserByEmail(email);
+    const { error: resetError } =
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://www.mrserver.com.br",
+      });
 
-    if (inviteError) {
-      console.log(`[Hotmart Webhook] Invite email note: ${inviteError.message}`);
+    if (resetError) {
+      console.log(`[Hotmart Webhook] Email note: ${resetError.message}`);
     } else {
-      console.log(`[Hotmart Webhook] Invite email sent to: ${email}`);
+      console.log(`[Hotmart Webhook] Welcome email sent to: ${email}`);
     }
 
     res.status(200).json({
