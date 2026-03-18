@@ -52,17 +52,19 @@ Preferred communication style: Simple, everyday language. Portuguese (Brazilian)
 - **Session Control**: Only one active session per user — logging in on another device forces logout on the previous one
 - **SUPABASE_URL**: `https://guczydknusnhpooaxvtb.supabase.co`
 
-### Hotmart Integration (IMPLEMENTED)
+### Hotmart Integration (IMPLEMENTED ✅)
 
 - **Webhook URL**: `https://www.mrserver.com.br/api/hotmart/webhook` (must include `www` — Vercel redirects non-www to www with 308)
-- **Flow**: Hotmart sale → webhook POST → validate hottok → invite user via Supabase → user receives email with link to set password → redirects to login
+- **Flow**: Hotmart sale → webhook POST → validate hottok → `createUser` com senha temporária → `resetPasswordForEmail` para disparar email → usuário faz login com senha temporária → tela set-password → cria senha definitiva
 - **Events handled**: `PURCHASE_APPROVED`, `PURCHASE_COMPLETE`
-- **User creation**: Uses `supabase.auth.admin.inviteUserByEmail()` — sends invitation email automatically
+- **User creation**: `supabase.auth.admin.createUser()` com `email_confirm: true` e `temp_password` no metadata + `supabase.auth.resetPasswordForEmail()` para disparar email de boas-vindas
 - **Duplicate prevention**: Checks if user already exists before creating
 - **Files**: `api/hotmart/webhook.ts` (Vercel), `server/hotmart-webhook.ts` (Express dev)
 - **Secrets**: `HOTMART_HOTTOK` (webhook token), `SUPABASE_SERVICE_ROLE_KEY` (admin access)
 - **Product**: R$ 257,00 pagamento único, primeiros 1.000 acessos
-- **Email template**: Customized in Supabase Dashboard → Authentication → Email Templates → Invite User (branding CasaBlindada MR@)
+- **Email template**: Supabase Dashboard → Authentication → Email Templates → **Reset Password** (branding CasaBlindada MR@ + senha temporária em `{{ .Data.temp_password }}`)
+- **Login flow**: login.tsx detecta `needs_password_reset` no metadata → `markInviteFlow()` → redireciona para `/set-password` → ao trocar senha, `registerSessionToken()` → entra no app
+- **Session guard bypass**: `isInviteFlowActive()` (sessionStorage) impede sign-out automático durante troca de senha
 
 ### PWA (IMPLEMENTED)
 
@@ -146,6 +148,13 @@ Preferred communication style: Simple, everyday language. Portuguese (Brazilian)
 - Gold: `#D4AF37`
 - Warning/delete: `#FF9F43` (orange)
 - Web paddingTop: 20px; tab bar height: 60px; content paddingBottom: 70px
+
+### PDF Report — Android Fix (IMPLEMENTED ✅)
+
+- **Geração**: `expo-print` com `width: 794, height: 1123` no Android para paginação correta
+- **Compartilhamento**: Arquivo copiado para `FileSystem.cacheDirectory` com nome legível antes de compartilhar — isso permite que WhatsApp e outros apps acessem o arquivo
+- **CSS**: `break-inside: avoid` e `break-before: page` para compatibilidade com Chromium/Android além das propriedades WebKit
+- **Target**: `android` | `webkit` | `browser` — CSS e layout ajustados por plataforma
 
 ## Planned Features (Not Yet Implemented)
 

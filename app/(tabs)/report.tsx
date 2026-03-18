@@ -10,6 +10,7 @@ import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
 import Colors from '@/constants/colors';
 import { useAudit, SavedAudit } from '@/lib/audit-context';
 import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS, generateActionItems, getTopVulnerabilities } from '@/lib/audit-data';
@@ -155,17 +156,22 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
           printOptions.height = 1123;
         }
         const { uri } = await Print.printToFileAsync(printOptions);
+
+        const safeName = audit.name.replace(/[^a-zA-Z0-9_\-]/g, '_');
+        const destUri = `${FileSystem.cacheDirectory}Relatorio_${safeName}.pdf`;
+        await FileSystem.copyAsync({ from: uri, to: destUri });
+
         setGeneratingPDF(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         const canShare = await Sharing.isAvailableAsync();
         if (canShare) {
-          await Sharing.shareAsync(uri, {
+          await Sharing.shareAsync(destUri, {
             mimeType: 'application/pdf',
             dialogTitle: `Relatorio - ${audit.name}`,
             UTI: 'com.adobe.pdf',
           });
         } else {
-          Alert.alert('PDF Gerado', 'O relatorio foi salvo com sucesso.');
+          Alert.alert('PDF Gerado', `Relatorio salvo em: ${destUri}`);
         }
         setTimeout(() => onClose(), 500);
       }
