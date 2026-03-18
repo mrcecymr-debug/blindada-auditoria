@@ -117,7 +117,26 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
       const html = generateFullReportHTML(audit, allAudits, target);
 
       if (isWeb) {
+        const safeName = audit.name.replace(/[^a-zA-Z0-9_\-]/g, '_');
         const blob = new Blob([html], { type: 'text/html' });
+
+        // Try Web Share API with file (Android Chrome, iOS Safari) — opens native share sheet with WhatsApp etc.
+        const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean };
+        if (nav.share && nav.canShare) {
+          const file = new File([blob], `Relatorio_${safeName}.html`, { type: 'text/html' });
+          if (nav.canShare({ files: [file] })) {
+            setGeneratingPDF(false);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            try {
+              await nav.share({ files: [file], title: `Relatório Casa Blindada - ${audit.name}` });
+            } catch (_) {
+              // user cancelled — do nothing
+            }
+            return;
+          }
+        }
+
+        // Fallback: print dialog (desktop or browsers without Web Share API)
         const blobUrl = URL.createObjectURL(blob);
         const iframe = document.createElement('iframe');
         iframe.style.position = 'fixed';
@@ -135,7 +154,7 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
             } catch (e) {
               const link = document.createElement('a');
               link.href = blobUrl;
-              link.download = `Relatorio_${audit.name.replace(/\s+/g, '_')}.html`;
+              link.download = `Relatorio_${safeName}.html`;
               link.click();
             }
             setTimeout(() => {
