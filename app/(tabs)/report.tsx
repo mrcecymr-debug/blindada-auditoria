@@ -111,7 +111,9 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
       setGeneratingPDF(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const isWeb = Platform.OS === 'web';
-      const html = generateFullReportHTML(audit, allAudits, isWeb ? 'browser' : 'webkit');
+      const isAndroid = Platform.OS === 'android';
+      const target = isWeb ? 'browser' : isAndroid ? 'android' : 'webkit';
+      const html = generateFullReportHTML(audit, allAudits, target);
 
       if (isWeb) {
         const blob = new Blob([html], { type: 'text/html' });
@@ -144,10 +146,15 @@ function ReportDetail({ audit, onClose, allAudits }: { audit: SavedAudit; onClos
         setGeneratingPDF(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
-        const { uri } = await Print.printToFileAsync({
+        const printOptions: Parameters<typeof Print.printToFileAsync>[0] = {
           html,
           base64: false,
-        });
+        };
+        if (isAndroid) {
+          printOptions.width = 794;
+          printOptions.height = 1123;
+        }
+        const { uri } = await Print.printToFileAsync(printOptions);
         setGeneratingPDF(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         const canShare = await Sharing.isAvailableAsync();

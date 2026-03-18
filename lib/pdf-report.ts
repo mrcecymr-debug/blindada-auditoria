@@ -97,7 +97,7 @@ function generateEvolutionChartSVG(audits: { date: string; percentage: number; i
   </svg>`;
 }
 
-export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[], target: 'webkit' | 'browser' = 'webkit'): string {
+export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[], target: 'webkit' | 'browser' | 'android' = 'webkit'): string {
   const score = calculateScore(audit.answers);
   const scoreColor = getScoreColor(score.percentage);
 
@@ -272,7 +272,7 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
 <style>
   @page {
     size: A4;
-    margin: ${target === 'webkit' ? '28mm 18mm 24mm 18mm' : '18mm 18mm 20mm 18mm'};
+    margin: ${target === 'webkit' ? '28mm 18mm 24mm 18mm' : target === 'android' ? '12mm 10mm 12mm 10mm' : '18mm 18mm 20mm 18mm'};
     ${target === 'webkit' ? `
     @top-center {
       content: element(page-header);
@@ -291,14 +291,18 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
     background: #060E1A;
     color: #E0E6ED;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
+    font-size: ${target === 'android' ? '11px' : '12px'};
     line-height: 1.5;
-    max-width: 170mm;
+    width: ${target === 'android' ? '190mm' : '170mm'};
+    max-width: ${target === 'android' ? '190mm' : '170mm'};
     margin: 0 auto;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  .page-break { page-break-before: always; }
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
 
   /* ===== RUNNING HEADER (every page except first) ===== */
   .running-header {
@@ -837,6 +841,21 @@ export function generateFullReportHTML(audit: SavedAudit, allAudits: SavedAudit[
   }
   .print-thead, .print-tfoot { display: none; }
   `}
+
+  /* ===== ANDROID / CHROMIUM BREAK COMPATIBILITY ===== */
+  .meta-grid { break-inside: avoid; }
+  .section { break-inside: auto; }
+  .section-header { break-after: avoid; }
+  .score-container { break-inside: avoid; }
+  .cat-row { break-inside: avoid; }
+  .ans-table { break-inside: auto; }
+  .ans-cat-header { break-after: avoid; }
+  .ans-table tr { break-inside: avoid; }
+  .action-card { break-inside: avoid; }
+  .vuln-row { break-inside: avoid; }
+  .timeline-row { break-inside: avoid; }
+  .evo-row { break-inside: avoid; }
+  .summary-grid { break-inside: avoid; }
 </style>
 </head>
 <body>
