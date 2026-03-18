@@ -149,12 +149,15 @@ Preferred communication style: Simple, everyday language. Portuguese (Brazilian)
 - Warning/delete: `#FF9F43` (orange)
 - Web paddingTop: 20px; tab bar height: 60px; content paddingBottom: 70px
 
-### PDF Report — Android Fix (IMPLEMENTED ✅)
+### PDF / Relatório — Compartilhamento (IMPLEMENTED ✅)
 
-- **Geração**: `expo-print` com `width: 794, height: 1123` no Android para paginação correta
-- **Compartilhamento**: Arquivo copiado para `FileSystem.cacheDirectory` com nome legível antes de compartilhar — isso permite que WhatsApp e outros apps acessem o arquivo
-- **CSS**: `break-inside: avoid` e `break-before: page` para compatibilidade com Chromium/Android além das propriedades WebKit
-- **Target**: `android` | `webkit` | `browser` — CSS e layout ajustados por plataforma
+- **iOS nativo** (Expo Go): `expo-print` gera PDF real → `expo-sharing` abre share sheet com WhatsApp, email, etc.
+- **Android nativo** (Expo Go): `expo-print` com `width: 794, height: 1123` → cópia para `FileSystem.cacheDirectory` com nome legível → `expo-sharing`
+- **Web/PWA (Android Chrome, iOS Safari)**: Web Share API (`navigator.share({ files: [htmlFile] })`) → abre menu nativo do sistema com WhatsApp, Gmail, Drive, etc. Fallback: print dialog para desktop
+- **Impressão**: arquivo HTML recebido pode ser aberto no navegador e impresso via Ctrl+P / menu do browser — CSS `@media print` garante formatação A4 correta
+- **CSS paginação**: `break-inside: avoid` + `page-break-inside: avoid` para compatibilidade WebKit e Chromium/Android
+- **Target rendering**: `android` | `webkit` | `browser` — CSS e margens ajustados por plataforma
+- **Dependência**: `expo-file-system` instalado para cópia de arquivo no Android nativo
 
 ## Planned Features (Not Yet Implemented)
 
