@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuditAnswer, calculateScore, QUESTIONS } from './audit-data';
 
+export function getActionKey(category: string, vulnerability: string): string {
+  return `${category}||${vulnerability}`;
+}
+
 export interface SavedAudit {
   id: string;
   name: string;
@@ -25,28 +29,36 @@ interface AuditContextValue {
   saveCurrentAudit: (name: string) => void;
   deleteSavedAudit: (id: string) => void;
   loadSavedAudit: (id: string) => void;
+  completedActions: Set<string>;
+  toggleAction: (key: string) => void;
 }
 
 const AuditContext = createContext<AuditContextValue | null>(null);
 
 const STORAGE_KEY = '@casa_blindada_answers';
 const SAVED_KEY = '@casa_blindada_saved';
+const COMPLETED_KEY = '@casa_blindada_completed_actions';
 
 export function AuditProvider({ children }: { children: ReactNode }) {
   const [answers, setAnswers] = useState<Record<string, AuditAnswer>>({});
   const [savedAudits, setSavedAudits] = useState<SavedAudit[]>([]);
+  const [completedActions, setCompletedActions] = useState<Set<string>>(new Set());
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     Promise.all([
       AsyncStorage.getItem(STORAGE_KEY),
       AsyncStorage.getItem(SAVED_KEY),
-    ]).then(([answersData, savedData]) => {
+      AsyncStorage.getItem(COMPLETED_KEY),
+    ]).then(([answersData, savedData, completedData]) => {
       if (answersData) {
         try { setAnswers(JSON.parse(answersData)); } catch {}
       }
       if (savedData) {
         try { setSavedAudits(JSON.parse(savedData)); } catch {}
+      }
+      if (completedData) {
+        try { setCompletedActions(new Set(JSON.parse(completedData))); } catch {}
       }
       setLoaded(true);
     });
@@ -63,6 +75,24 @@ export function AuditProvider({ children }: { children: ReactNode }) {
       AsyncStorage.setItem(SAVED_KEY, JSON.stringify(savedAudits));
     }
   }, [savedAudits, loaded]);
+
+  useEffect(() => {
+    if (loaded) {
+      AsyncStorage.setItem(COMPLETED_KEY, JSON.stringify(Array.from(completedActions)));
+    }
+  }, [completedActions, loaded]);
+
+  const toggleAction = useCallback((key: string) => {
+    setCompletedActions(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
 
   const setAnswer = useCallback((code: string, answer: string, observation?: string) => {
     setAnswers(prev => ({
@@ -134,7 +164,9 @@ export function AuditProvider({ children }: { children: ReactNode }) {
     saveCurrentAudit,
     deleteSavedAudit,
     loadSavedAudit,
-  }), [answers, score, answeredCount, totalCount, savedAudits, saveCurrentAudit, deleteSavedAudit, loadSavedAudit]);
+    completedActions,
+    toggleAction,
+  }), [answers, score, answeredCount, totalCount, savedAudits, saveCurrentAudit, deleteSavedAudit, loadSavedAudit, completedActions, toggleAction]);
 
   if (!loaded) return null;
 

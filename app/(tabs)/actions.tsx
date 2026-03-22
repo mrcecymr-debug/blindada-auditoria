@@ -5,10 +5,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { generateActionItems, ActionItem } from '@/lib/audit-data';
-import { useAudit } from '@/lib/audit-context';
+import { useAudit, getActionKey } from '@/lib/audit-context';
 import FlowNavHint from '@/components/FlowNavHint';
 import HeaderActions from '@/components/HeaderActions';
 import GuideModal from '@/components/GuideModal';
@@ -28,7 +29,17 @@ function PriorityBadge({ priority }: { priority: number }) {
   );
 }
 
-function ActionCard({ item, index }: { item: ActionItem; index: number }) {
+function ActionCard({
+  item,
+  index,
+  completed,
+  onToggle,
+}: {
+  item: ActionItem;
+  index: number;
+  completed: boolean;
+  onToggle: () => void;
+}) {
   const getCategoryIcon = (cat: string) => {
     const icons: Record<string, string> = {
       ACESSO: 'key-outline',
@@ -41,23 +52,49 @@ function ActionCard({ item, index }: { item: ActionItem; index: number }) {
     return icons[cat] || 'construct-outline';
   };
 
+  const handleToggle = () => {
+    Haptics.impactAsync(
+      completed ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium
+    );
+    onToggle();
+  };
+
   return (
     <Animated.View entering={FadeInDown.delay(index * 80).duration(400)}>
-      <View style={styles.actionCard}>
-        <View style={styles.actionHeader}>
+      <View style={[styles.actionCard, completed && styles.actionCardDone]}>
+        {completed && (
+          <View style={styles.doneBanner}>
+            <Ionicons name="checkmark-circle" size={14} color={Colors.success} />
+            <Text style={styles.doneBannerText}>Implementado</Text>
+          </View>
+        )}
+
+        <View style={[styles.actionHeader, completed && { opacity: 0.5 }]}>
           <View style={styles.actionLeft}>
-            <View style={styles.actionIconContainer}>
-              <Ionicons name={getCategoryIcon(item.category) as any} size={20} color={Colors.accent} />
+            <View style={[
+              styles.actionIconContainer,
+              completed && { backgroundColor: Colors.success + '20' },
+            ]}>
+              <Ionicons
+                name={completed ? 'checkmark-done-outline' : getCategoryIcon(item.category) as any}
+                size={20}
+                color={completed ? Colors.success : Colors.accent}
+              />
             </View>
             <View style={styles.actionTitleGroup}>
               <Text style={styles.actionCategory}>{item.category}</Text>
-              <Text style={styles.actionVulnerability}>{item.vulnerability}</Text>
+              <Text style={[
+                styles.actionVulnerability,
+                completed && styles.textStrikethrough,
+              ]}>
+                {item.vulnerability}
+              </Text>
             </View>
           </View>
-          <PriorityBadge priority={item.priority} />
+          {!completed && <PriorityBadge priority={item.priority} />}
         </View>
 
-        {item.answerText && (
+        {!completed && item.answerText && (
           <View style={styles.answerRow}>
             <Ionicons name="chatbubble-ellipses-outline" size={13} color={Colors.warning} />
             <Text style={styles.answerLabel}>{item.questionLabel}:</Text>
@@ -65,37 +102,61 @@ function ActionCard({ item, index }: { item: ActionItem; index: number }) {
           </View>
         )}
 
-        <View style={styles.actionDivider} />
+        {!completed && (
+          <>
+            <View style={styles.actionDivider} />
+            <View style={styles.actionBody}>
+              <View style={styles.actionRow}>
+                <Ionicons name="construct-outline" size={14} color={Colors.textMuted} />
+                <Text style={styles.actionRowLabel}>Solucao:</Text>
+                <Text style={styles.actionRowValue}>{item.solution}</Text>
+              </View>
+              <View style={styles.actionRow}>
+                <Ionicons name="cube-outline" size={14} color={Colors.textMuted} />
+                <Text style={styles.actionRowLabel}>Produto:</Text>
+                <Text style={styles.actionRowValue}>{item.product}</Text>
+              </View>
+            </View>
 
-        <View style={styles.actionBody}>
-          <View style={styles.actionRow}>
-            <Ionicons name="construct-outline" size={14} color={Colors.textMuted} />
-            <Text style={styles.actionRowLabel}>Solucao:</Text>
-            <Text style={styles.actionRowValue}>{item.solution}</Text>
-          </View>
-          <View style={styles.actionRow}>
-            <Ionicons name="cube-outline" size={14} color={Colors.textMuted} />
-            <Text style={styles.actionRowLabel}>Produto:</Text>
-            <Text style={styles.actionRowValue}>{item.product}</Text>
-          </View>
-        </View>
+            <View style={styles.actionFooter}>
+              <View style={styles.actionStat}>
+                <Text style={styles.actionStatLabel}>Investimento</Text>
+                <Text style={styles.actionStatValue}>{item.investment}</Text>
+              </View>
+              <View style={styles.actionStatDivider} />
+              <View style={styles.actionStat}>
+                <Text style={styles.actionStatLabel}>Instalacao</Text>
+                <Text style={styles.actionStatValue}>{item.installation}</Text>
+              </View>
+              <View style={styles.actionStatDivider} />
+              <View style={styles.actionStat}>
+                <Text style={styles.actionStatLabel}>Impacto</Text>
+                <Text style={[styles.actionStatValue, { color: Colors.success }]}>{item.impact}</Text>
+              </View>
+            </View>
+          </>
+        )}
 
-        <View style={styles.actionFooter}>
-          <View style={styles.actionStat}>
-            <Text style={styles.actionStatLabel}>Investimento</Text>
-            <Text style={styles.actionStatValue}>{item.investment}</Text>
-          </View>
-          <View style={styles.actionStatDivider} />
-          <View style={styles.actionStat}>
-            <Text style={styles.actionStatLabel}>Instalacao</Text>
-            <Text style={styles.actionStatValue}>{item.installation}</Text>
-          </View>
-          <View style={styles.actionStatDivider} />
-          <View style={styles.actionStat}>
-            <Text style={styles.actionStatLabel}>Impacto</Text>
-            <Text style={[styles.actionStatValue, { color: Colors.success }]}>{item.impact}</Text>
-          </View>
-        </View>
+        <Pressable
+          onPress={handleToggle}
+          style={({ pressed }) => [
+            styles.toggleButton,
+            completed ? styles.toggleButtonDone : styles.toggleButtonPending,
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Ionicons
+            name={completed ? 'arrow-undo-outline' : 'checkmark-circle-outline'}
+            size={16}
+            color={completed ? Colors.textMuted : Colors.success}
+          />
+          <Text style={[
+            styles.toggleButtonText,
+            completed ? styles.toggleButtonTextDone : styles.toggleButtonTextPending,
+          ]}>
+            {completed ? 'Desfazer' : 'Marcar como feito'}
+          </Text>
+        </Pressable>
       </View>
     </Animated.View>
   );
@@ -103,7 +164,7 @@ function ActionCard({ item, index }: { item: ActionItem; index: number }) {
 
 export default function ActionsScreen() {
   const insets = useSafeAreaInsets();
-  const { answers, answeredCount } = useAudit();
+  const { answers, answeredCount, completedActions, toggleAction } = useAudit();
   const scrollRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
   const [showGuide, setShowGuide] = useState(false);
@@ -126,6 +187,11 @@ export default function ActionsScreen() {
   const priority3 = actionItems.filter(i => i.priority === 3);
 
   const hasActions = actionItems.length > 0;
+
+  const completedCount = actionItems.filter(
+    i => completedActions.has(getActionKey(i.category, i.vulnerability))
+  ).length;
+  const progressPct = actionItems.length > 0 ? (completedCount / actionItems.length) * 100 : 0;
 
   return (
     <View style={styles.container}>
@@ -183,7 +249,38 @@ export default function ActionsScreen() {
         {hasActions && (
           <Animated.View entering={FadeInDown.duration(400)}>
             <View style={styles.investmentCard}>
-              <Text style={styles.investmentTitle}>Resumo de Acoes</Text>
+              <View style={styles.progressHeader}>
+                <Text style={styles.investmentTitle}>Resumo de Acoes</Text>
+                <View style={styles.progressBadge}>
+                  <Text style={styles.progressBadgeText}>
+                    {completedCount}/{actionItems.length} concluidas
+                  </Text>
+                </View>
+              </View>
+
+              {actionItems.length > 0 && (
+                <View style={styles.progressBarTrack}>
+                  <Animated.View
+                    style={[
+                      styles.progressBarFill,
+                      {
+                        width: `${progressPct}%` as any,
+                        backgroundColor: progressPct === 100 ? Colors.success : Colors.accent,
+                      },
+                    ]}
+                  />
+                </View>
+              )}
+
+              {progressPct === 100 && completedCount > 0 && (
+                <Animated.View entering={FadeIn.duration(400)}>
+                  <View style={styles.allDoneBanner}>
+                    <Ionicons name="trophy-outline" size={18} color="#D4AF37" />
+                    <Text style={styles.allDoneText}>Todas as acoes foram implementadas!</Text>
+                  </View>
+                </Animated.View>
+              )}
+
               <Pressable
                 style={({ pressed }) => [styles.investmentRow, styles.investmentRowBtn, pressed && { opacity: 0.6 }]}
                 onPress={() => scrollToSection('p1')}
@@ -233,9 +330,18 @@ export default function ActionsScreen() {
               <View style={[styles.sectionDot, { backgroundColor: Colors.danger }]} />
               <Text style={styles.sectionTitle}>Prioridade 1 - Implementar em 7 dias</Text>
             </View>
-            {priority1.map((item, idx) => (
-              <ActionCard key={`p1-${idx}`} item={item} index={idx} />
-            ))}
+            {priority1.map((item, idx) => {
+              const key = getActionKey(item.category, item.vulnerability);
+              return (
+                <ActionCard
+                  key={`p1-${idx}`}
+                  item={item}
+                  index={idx}
+                  completed={completedActions.has(key)}
+                  onToggle={() => toggleAction(key)}
+                />
+              );
+            })}
           </View>
         )}
 
@@ -248,9 +354,18 @@ export default function ActionsScreen() {
               <View style={[styles.sectionDot, { backgroundColor: Colors.warning }]} />
               <Text style={styles.sectionTitle}>Prioridade 2 - Implementar em 30 dias</Text>
             </View>
-            {priority2.map((item, idx) => (
-              <ActionCard key={`p2-${idx}`} item={item} index={idx + priority1.length} />
-            ))}
+            {priority2.map((item, idx) => {
+              const key = getActionKey(item.category, item.vulnerability);
+              return (
+                <ActionCard
+                  key={`p2-${idx}`}
+                  item={item}
+                  index={idx + priority1.length}
+                  completed={completedActions.has(key)}
+                  onToggle={() => toggleAction(key)}
+                />
+              );
+            })}
           </View>
         )}
 
@@ -263,9 +378,18 @@ export default function ActionsScreen() {
               <View style={[styles.sectionDot, { backgroundColor: Colors.info }]} />
               <Text style={styles.sectionTitle}>Prioridade 3 - Implementar em 90 dias</Text>
             </View>
-            {priority3.map((item, idx) => (
-              <ActionCard key={`p3-${idx}`} item={item} index={idx + priority1.length + priority2.length} />
-            ))}
+            {priority3.map((item, idx) => {
+              const key = getActionKey(item.category, item.vulnerability);
+              return (
+                <ActionCard
+                  key={`p3-${idx}`}
+                  item={item}
+                  index={idx + priority1.length + priority2.length}
+                  completed={completedActions.has(key)}
+                  onToggle={() => toggleAction(key)}
+                />
+              );
+            })}
           </View>
         )}
 
@@ -342,7 +466,49 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     gap: 12,
   },
-  investmentTitle: { fontSize: 16, fontWeight: '700' as const, color: Colors.text, marginBottom: 4 },
+  progressHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  investmentTitle: { fontSize: 16, fontWeight: '700' as const, color: Colors.text },
+  progressBadge: {
+    backgroundColor: Colors.accent + '18',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  progressBadgeText: {
+    fontSize: 12,
+    fontWeight: '700' as const,
+    color: Colors.accent,
+  },
+  progressBarTrack: {
+    height: 6,
+    backgroundColor: Colors.border,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  allDoneBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#D4AF3715',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#D4AF3730',
+  },
+  allDoneText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: '#D4AF37',
+  },
   investmentRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -376,6 +542,28 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: Colors.border,
+    gap: 0,
+  },
+  actionCardDone: {
+    borderColor: Colors.success + '40',
+    backgroundColor: Colors.success + '08',
+  },
+  doneBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 10,
+    backgroundColor: Colors.success + '15',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    alignSelf: 'flex-start',
+  },
+  doneBannerText: {
+    fontSize: 11,
+    fontWeight: '700' as const,
+    color: Colors.success,
+    letterSpacing: 0.5,
   },
   actionHeader: {
     flexDirection: 'row',
@@ -391,6 +579,10 @@ const styles = StyleSheet.create({
   actionTitleGroup: { flex: 1 },
   actionCategory: { fontSize: 11, color: Colors.textMuted, fontWeight: '600' as const },
   actionVulnerability: { fontSize: 15, fontWeight: '600' as const, color: Colors.text, marginTop: 2 },
+  textStrikethrough: {
+    textDecorationLine: 'line-through',
+    color: Colors.textMuted,
+  },
   answerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -438,4 +630,32 @@ const styles = StyleSheet.create({
   },
   actionStatLabel: { fontSize: 10, color: Colors.textMuted, marginBottom: 4 },
   actionStatValue: { fontSize: 13, fontWeight: '700' as const, color: Colors.text },
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  toggleButtonPending: {
+    backgroundColor: Colors.success + '12',
+    borderColor: Colors.success + '40',
+  },
+  toggleButtonDone: {
+    backgroundColor: Colors.card,
+    borderColor: Colors.border,
+  },
+  toggleButtonText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+  },
+  toggleButtonTextPending: {
+    color: Colors.success,
+  },
+  toggleButtonTextDone: {
+    color: Colors.textMuted,
+  },
 });
