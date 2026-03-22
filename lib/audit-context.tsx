@@ -83,26 +83,27 @@ export function AuditProvider({ children }: { children: ReactNode }) {
   }, [completedActions, loaded]);
 
   const toggleAction = useCallback((key: string, questionCode?: string, targetAnswer?: string) => {
+    const wasCompleted = completedActions.has(key);
     setCompletedActions(prev => {
       const next = new Set(prev);
       if (next.has(key)) {
         next.delete(key);
       } else {
         next.add(key);
-        if (questionCode && targetAnswer) {
-          setAnswers(ans => ({
-            ...ans,
-            [questionCode]: {
-              code: questionCode,
-              answer: targetAnswer,
-              observation: ans[questionCode]?.observation ?? '',
-            },
-          }));
-        }
       }
       return next;
     });
-  }, []);
+    if (!wasCompleted && questionCode && targetAnswer) {
+      setAnswers(prev => ({
+        ...prev,
+        [questionCode]: {
+          code: questionCode,
+          answer: targetAnswer,
+          observation: prev[questionCode]?.observation ?? '',
+        },
+      }));
+    }
+  }, [completedActions]);
 
   const setAnswer = useCallback((code: string, answer: string, observation?: string) => {
     setAnswers(prev => ({
