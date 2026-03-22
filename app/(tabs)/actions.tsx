@@ -38,7 +38,7 @@ function ActionCard({
   item: ActionItem;
   index: number;
   completed: boolean;
-  onToggle: () => void;
+  onToggle: (questionCode?: string, targetAnswer?: string) => void;
 }) {
   const getCategoryIcon = (cat: string) => {
     const icons: Record<string, string> = {
@@ -56,7 +56,7 @@ function ActionCard({
     Haptics.impactAsync(
       completed ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium
     );
-    onToggle();
+    onToggle(item.questionCode, item.targetAnswer);
   };
 
   return (
@@ -99,6 +99,14 @@ function ActionCard({
             <Ionicons name="chatbubble-ellipses-outline" size={13} color={Colors.warning} />
             <Text style={styles.answerLabel}>{item.questionLabel}:</Text>
             <Text style={styles.answerValue}>{item.answerText}</Text>
+          </View>
+        )}
+
+        {!completed && item.targetAnswer && (
+          <View style={styles.targetRow}>
+            <Ionicons name="arrow-up-circle-outline" size={13} color={Colors.accent} />
+            <Text style={styles.targetLabel}>Meta no diagnostico:</Text>
+            <Text style={styles.targetValue}>{item.targetAnswer}</Text>
           </View>
         )}
 
@@ -338,7 +346,7 @@ export default function ActionsScreen() {
                   item={item}
                   index={idx}
                   completed={completedActions.has(key)}
-                  onToggle={() => toggleAction(key)}
+                  onToggle={(qCode, tAnswer) => toggleAction(key, qCode, tAnswer)}
                 />
               );
             })}
@@ -362,7 +370,7 @@ export default function ActionsScreen() {
                   item={item}
                   index={idx + priority1.length}
                   completed={completedActions.has(key)}
-                  onToggle={() => toggleAction(key)}
+                  onToggle={(qCode, tAnswer) => toggleAction(key, qCode, tAnswer)}
                 />
               );
             })}
@@ -386,7 +394,7 @@ export default function ActionsScreen() {
                   item={item}
                   index={idx + priority1.length + priority2.length}
                   completed={completedActions.has(key)}
-                  onToggle={() => toggleAction(key)}
+                  onToggle={(qCode, tAnswer) => toggleAction(key, qCode, tAnswer)}
                 />
               );
             })}
@@ -595,6 +603,18 @@ const styles = StyleSheet.create({
   },
   answerLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '500' as const },
   answerValue: { fontSize: 12, color: Colors.warning, fontWeight: '600' as const, flex: 1 },
+  targetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+    backgroundColor: Colors.accent + '10',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  targetLabel: { fontSize: 11, color: Colors.textMuted, fontWeight: '500' as const },
+  targetValue: { fontSize: 12, color: Colors.accent, fontWeight: '700' as const, flex: 1 },
   priorityBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,

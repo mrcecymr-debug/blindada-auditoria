@@ -30,7 +30,7 @@ interface AuditContextValue {
   deleteSavedAudit: (id: string) => void;
   loadSavedAudit: (id: string) => void;
   completedActions: Set<string>;
-  toggleAction: (key: string) => void;
+  toggleAction: (key: string, questionCode?: string, targetAnswer?: string) => void;
 }
 
 const AuditContext = createContext<AuditContextValue | null>(null);
@@ -82,13 +82,23 @@ export function AuditProvider({ children }: { children: ReactNode }) {
     }
   }, [completedActions, loaded]);
 
-  const toggleAction = useCallback((key: string) => {
+  const toggleAction = useCallback((key: string, questionCode?: string, targetAnswer?: string) => {
     setCompletedActions(prev => {
       const next = new Set(prev);
       if (next.has(key)) {
         next.delete(key);
       } else {
         next.add(key);
+        if (questionCode && targetAnswer) {
+          setAnswers(ans => ({
+            ...ans,
+            [questionCode]: {
+              code: questionCode,
+              answer: targetAnswer,
+              observation: ans[questionCode]?.observation ?? '',
+            },
+          }));
+        }
       }
       return next;
     });

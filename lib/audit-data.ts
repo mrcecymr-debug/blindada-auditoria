@@ -25,6 +25,8 @@ export interface ActionItem {
   impact: string;
   questionLabel?: string;
   answerText?: string;
+  questionCode?: string;
+  targetAnswer?: string;
 }
 
 export interface CategoryScore {
@@ -1036,7 +1038,7 @@ function getAnswerScore(questionCode: string, answer: string): number {
   return question.inverted ? 1 - rawScore : rawScore;
 }
 
-function getDynamicRecommendation(questionCode: string, answerText: string): { priority: number; solution: string; product: string; investment: string; installation: string } | null {
+function getDynamicRecommendation(questionCode: string, answerText: string): { priority: number; solution: string; product: string; investment: string; installation: string; targetAnswer?: string } | null {
   const upgrade = UPGRADE_MAP[questionCode];
   if (!upgrade) return null;
 
@@ -1046,14 +1048,37 @@ function getDynamicRecommendation(questionCode: string, answerText: string): { p
   const answerIndex = question.options.indexOf(answerText);
   if (answerIndex < 0) return null;
 
+  const getTargetAnswer = (tierMaxIndex: number): string | undefined => {
+    if (question.inverted) return undefined;
+    const targetIndex = tierMaxIndex + 1;
+    if (targetIndex >= question.options.length) return undefined;
+    const candidate = question.options[targetIndex];
+    if (candidate === 'Outro (especificar)') return undefined;
+    return candidate;
+  };
+
   for (const tier of upgrade.tiers) {
     if (answerIndex <= tier.maxIndex) {
-      return { priority: tier.priority, solution: tier.solution, product: tier.product, investment: tier.investment, installation: tier.installation };
+      return {
+        priority: tier.priority,
+        solution: tier.solution,
+        product: tier.product,
+        investment: tier.investment,
+        installation: tier.installation,
+        targetAnswer: getTargetAnswer(tier.maxIndex),
+      };
     }
   }
 
   const lastTier = upgrade.tiers[upgrade.tiers.length - 1];
-  return { priority: lastTier.priority, solution: lastTier.solution, product: lastTier.product, investment: lastTier.investment, installation: lastTier.installation };
+  return {
+    priority: lastTier.priority,
+    solution: lastTier.solution,
+    product: lastTier.product,
+    investment: lastTier.investment,
+    installation: lastTier.installation,
+    targetAnswer: getTargetAnswer(lastTier.maxIndex),
+  };
 }
 
 export function generateActionItems(answers: Record<string, AuditAnswer>): ActionItem[] {
@@ -1080,6 +1105,8 @@ export function generateActionItems(answers: Record<string, AuditAnswer>): Actio
         installation: dynamic?.installation || rule.item.installation,
         questionLabel: question?.question ?? '',
         answerText: answer.answer,
+        questionCode: rule.questionCode,
+        targetAnswer: dynamic?.targetAnswer,
       });
     }
   }
