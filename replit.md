@@ -85,6 +85,22 @@ Preferred communication style: Simple, everyday language. Portuguese (Brazilian)
 5. **Dual deployment**: Vercel for production (serverless + static), Replit for development
 6. **Painel button**: Only appears after all 32 questions are answered (32/32)
 
+### ⚠️ Princípio Fundamental de Coerência — NUNCA VIOLAR
+
+**O sistema inteiro deve ser sempre 100% coerente entre si.** As quatro abas formam um único organismo integrado:
+
+- **Diagnóstico** → as respostas são a única fonte de verdade (`answers` no AuditContext)
+- **Painel** → reflete o score calculado em tempo real a partir das respostas (`calculateScore(answers)`)
+- **Ações** → geradas dinamicamente a partir das respostas (`generateActionItems(answers)`). Cada ação propõe como meta uma **opção real existente no próprio questionário** (não texto genérico inventado separadamente). Ao marcar uma ação como feita, o diagnóstico da pergunta correspondente é atualizado automaticamente para o nível-meta
+- **Relatório** → consolidação final de tudo acima
+
+**Regras invioláveis:**
+- Qualquer melhoria sugerida nas Ações DEVE corresponder a uma opção existente no `QUESTIONS[x].options` do Diagnóstico
+- Ao marcar uma ação como feita, o `answers[questionCode]` DEVE ser atualizado para o `targetAnswer` correspondente
+- O score no Painel DEVE sempre refletir o estado atual de `answers`, sem cache ou valor fixo
+- Nunca criar texto de solução nas Ações que não tenha correspondência no Diagnóstico
+- `calculateScore()` em `lib/audit-data.ts` é a ÚNICA fonte de verdade para pontuação — nunca calcular score em outro lugar
+
 ### Build & Development
 
 - **Development**: Two processes — `expo:dev` (port 8081) + `server:dev` (port 5000)
