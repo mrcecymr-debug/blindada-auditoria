@@ -5,8 +5,9 @@ import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Colors from "@/constants/colors";
+import WelcomeModal from "@/components/WelcomeModal";
 
 function NativeTabLayout() {
   return (
@@ -105,8 +106,17 @@ function ClassicTabLayout() {
 }
 
 export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWelcome(true), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <>
+      {isLiquidGlassAvailable() ? <NativeTabLayout /> : <ClassicTabLayout />}
+      <WelcomeModal visible={showWelcome} onClose={() => setShowWelcome(false)} />
+    </>
+  );
 }
