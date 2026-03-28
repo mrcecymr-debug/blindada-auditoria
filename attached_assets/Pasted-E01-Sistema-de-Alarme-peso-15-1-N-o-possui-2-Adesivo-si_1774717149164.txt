@@ -1,0 +1,111 @@
+E01 — Sistema de Alarme (peso 15)
+
+1.	Não possui 
+2.	Adesivo/simulador 
+3.	Alarme local simples (ex: Intelbras ANM 2003) 
+4.	Alarme com discadora (ex: Intelbras ANM 3004 ST) 
+5.	Monitorado 24h (empresa terceira) 
+6.	Monitorado + resposta armada 
+7.	Smart DIY (ex: Intelbras Izy Smart) 
+8.	Smart com app (ex: JFL Active Full app mobile) 
+9.	Smart com IA (ex: Hikvision AX PRO) 
+10.	Híbrido local + monitorado (ex: Intelbras AMT 8000)  
+11.	Múltiplas centrais integradas (casas grandes) 
+12.	Integrado com cerca elétrica (JFL/Intelbras) 
+13.	Com botão de pânico integrado 
+14.	Sistema com redundância + backup 4G + IA avançada (nível alto padrão) 
+ E02 — Sensores de abertura (peso 8)
+1.	Nenhum 
+2.	1 sensor básico  
+3.	2–3 sensores 
+4.	Apenas portas 
+5.	Apenas janelas 
+6.	Portas + janelas principais  
+7.	Portas + janelas + basculantes 
+8.	Sistema com fio (mais estável) 
+9.	Wireless supervisionado (ex: Intelbras XAS / Hikvision AX)  
+10.	Sensores inteligentes com alerta no app + automação 
+E03 — Sensores de movimento (peso 7)
+
+ 
+1.	Nenhum 
+2.	1 sensor simples 
+3.	2–3 sensores 
+4.	PIR pet até 15kg 
+5.	PIR pet até 25kg (ex: Intelbras IVP 3000 PET) 
+6.	Micro-ondas (MW) 
+7.	Dupla tecnologia PIR + MW 
+8.	Sensor tipo cortina (portas/janelas) 
+9.	Sensor com câmera integrada (Hikvision AX PRO) 
+10.	Sensor inteligente com IA (redução de falso alarme) 
+E04 — Câmeras CFTV (peso 8)
+
+ 
+
+1.	Nenhuma 
+2.	1 câmera básica 
+3.	2 câmeras (frente/fundos) 
+4.	Cobertura frente + fundos 
+5.	Perímetro completo (4–8 câmeras) 
+6.	Perímetro + interior 
+7.	Reconhecimento facial (IA) 
+8.	Leitura de placas (LPR) 
+9.	Câmeras PTZ (speed dome) 
+10.	Sistema inteligente com IA ativa (ex: linha Intelbras VIP 3230 IA) 
+E05 — Qualidade de gravação (peso 4)
+
+
+1.	N/A 
+2.	Analógico SD 
+3.	HD 720p 
+4.	Full HD 1080p (padrão atual) 
+5.	2K QHD 
+6.	4K UHD (topo atual) 
+7.	Visão noturna até 20m 
+8.	Visão noturna 40m+ 
+9.	Visão colorida noturna (ColorVu / Full Color) 
+10.	WDR 
+11.	HDR 
+12.	IA + imagem otimizada automática 
+E06 — Armazenamento CFTV (peso 3)
+
+ 
+
+1.	N/A 
+2.	Sem gravação 
+3.	Cartão SD 
+4.	DVR 7 dias 
+5.	DVR 30 dias 
+6.	NVR IP (ex: Intelbras INVD com IA) 
+7.	Cloud 7 dias 
+8.	Cloud 30 dias 
+9.	Cloud 90+ dias 
+10.	Híbrido (local + nuvem) 
+11.	Gravação por movimento 
+12.	Gravação contínua 24/7 
+13.	Redundância (RAID / backup automático) 
+14.	Sistema corporativo com failover 
+E07 — Botão de pânico (peso 5)
+
+  
+1.	Não possui 
+2.	Fixo (1 ponto)  
+3.	Fixo múltiplos pontos 
+4.	Portátil (controle/chaveiro) 
+5.	Pelo celular (app) 
+6.	Integrado à central 
+7.	Botão oculto estratégico 
+8.	Por voz (Alexa/Google) 
+9.	Sistema com acionamento automático por IA (queda/invasão) 
+E08 — Automação residencial (peso 6)
+
+
+
+1.	Nenhuma 
+2.	Lâmpadas smart 
+3.	Central básica (ex: Intelbras Izy) 
+4.	Cenas automatizadas (rotinas) 
+5.	Geofencing (ativa/desativa sozinho) 
+6.	Automação com IA (aprende hábitos) 
+7.	Controle total por voz (Alexa/Google) 
+8.	Casa inteligente integrada com segurança (nível premium) 
