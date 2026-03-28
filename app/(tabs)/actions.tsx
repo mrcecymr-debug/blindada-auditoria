@@ -280,21 +280,21 @@ function CelebrationModal({
                   </Text>
                 </Pressable>
               ) : (
-                <Animated.View entering={ZoomIn.duration(300)} style={celebStyles.savedConfirm}>
-                  <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
-                  <Text style={celebStyles.savedConfirmText}>Relatorio salvo com sucesso!</Text>
-                </Animated.View>
-              )}
+                <>
+                  <Animated.View entering={ZoomIn.duration(300)} style={celebStyles.savedConfirm}>
+                    <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                    <Text style={celebStyles.savedConfirmText}>Relatorio salvo com sucesso!</Text>
+                  </Animated.View>
 
-              <Pressable
-                onPress={handleNext}
-                style={({ pressed }) => [celebStyles.btnSecondary, pressed && { opacity: 0.7 }]}
-              >
-                <Text style={celebStyles.btnSecondaryText}>
-                  {saved ? 'O que vem a seguir' : 'Pular esta etapa'}
-                </Text>
-                <Ionicons name="arrow-forward-outline" size={16} color={Colors.accent} />
-              </Pressable>
+                  <Pressable
+                    onPress={handleNext}
+                    style={({ pressed }) => [celebStyles.btnSecondary, pressed && { opacity: 0.7 }]}
+                  >
+                    <Text style={celebStyles.btnSecondaryText}>O que vem a seguir</Text>
+                    <Ionicons name="arrow-forward-outline" size={16} color={Colors.accent} />
+                  </Pressable>
+                </>
+              )}
 
               <Pressable onPress={onClose} style={celebStyles.closeBtn}>
                 <Text style={celebStyles.closeBtnText}>Fechar</Text>
