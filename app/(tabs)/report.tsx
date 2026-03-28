@@ -843,7 +843,7 @@ export default function ReportScreen() {
       <ConfirmModal
         visible={showClearConfirm}
         title="Limpar Diagnostico Atual"
-        message="Deseja apagar todas as respostas do formulario atual? Os diagnosticos salvos nao serao afetados."
+        message={"Isso apagara permanentemente:\n\n• Todas as 32 respostas do formulario\n• Todas as acoes marcadas como feitas\n\nOs diagnosticos salvos nao serao afetados."}
         confirmText="Limpar"
         confirmColor={Colors.warning}
         onConfirm={() => {
@@ -1049,8 +1049,8 @@ const styles = StyleSheet.create({
   confirmTitle: { fontSize: 18, fontWeight: '700' as const, color: Colors.text, marginTop: 12 },
   confirmMessage: {
     fontSize: 14, color: Colors.textSecondary,
-    textAlign: 'center', marginTop: 8, marginBottom: 20,
-    lineHeight: 20,
+    textAlign: 'left', marginTop: 8, marginBottom: 20,
+    lineHeight: 22,
   },
   confirmButtons: {
     flexDirection: 'row',
