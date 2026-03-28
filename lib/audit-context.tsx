@@ -129,7 +129,9 @@ export function AuditProvider({ children }: { children: ReactNode }) {
 
   const clearAll = useCallback(() => {
     setAnswers({});
+    setCompletedActions(new Set());
     AsyncStorage.removeItem(STORAGE_KEY);
+    AsyncStorage.removeItem(COMPLETED_KEY);
   }, []);
 
   const score = useMemo(() => calculateScore(answers), [answers]);
