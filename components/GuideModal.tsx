@@ -13,6 +13,7 @@ type GuideItem = {
   title: string;
   description: string;
   highlight?: boolean;
+  color?: string;
 };
 
 type GuideSection = {
@@ -24,61 +25,89 @@ type GuideSection = {
 
 const GUIDE_SECTIONS: GuideSection[] = [
   {
-    sectionTitle: 'Fluxo da Auditoria',
+    sectionTitle: 'Como Usar o App',
     sectionIcon: 'navigate-outline',
     sectionColor: Colors.accent,
     items: [
       {
         icon: 'clipboard-outline',
-        title: 'Passo 1 - Diagnostico',
-        description: 'Responda as perguntas de cada categoria de seguranca. Toque na categoria para expandir e selecione a opcao que melhor descreve seu imovel. Quanto mais perguntas responder, mais precisa sera a analise.',
+        title: 'Passo 1 — Diagnostico',
+        description: 'Responda as 32 perguntas distribuidas em 5 categorias de seguranca. Para cada pergunta, escolha a opcao que melhor descreve a situacao atual do seu imovel. Use o campo de observacao para anotar detalhes.',
       },
       {
         icon: 'bar-chart-outline',
-        title: 'Passo 2 - Painel',
-        description: 'Acompanhe sua pontuacao geral e por categoria no painel. O grafico mostra os pontos fortes e fracos da seguranca do seu imovel em tempo real conforme voce responde.',
+        title: 'Passo 2 — Painel',
+        description: 'Apos responder todas as 32 perguntas, o botao do Painel fica disponivel. Ali voce ve a pontuacao geral de seguranca e os resultados por categoria, atualizados em tempo real.',
       },
       {
         icon: 'shield-checkmark-outline',
-        title: 'Passo 3 - Acoes',
-        description: 'Consulte as acoes recomendadas geradas automaticamente com base nas suas respostas. Cada acao inclui prioridade, produto sugerido, estimativa de investimento e tipo de instalacao.',
+        title: 'Passo 3 — Plano de Acao',
+        description: 'O app gera automaticamente uma lista de melhorias com prioridade, produto sugerido, custo estimado e impacto na pontuacao. Implemente cada melhoria e marque como feito.',
       },
       {
         icon: 'document-text-outline',
-        title: 'Passo 4 - Relatorio',
-        description: 'Salve o diagnostico para criar um relatorio completo. Voce pode baixar o PDF da auditoria ou do plano de acao, e compartilhar via WhatsApp ou outras plataformas.',
+        title: 'Passo 4 — Relatorio',
+        description: 'Salve o diagnostico com um nome e gere um PDF profissional completo. Compartilhe via WhatsApp, e-mail ou imprima. Com 2 ou mais relatorios, aparece um grafico de evolucao da pontuacao.',
       },
     ],
   },
   {
-    sectionTitle: 'Categorias de Seguranca',
+    sectionTitle: 'Ciclo de Evolucao',
+    sectionIcon: 'refresh-circle-outline',
+    sectionColor: '#D4AF37',
+    items: [
+      {
+        icon: 'checkmark-circle-outline',
+        title: 'Marcar Acao como Feita',
+        description: 'Ao marcar uma acao como implementada, o diagnostico dessa pergunta e atualizado automaticamente para o nivel-meta. O score sobe instantaneamente no Painel.',
+      },
+      {
+        icon: 'trophy-outline',
+        title: 'Missao Cumprida',
+        description: 'Quando voce implementa TODAS as melhorias do plano, o app exibe uma celebracao com sua pontuacao final. E a hora de salvar o relatorio desta fase antes de avancar.',
+        highlight: true,
+      },
+      {
+        icon: 'rocket-outline',
+        title: 'Nova Fase',
+        description: 'Apos salvar, inicie uma nova avaliacao completa. Com o imovel melhorado, suas respostas serao diferentes — um novo conjunto de melhorias mais refinadas sera gerado para atingir o nivel maximo.',
+      },
+      {
+        icon: 'trending-up-outline',
+        title: 'Acompanhe a Evolucao',
+        description: 'Cada fase salva vira um ponto no grafico de evolucao na aba Relatorio. Voce visualiza de forma clara o quanto seu lar evoluiu entre as fases.',
+      },
+    ],
+  },
+  {
+    sectionTitle: 'Categorias Avaliadas',
     sectionIcon: 'layers-outline',
     sectionColor: '#4D96FF',
     items: [
       {
         icon: 'home-outline',
         title: 'Perimetro e Estrutura',
-        description: 'Avalia muros, cercas, portoes, grades e a integridade fisica do imovel. Pontos de entrada e barreiras externas.',
+        description: 'Muros, cercas, portoes, grades, altura das barreiras e integridade fisica dos pontos de entrada e acesso externo.',
       },
       {
         icon: 'sunny-outline',
         title: 'Iluminacao e Visibilidade',
-        description: 'Verifica iluminacao externa, sensores de presenca, pontos cegos e visibilidade do imovel a partir da rua.',
+        description: 'Iluminacao externa, sensores de presenca, cobertura de pontos cegos e visibilidade do imovel a partir da rua.',
       },
       {
         icon: 'key-outline',
         title: 'Controle de Acesso',
-        description: 'Analisa fechaduras, portoes automatizados, controle de chaves e acesso de pessoas ao imovel.',
+        description: 'Fechaduras, portoes automatizados, controle de chaves, interfone e gerenciamento do acesso de pessoas.',
       },
       {
         icon: 'videocam-outline',
         title: 'Sistemas Eletronicos',
-        description: 'Cameras, alarmes, sensores, central de monitoramento e integracao de sistemas de seguranca eletronicos.',
+        description: 'Cameras de seguranca, alarmes, sensores de movimento, monitoramento 24h e integracao de sistemas eletronicos.',
       },
       {
         icon: 'people-outline',
-        title: 'Fatores Humanos e Automacao',
-        description: 'Rotinas de seguranca, treinamento de moradores, automacao residencial e procedimentos de emergencia.',
+        title: 'Fatores Humanos',
+        description: 'Rotinas de seguranca, consciencia dos moradores, automacao residencial, procedimentos de emergencia e historico da regiao.',
       },
     ],
   },
@@ -89,45 +118,45 @@ const GUIDE_SECTIONS: GuideSection[] = [
     items: [
       {
         icon: 'pie-chart-outline',
-        title: 'Pontuacao Geral',
-        description: 'O medidor circular mostra a porcentagem de seguranca do imovel (0-100%). A cor muda de vermelho (critico) a verde (excelente) conforme a pontuacao.',
+        title: 'Pontuacao Geral (0 a 100%)',
+        description: 'O medidor circular exibe o nivel geral de seguranca. Abaixo de 40% e Critico (vermelho), entre 40-69% e Atencao (laranja/amarelo), acima de 70% e Bom (verde).',
       },
       {
         icon: 'stats-chart-outline',
         title: 'Analise por Categoria',
-        description: 'Barras de progresso horizontais mostram a saude de cada area. Identifique rapidamente quais categorias precisam de mais atencao.',
+        description: 'Barras de progresso mostram o desempenho em cada uma das 5 categorias. Identifique rapidamente quais areas precisam de mais atencao.',
       },
       {
-        icon: 'refresh-outline',
-        title: 'Atualizacao em Tempo Real',
-        description: 'O painel atualiza automaticamente conforme voce muda as respostas na aba Diagnostico. Nenhuma acao adicional necessaria.',
+        icon: 'lock-open-outline',
+        title: 'Disponivel apos 32/32',
+        description: 'O botao para acessar o Painel so aparece quando todas as 32 perguntas forem respondidas. Isso garante que o score e os dados sejam completos e precisos.',
       },
     ],
   },
   {
-    sectionTitle: 'Plano de Acao',
-    sectionIcon: 'rocket-outline',
+    sectionTitle: 'Plano de Acao — Detalhes',
+    sectionIcon: 'construct-outline',
     sectionColor: Colors.warning,
     items: [
       {
         icon: 'alert-circle-outline',
-        title: 'Prioridade 1 - Critico',
-        description: 'Acoes urgentes que devem ser implementadas em ate 7 dias. Vulnerabilidades graves que representam risco imediato.',
+        title: 'Prioridade 1 — Critico (7 dias)',
+        description: 'Vulnerabilidades graves que representam risco imediato. Devem ser resolvidas com urgencia.',
       },
       {
         icon: 'warning-outline',
-        title: 'Prioridade 2 - Importante',
-        description: 'Melhorias importantes para implementar em ate 30 dias. Corrigem falhas significativas na seguranca.',
+        title: 'Prioridade 2 — Importante (30 dias)',
+        description: 'Falhas significativas que comprometem a seguranca do imovel. Planeje e execute dentro de 1 mes.',
       },
       {
         icon: 'construct-outline',
-        title: 'Prioridade 3 - Melhoria',
-        description: 'Aprimoramentos para implementar em ate 90 dias. Elevam o nivel geral de protecao do imovel.',
+        title: 'Prioridade 3 — Melhoria (90 dias)',
+        description: 'Aprimoramentos que elevam o nivel geral de protecao. Podem ser feitos de forma gradual em ate 3 meses.',
       },
       {
         icon: 'pricetag-outline',
-        title: 'Detalhes de Cada Acao',
-        description: 'Cada acao recomendada inclui: produto sugerido, estimativa de investimento (R$), tipo de instalacao (DIY ou profissional) e impacto na pontuacao.',
+        title: 'O que cada acao inclui',
+        description: 'Vulnerabilidade identificada, meta de melhoria no diagnostico, produto sugerido, solucao tecnica, investimento estimado e se e instalacao DIY ou profissional.',
       },
     ],
   },
@@ -138,63 +167,78 @@ const GUIDE_SECTIONS: GuideSection[] = [
     items: [
       {
         icon: 'save-outline',
-        title: 'Salvar Auditoria',
-        description: 'Na aba Relatorio, toque em "Salvar Diagnostico Atual" para guardar o estado atual. De um nome unico para cada auditoria.',
+        title: 'Salvar Diagnostico',
+        description: 'Na aba Relatorio, toque em "Salvar Diagnostico Atual". Escolha um nome descritivo (ex: "Fase 1" ou "Antes das melhorias"). O historico de auditorias salvas aparece logo abaixo.',
       },
       {
         icon: 'document-attach-outline',
         title: 'Gerar PDF Profissional',
-        description: 'Abra um relatorio salvo e toque no botao PDF no topo. O relatorio inclui resumo executivo, analise por categoria, vulnerabilidades, cronograma e plano de acao completo.',
+        description: 'Abra um relatorio salvo e toque no botao PDF. O documento inclui: resumo executivo, pontuacao por categoria, lista de vulnerabilidades, cronograma de acoes e plano completo.',
       },
       {
         icon: 'share-social-outline',
         title: 'Compartilhar',
-        description: 'Apos gerar o PDF, compartilhe diretamente via WhatsApp, e-mail ou qualquer outro aplicativo instalado no seu dispositivo.',
+        description: 'Apos gerar o PDF, compartilhe via WhatsApp, e-mail, Drive ou qualquer app instalado no dispositivo. No computador, o PDF pode ser impresso em A4.',
       },
       {
         icon: 'trending-up-outline',
-        title: 'Evolucao do Lar',
-        description: 'Com 2 ou mais auditorias salvas, um grafico de evolucao aparece mostrando como a pontuacao mudou ao longo do tempo. Acompanhe o progresso das melhorias.',
+        title: 'Grafico de Evolucao',
+        description: 'Com 2 ou mais relatorios salvos, aparece automaticamente um grafico mostrando como a pontuacao evoluiu entre as fases. Tangibiliza o progresso das melhorias.',
       },
       {
         icon: 'trash-outline',
-        title: 'Gerenciar Relatorios',
-        description: 'Na lista de relatorios salvos, deslize para a esquerda ou toque e segure para excluir um relatorio que nao precisa mais.',
+        title: 'Excluir Relatorio',
+        description: 'Na lista de relatorios salvos, deslize o card para a esquerda para excluir. Relatorios apagados nao podem ser recuperados.',
       },
     ],
   },
   {
-    sectionTitle: 'Observacoes e Conta',
+    sectionTitle: 'Sua Conta e Dados',
     sectionIcon: 'settings-outline',
     sectionColor: Colors.textSecondary,
     items: [
       {
-        icon: 'create-outline',
-        title: 'Campo de Observacao',
-        description: 'Cada pergunta do Diagnostico possui um campo de observacao. Use para anotar detalhes do imovel, medidas, fotos de referencia ou qualquer informacao extra.',
+        icon: 'phone-portrait-outline',
+        title: 'Sessao Unica',
+        description: 'Sua conta permite apenas uma sessao ativa por vez. Ao fazer login em outro dispositivo, a sessao anterior e encerrada automaticamente por seguranca.',
+      },
+      {
+        icon: 'cloud-offline-outline',
+        title: 'Dados Locais',
+        description: 'O diagnostico atual e as acoes marcadas ficam salvos no dispositivo. Os relatorios salvos tambem ficam no aparelho. Tudo funciona sem internet.',
+      },
+      {
+        icon: 'refresh-outline',
+        title: 'Limpar Diagnostico Atual',
+        description: 'Na aba Relatorio, o botao "Limpar" apaga as respostas atuais e as acoes marcadas. Os relatorios ja salvos NAO sao afetados. Use isso para iniciar uma nova fase.',
       },
       {
         icon: 'log-out-outline',
         title: 'Sair da Conta',
-        description: 'O botao de sair fica no canto superior direito de todas as telas. Ao sair, seus dados locais sao preservados para o proximo acesso.',
-      },
-      {
-        icon: 'phone-portrait-outline',
-        title: 'Sessao Unica',
-        description: 'Sua conta permite apenas uma sessao ativa por vez. Se voce fizer login em outro dispositivo, o anterior sera desconectado automaticamente.',
+        description: 'O botao de sair fica no canto superior direito de todas as telas. Seus dados locais sao preservados — ao entrar novamente, tudo estara como antes.',
       },
     ],
   },
   {
-    sectionTitle: 'Dica Importante',
+    sectionTitle: 'Dicas Importantes',
     sectionIcon: 'bulb-outline',
     sectionColor: '#D4AF37',
     items: [
       {
         icon: 'bulb-outline',
-        title: 'Dica',
-        description: 'Voce pode alterar qualquer resposta a qualquer momento na aba Diagnostico. O painel e as acoes serao atualizados automaticamente, porem voce devera SALVAR um NOVO relatorio com um nome diferente para essas suas NOVAS alteracoes. Use o campo de observacao em cada pergunta do Diagnostico para anotar detalhes extras.',
+        title: 'Seja honesto nas respostas',
+        description: 'O valor do diagnostico depende da precisao das respostas. Escolha sempre a opcao que reflete a realidade atual — nao o que voce planeja ter futuramente.',
         highlight: true,
+      },
+      {
+        icon: 'create-outline',
+        title: 'Use o campo de observacao',
+        description: 'Cada pergunta tem um campo para anotacoes. Registre medidas, marcas de equipamentos, pendencias ou qualquer detalhe relevante que queira guardar.',
+      },
+      {
+        icon: 'save-outline',
+        title: 'Salve antes de mudar',
+        description: 'Se quiser guardar o estado atual antes de alterar respostas ou iniciar nova fase, salve um relatorio primeiro. Mudancas no diagnostico nao podem ser desfeitas.',
       },
     ],
   },
@@ -215,7 +259,7 @@ export default function GuideModal({ visible, onClose }: { visible: boolean; onC
               </View>
               <View>
                 <Text style={styles.headerTitle}>Central de Ajuda</Text>
-                <Text style={styles.headerSubtitle}>Tudo sobre o Casa Blindada</Text>
+                <Text style={styles.headerSubtitle}>Como usar o Casa Blindada MR@</Text>
               </View>
             </View>
             <Pressable onPress={onClose} hitSlop={12}>
@@ -257,7 +301,7 @@ export default function GuideModal({ visible, onClose }: { visible: boolean; onC
 
             <View style={styles.versionWrap}>
               <Text style={styles.versionText}>Casa Blindada Auditoria v3.0</Text>
-              <Text style={styles.versionText}>MR ENG - Seguranca Estrategica</Text>
+              <Text style={styles.versionText}>MR ENG — Seguranca Estrategica</Text>
             </View>
           </ScrollView>
 
@@ -284,7 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    maxHeight: '90%',
+    maxHeight: '92%',
     paddingHorizontal: 20,
   },
   handle: {
