@@ -71,7 +71,7 @@ export const QUESTIONS: AuditQuestion[] = [
   {
     code: 'P05', category: 'Perimetro e Estrutura', categoryKey: 'perimetro',
     question: 'Quantidade de janelas acessiveis do solo (<2,5m)', weight: 10,
-    options: ['0 janelas', '1 janela', '2 janelas', '3-4 janelas', '5-6 janelas', '7-10 janelas', '10+ janelas', 'Todas >2,5m', 'Outro (especificar)'],
+    options: ['0 janelas', 'Todas >2,5m', '1 janela', '2 janelas', '3-4 janelas', '5-6 janelas', '7-10 janelas', '10+ janelas', 'Outro (especificar)'],
     inverted: true,
   },
   {
@@ -209,7 +209,7 @@ export const QUESTIONS: AuditQuestion[] = [
   {
     code: 'H08', category: 'Fatores Humanos', categoryKey: 'humano',
     question: 'Indice de criminalidade do bairro/regiao', weight: 10,
-    options: ['Muito baixo <5/1000', 'Baixo 5-15/1000', 'Medio 15-30/1000', 'Alto 30-50/1000', 'Muito alto >50/1000', 'Dados indisponiveis', 'Consultado SSP', 'Outro (especificar)'],
+    options: ['Muito baixo <5/1000', 'Consultado SSP', 'Baixo 5-15/1000', 'Dados indisponiveis', 'Medio 15-30/1000', 'Alto 30-50/1000', 'Muito alto >50/1000', 'Outro (especificar)'],
     inverted: true,
   },
 ];
@@ -1039,8 +1039,10 @@ const ACTION_RULES: ActionRule[] = [
 function getAnswerScore(questionCode: string, answer: string): number {
   const question = QUESTIONS.find(q => q.code === questionCode);
   if (!question || !answer) return 0;
-  const optionIndex = question.options.indexOf(answer);
-  const totalOptions = question.options.length;
+  if (answer === 'Outro (especificar)') return 0;
+  const effectiveOptions = question.options.filter(o => o !== 'Outro (especificar)');
+  const optionIndex = effectiveOptions.indexOf(answer);
+  const totalOptions = effectiveOptions.length;
   if (optionIndex < 0 || totalOptions <= 1) return 0;
   const rawScore = optionIndex / (totalOptions - 1);
   return question.inverted ? 1 - rawScore : rawScore;
@@ -1056,9 +1058,9 @@ function getDynamicRecommendation(questionCode: string, answerText: string): { p
   const answerIndex = question.options.indexOf(answerText);
   if (answerIndex < 0) return null;
 
-  const getTargetAnswer = (tierMaxIndex: number): string | undefined => {
+  const getTargetAnswer = (): string | undefined => {
     if (question.inverted) return undefined;
-    const targetIndex = tierMaxIndex + 1;
+    const targetIndex = answerIndex + 1;
     if (targetIndex >= question.options.length) return undefined;
     const candidate = question.options[targetIndex];
     if (candidate === 'Outro (especificar)') return undefined;
@@ -1073,7 +1075,7 @@ function getDynamicRecommendation(questionCode: string, answerText: string): { p
         product: tier.product,
         investment: tier.investment,
         installation: tier.installation,
-        targetAnswer: getTargetAnswer(tier.maxIndex),
+        targetAnswer: getTargetAnswer(),
       };
     }
   }
@@ -1085,7 +1087,7 @@ function getDynamicRecommendation(questionCode: string, answerText: string): { p
     product: lastTier.product,
     investment: lastTier.investment,
     installation: lastTier.installation,
-    targetAnswer: getTargetAnswer(lastTier.maxIndex),
+    targetAnswer: getTargetAnswer(),
   };
 }
 
@@ -1178,9 +1180,10 @@ export function calculateScore(answers: Record<string, AuditAnswer>): {
     categoryMap[q.categoryKey].max += q.weight;
 
     const answer = answers[q.code];
-    if (answer && answer.answer) {
-      const optionIndex = q.options.indexOf(answer.answer);
-      const totalOptions = q.options.length;
+    if (answer && answer.answer && answer.answer !== 'Outro (especificar)') {
+      const effectiveOptions = q.options.filter(o => o !== 'Outro (especificar)');
+      const optionIndex = effectiveOptions.indexOf(answer.answer);
+      const totalOptions = effectiveOptions.length;
       if (optionIndex >= 0 && totalOptions > 1) {
         const rawScore = optionIndex / (totalOptions - 1);
         const adjustedScore = q.inverted ? 1 - rawScore : rawScore;
