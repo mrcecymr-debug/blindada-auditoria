@@ -1,12 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
-  StyleSheet, Text, View, ScrollView, Platform, Pressable, Image,
+  StyleSheet, Text, View, ScrollView, Platform, Pressable, Image, Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeIn, ZoomIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import Colors from '@/constants/colors';
 import { generateActionItems, ActionItem } from '@/lib/audit-data';
 import { useAudit, getActionKey } from '@/lib/audit-context';
@@ -170,12 +171,218 @@ function ActionCard({
   );
 }
 
+function CelebrationModal({
+  visible,
+  scorePercentage,
+  totalActions,
+  phaseNumber,
+  onSave,
+  onNewCycle,
+  onClose,
+}: {
+  visible: boolean;
+  scorePercentage: number;
+  totalActions: number;
+  phaseNumber: number;
+  onSave: () => void;
+  onNewCycle: () => void;
+  onClose: () => void;
+}) {
+  const [step, setStep] = useState<'celebrate' | 'newcycle'>('celebrate');
+  const [saved, setSaved] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (visible) {
+      setStep('celebrate');
+      setSaved(false);
+    }
+  }, [visible]);
+
+  const handleSave = () => {
+    onSave();
+    setSaved(true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const handleNext = () => {
+    setStep('newcycle');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
+  const handleNewCycle = () => {
+    onNewCycle();
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent>
+      <View style={celebStyles.overlay}>
+        <View style={[celebStyles.sheet, { paddingBottom: insets.bottom + 16 }]}>
+
+          {step === 'celebrate' ? (
+            <Animated.View entering={FadeIn.duration(500)} style={celebStyles.content}>
+              <View style={celebStyles.trophyContainer}>
+                <LinearGradient
+                  colors={['#D4AF3730', '#D4AF3710']}
+                  style={celebStyles.trophyGlow}
+                />
+                <View style={celebStyles.trophyIconBg}>
+                  <Ionicons name="trophy" size={52} color="#D4AF37" />
+                </View>
+                <View style={celebStyles.starRow}>
+                  <Text style={celebStyles.star}>★</Text>
+                  <Text style={[celebStyles.star, celebStyles.starLg]}>★</Text>
+                  <Text style={celebStyles.star}>★</Text>
+                </View>
+              </View>
+
+              <Text style={celebStyles.titleGold}>Missao Cumprida!</Text>
+              <Text style={celebStyles.subtitle}>
+                Voce implementou todas as {totalActions} melhorias recomendadas
+                para o seu lar. Isso e um marco real de seguranca.
+              </Text>
+
+              <View style={celebStyles.scoreBadge}>
+                <View style={celebStyles.scoreBadgeLeft}>
+                  <Ionicons name="shield-checkmark" size={22} color={Colors.accent} />
+                  <View>
+                    <Text style={celebStyles.scoreBadgeLabel}>Nivel de Seguranca Atual</Text>
+                    <Text style={celebStyles.scoreBadgeValue}>{scorePercentage}% protegido</Text>
+                  </View>
+                </View>
+                <View style={[celebStyles.scoreCircle, {
+                  borderColor: scorePercentage >= 80 ? Colors.success : scorePercentage >= 60 ? Colors.accent : Colors.warning,
+                }]}>
+                  <Text style={[celebStyles.scoreCircleNum, {
+                    color: scorePercentage >= 80 ? Colors.success : scorePercentage >= 60 ? Colors.accent : Colors.warning,
+                  }]}>{scorePercentage}</Text>
+                  <Text style={celebStyles.scoreCircleSign}>%</Text>
+                </View>
+              </View>
+
+              <View style={celebStyles.infoBox}>
+                <Ionicons name="information-circle-outline" size={18} color={Colors.accent} />
+                <Text style={celebStyles.infoText}>
+                  Salve um registro desta fase antes de comecar uma nova avaliacao.
+                  Assim voce acompanha sua evolucao ao longo do tempo.
+                </Text>
+              </View>
+
+              {!saved ? (
+                <Pressable
+                  onPress={handleSave}
+                  style={({ pressed }) => [celebStyles.btnPrimary, pressed && { opacity: 0.85 }]}
+                >
+                  <Ionicons name="save-outline" size={18} color="#000" />
+                  <Text style={celebStyles.btnPrimaryText}>
+                    Salvar Relatorio da Fase {phaseNumber}
+                  </Text>
+                </Pressable>
+              ) : (
+                <Animated.View entering={ZoomIn.duration(300)} style={celebStyles.savedConfirm}>
+                  <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                  <Text style={celebStyles.savedConfirmText}>Relatorio salvo com sucesso!</Text>
+                </Animated.View>
+              )}
+
+              <Pressable
+                onPress={handleNext}
+                style={({ pressed }) => [celebStyles.btnSecondary, pressed && { opacity: 0.7 }]}
+              >
+                <Text style={celebStyles.btnSecondaryText}>
+                  {saved ? 'O que vem a seguir' : 'Pular esta etapa'}
+                </Text>
+                <Ionicons name="arrow-forward-outline" size={16} color={Colors.accent} />
+              </Pressable>
+
+              <Pressable onPress={onClose} style={celebStyles.closeBtn}>
+                <Text style={celebStyles.closeBtnText}>Fechar</Text>
+              </Pressable>
+            </Animated.View>
+          ) : (
+            <Animated.View entering={FadeIn.duration(400)} style={celebStyles.content}>
+              <View style={celebStyles.trophyContainer}>
+                <LinearGradient
+                  colors={[Colors.accent + '30', Colors.accent + '10']}
+                  style={celebStyles.trophyGlow}
+                />
+                <View style={[celebStyles.trophyIconBg, { backgroundColor: Colors.accent + '20' }]}>
+                  <Ionicons name="refresh-circle" size={52} color={Colors.accent} />
+                </View>
+              </View>
+
+              <Text style={celebStyles.titleTeal}>Hora de Evoluir!</Text>
+              <Text style={celebStyles.subtitle}>
+                Com todas as melhorias implementadas, suas respostas de diagnostico
+                agora refletem um nivel muito mais alto de seguranca.
+              </Text>
+
+              <View style={celebStyles.stepsList}>
+                <View style={celebStyles.stepsItem}>
+                  <View style={[celebStyles.stepsDot, { backgroundColor: Colors.accent }]} />
+                  <Text style={celebStyles.stepsText}>
+                    Responda as 32 perguntas novamente com a realidade atual
+                  </Text>
+                </View>
+                <View style={celebStyles.stepsItem}>
+                  <View style={[celebStyles.stepsDot, { backgroundColor: '#D4AF37' }]} />
+                  <Text style={celebStyles.stepsText}>
+                    O sistema ira revelar um novo conjunto de melhorias mais refinadas
+                  </Text>
+                </View>
+                <View style={celebStyles.stepsItem}>
+                  <View style={[celebStyles.stepsDot, { backgroundColor: Colors.success }]} />
+                  <Text style={celebStyles.stepsText}>
+                    Cada ciclo aproxima seu lar do nivel maximo de protecao
+                  </Text>
+                </View>
+              </View>
+
+              <View style={celebStyles.warningBox}>
+                <Ionicons name="warning-outline" size={17} color={Colors.warning} />
+                <Text style={celebStyles.warningText}>
+                  O diagnostico atual e as acoes marcadas serao apagados.
+                  {!saved ? ' Salve o relatorio antes se desejar guardar o historico.' : ' O relatorio ja foi salvo.'}
+                </Text>
+              </View>
+
+              <Pressable
+                onPress={handleNewCycle}
+                style={({ pressed }) => [celebStyles.btnAccent, pressed && { opacity: 0.85 }]}
+              >
+                <Ionicons name="play-circle-outline" size={18} color="#000" />
+                <Text style={celebStyles.btnPrimaryText}>Iniciar Nova Avaliacao</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={onClose}
+                style={({ pressed }) => [celebStyles.btnSecondary, pressed && { opacity: 0.7 }]}
+              >
+                <Ionicons name="close-outline" size={16} color={Colors.textMuted} />
+                <Text style={[celebStyles.btnSecondaryText, { color: Colors.textMuted }]}>
+                  Fechar sem iniciar nova fase
+                </Text>
+              </Pressable>
+            </Animated.View>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 export default function ActionsScreen() {
   const insets = useSafeAreaInsets();
-  const { answers, answeredCount, completedActions, toggleAction } = useAudit();
+  const router = useRouter();
+  const {
+    answers, answeredCount, completedActions, toggleAction,
+    score, savedAudits, saveCurrentAudit, clearAll,
+  } = useAudit();
   const scrollRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
   const [showGuide, setShowGuide] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const scrollToSection = (key: string) => {
     const y = sectionPositions.current[key];
@@ -200,6 +407,34 @@ export default function ActionsScreen() {
     i => completedActions.has(getActionKey(i.category, i.vulnerability))
   ).length;
   const progressPct = actionItems.length > 0 ? (completedCount / actionItems.length) * 100 : 0;
+  const allDone = actionItems.length > 0 && completedCount === actionItems.length;
+
+  const prevCompletedRef = useRef(completedCount);
+  useEffect(() => {
+    const prev = prevCompletedRef.current;
+    prevCompletedRef.current = completedCount;
+    if (actionItems.length > 0 && completedCount === actionItems.length && prev < actionItems.length) {
+      setTimeout(() => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setShowCelebration(true);
+      }, 700);
+    }
+  }, [completedCount, actionItems.length]);
+
+  const phaseNumber = savedAudits.length + 1;
+  const phaseSaveName = `Fase ${phaseNumber} — ${score.percentage}% — Todas implementadas`;
+
+  const handleSavePhase = () => {
+    saveCurrentAudit(phaseSaveName);
+  };
+
+  const handleNewCycle = () => {
+    setShowCelebration(false);
+    clearAll();
+    setTimeout(() => {
+      router.replace('/(tabs)');
+    }, 300);
+  };
 
   return (
     <View style={styles.container}>
@@ -225,6 +460,16 @@ export default function ActionsScreen() {
         </View>
       </LinearGradient>
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
+
+      <CelebrationModal
+        visible={showCelebration}
+        scorePercentage={score.percentage}
+        totalActions={actionItems.length}
+        phaseNumber={phaseNumber}
+        onSave={handleSavePhase}
+        onNewCycle={handleNewCycle}
+        onClose={() => setShowCelebration(false)}
+      />
 
       <ScrollView
         ref={scrollRef}
@@ -280,12 +525,16 @@ export default function ActionsScreen() {
                 </View>
               )}
 
-              {progressPct === 100 && completedCount > 0 && (
+              {allDone && (
                 <Animated.View entering={FadeIn.duration(400)}>
-                  <View style={styles.allDoneBanner}>
-                    <Ionicons name="trophy-outline" size={18} color="#D4AF37" />
-                    <Text style={styles.allDoneText}>Todas as acoes foram implementadas!</Text>
-                  </View>
+                  <Pressable
+                    onPress={() => setShowCelebration(true)}
+                    style={({ pressed }) => [styles.allDoneBanner, pressed && { opacity: 0.8 }]}
+                  >
+                    <Ionicons name="trophy" size={18} color="#D4AF37" />
+                    <Text style={styles.allDoneText}>Todas as acoes implementadas!</Text>
+                    <Ionicons name="chevron-forward" size={14} color="#D4AF37" />
+                  </Pressable>
                 </Animated.View>
               )}
 
@@ -413,6 +662,249 @@ export default function ActionsScreen() {
   );
 }
 
+const celebStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    maxHeight: '92%',
+  },
+  content: {
+    padding: 24,
+    gap: 16,
+    alignItems: 'center',
+  },
+  trophyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  trophyGlow: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
+  trophyIconBg: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: '#D4AF3720',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#D4AF3740',
+  },
+  starRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+  },
+  star: {
+    fontSize: 16,
+    color: '#D4AF37',
+    opacity: 0.8,
+  },
+  starLg: {
+    fontSize: 22,
+    opacity: 1,
+  },
+  titleGold: {
+    fontSize: 26,
+    fontWeight: '800' as const,
+    color: '#D4AF37',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  titleTeal: {
+    fontSize: 26,
+    fontWeight: '800' as const,
+    color: Colors.accent,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: 8,
+  },
+  scoreBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.accent + '12',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.accent + '30',
+    padding: 14,
+    width: '100%',
+    gap: 12,
+  },
+  scoreBadgeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  scoreBadgeLabel: {
+    fontSize: 11,
+    color: Colors.textMuted,
+    fontWeight: '500' as const,
+  },
+  scoreBadgeValue: {
+    fontSize: 15,
+    color: Colors.accent,
+    fontWeight: '700' as const,
+    marginTop: 2,
+  },
+  scoreCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  scoreCircleNum: {
+    fontSize: 18,
+    fontWeight: '800' as const,
+  },
+  scoreCircleSign: {
+    fontSize: 11,
+    color: Colors.textMuted,
+    marginTop: 4,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    backgroundColor: Colors.accent + '10',
+    borderRadius: 12,
+    padding: 12,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: Colors.accent + '20',
+  },
+  infoText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    flex: 1,
+    lineHeight: 20,
+  },
+  warningBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    backgroundColor: Colors.warning + '10',
+    borderRadius: 12,
+    padding: 12,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: Colors.warning + '25',
+  },
+  warningText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    flex: 1,
+    lineHeight: 20,
+  },
+  stepsList: {
+    width: '100%',
+    gap: 12,
+  },
+  stepsItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  stepsDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginTop: 6,
+    flexShrink: 0,
+  },
+  stepsText: {
+    fontSize: 14,
+    color: Colors.text,
+    flex: 1,
+    lineHeight: 21,
+  },
+  savedConfirm: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.success + '15',
+    borderRadius: 12,
+    padding: 14,
+    width: '100%',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.success + '35',
+  },
+  savedConfirmText: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: Colors.success,
+  },
+  btnPrimary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#D4AF37',
+    borderRadius: 14,
+    paddingVertical: 15,
+    width: '100%',
+  },
+  btnAccent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.accent,
+    borderRadius: 14,
+    paddingVertical: 15,
+    width: '100%',
+  },
+  btnPrimaryText: {
+    fontSize: 15,
+    fontWeight: '800' as const,
+    color: '#000',
+  },
+  btnSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    width: '100%',
+  },
+  btnSecondaryText: {
+    fontSize: 14,
+    color: Colors.accent,
+    fontWeight: '600' as const,
+  },
+  closeBtn: {
+    paddingVertical: 8,
+  },
+  closeBtnText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+});
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: {
@@ -516,6 +1008,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600' as const,
     color: '#D4AF37',
+    flex: 1,
   },
   investmentRow: {
     flexDirection: 'row',
