@@ -32,16 +32,10 @@ async function makeCall(number: string) {
     Alert.alert('Ligar', `Número: ${number}\n\nNo celular, toque para ligar diretamente.`);
     return;
   }
-  const url = `tel:${number}`;
   try {
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert('Discador indisponível', `Ligue manualmente para ${number}`);
-    }
+    await Linking.openURL(`tel:${number}`);
   } catch {
-    Alert.alert('Erro', `Não foi possível abrir o discador. Ligue para ${number}`);
+    Alert.alert('Erro ao abrir discador', `Ligue manualmente para ${number}`);
   }
 }
 
