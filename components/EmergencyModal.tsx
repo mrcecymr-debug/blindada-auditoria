@@ -30,7 +30,9 @@ const OFFICIAL_CONTACTS = [
 function makeCall(number: string) {
   const url = `tel:${number}`;
   if (Platform.OS === 'web') {
-    Alert.alert('Emergência', `Ligue para: ${number}`);
+    if (typeof window !== 'undefined') {
+      window.location.href = url;
+    }
     return;
   }
   Linking.openURL(url);
