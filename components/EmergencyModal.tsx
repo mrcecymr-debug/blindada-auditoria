@@ -27,12 +27,22 @@ const OFFICIAL_CONTACTS = [
   { label: 'Disk Denúncia', number: '181', icon: 'megaphone' as const, color: '#D4AF37' },
 ];
 
-function makeCall(number: string) {
+async function makeCall(number: string) {
   if (Platform.OS === 'web') {
     Alert.alert('Ligar', `Número: ${number}\n\nNo celular, toque para ligar diretamente.`);
     return;
   }
-  Linking.openURL(`tel:${number}`);
+  const url = `tel:${number}`;
+  try {
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert('Discador indisponível', `Ligue manualmente para ${number}`);
+    }
+  } catch {
+    Alert.alert('Erro', `Não foi possível abrir o discador. Ligue para ${number}`);
+  }
 }
 
 type ContactRowProps = {
