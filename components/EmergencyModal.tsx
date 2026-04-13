@@ -27,16 +27,13 @@ const OFFICIAL_CONTACTS = [
   { label: 'Disk Denúncia', number: '181', icon: 'megaphone' as const, color: '#D4AF37' },
 ];
 
-async function makeCall(number: string) {
+function makeCall(number: string) {
+  const url = `tel:${number}`;
   if (Platform.OS === 'web') {
-    Alert.alert('Ligar', `Número: ${number}\n\nNo celular, toque para ligar diretamente.`);
+    Alert.alert('Emergência', `Ligue para: ${number}`);
     return;
   }
-  try {
-    await Linking.openURL(`tel:${number}`);
-  } catch {
-    Alert.alert('Erro ao abrir discador', `Ligue manualmente para ${number}`);
-  }
+  Linking.openURL(url);
 }
 
 type ContactRowProps = {
