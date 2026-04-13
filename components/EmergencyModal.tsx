@@ -23,7 +23,7 @@ const OFFICIAL_CONTACTS = [
   { label: 'Bombeiros', number: '193', icon: 'flame' as const, color: '#FF6B6B' },
   { label: 'SAMU', number: '192', icon: 'medkit' as const, color: '#FF9F43' },
   { label: 'Guarda Civil', number: '153', icon: 'people' as const, color: '#6BCB77' },
-  { label: 'Emergência Geral', number: '199', icon: 'alert-circle' as const, color: '#9B59B6' },
+  { label: 'Defesa Civil', number: '199', icon: 'alert-circle' as const, color: '#9B59B6' },
   { label: 'Disk Denúncia', number: '181', icon: 'megaphone' as const, color: '#D4AF37' },
 ];
 
