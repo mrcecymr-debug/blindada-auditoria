@@ -13,6 +13,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import FlowNavHint from '@/components/FlowNavHint';
 import HeaderActions from '@/components/HeaderActions';
 import GuideModal from '@/components/GuideModal';
+import SecurityTipCard from '@/components/SecurityTipCard';
 import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
 import { QUESTIONS, CATEGORIES, getCategoryColor, AuditQuestion, calculateScore, OPTION_HINTS } from '@/lib/audit-data';
@@ -324,6 +325,8 @@ function getScoreColor(percentage: number): string {
         }]}
         showsVerticalScrollIndicator={false}
       >
+        <SecurityTipCard />
+
         {groupedQuestions.map((cat) => (
           <CategorySection
             key={cat.key}

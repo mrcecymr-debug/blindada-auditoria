@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Pressable, Modal, Platform,
 } from 'react-native';
@@ -7,13 +7,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import Colors from '@/constants/colors';
+import { GLOSSARY } from '@/lib/security-content';
 
 type GuideItem = {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
   highlight?: boolean;
-  color?: string;
 };
 
 type GuideSection = {
@@ -244,14 +244,23 @@ const GUIDE_SECTIONS: GuideSection[] = [
   },
 ];
 
+type Tab = 'guia' | 'glossario';
+
 export default function GuideModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const insets = useSafeAreaInsets();
+  const [activeTab, setActiveTab] = useState<Tab>('guia');
+
+  const handleTabChange = (tab: Tab) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setActiveTab(tab);
+  };
 
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <Animated.View entering={FadeIn.duration(300)} style={[styles.container, { paddingBottom: Platform.OS === 'web' ? 34 : Math.max(insets.bottom, 20) }]}>
           <View style={styles.handle} />
+
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <View style={styles.headerIcon}>
@@ -259,7 +268,7 @@ export default function GuideModal({ visible, onClose }: { visible: boolean; onC
               </View>
               <View>
                 <Text style={styles.headerTitle}>Central de Ajuda</Text>
-                <Text style={styles.headerSubtitle}>Como usar o Casa Blindada MR@</Text>
+                <Text style={styles.headerSubtitle}>Casa Blindada MR@</Text>
               </View>
             </View>
             <Pressable onPress={onClose} hitSlop={12}>
@@ -267,43 +276,107 @@ export default function GuideModal({ visible, onClose }: { visible: boolean; onC
             </Pressable>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
-            {GUIDE_SECTIONS.map((section, sIdx) => (
-              <View key={sIdx} style={styles.sectionWrap}>
-                <Animated.View entering={FadeInDown.delay(sIdx * 60).duration(300)}>
-                  <View style={styles.sectionHeader}>
-                    <View style={[styles.sectionDot, { backgroundColor: section.sectionColor }]} />
-                    <Ionicons name={section.sectionIcon} size={16} color={section.sectionColor} />
-                    <Text style={[styles.sectionTitle, { color: section.sectionColor }]}>{section.sectionTitle}</Text>
-                  </View>
-                </Animated.View>
-                {section.items.map((item, iIdx) => (
-                  <Animated.View key={iIdx} entering={FadeInDown.delay(sIdx * 60 + iIdx * 40).duration(300)}>
-                    <View style={[
-                      styles.stepCard,
-                      item.highlight && { borderColor: '#D4AF37' + '50', backgroundColor: '#D4AF37' + '08' },
-                    ]}>
-                      <View style={[
-                        styles.stepIcon,
-                        item.highlight && { backgroundColor: '#D4AF37' + '20' },
-                      ]}>
-                        <Ionicons name={item.icon} size={20} color={item.highlight ? '#D4AF37' : Colors.text} />
-                      </View>
-                      <View style={styles.stepContent}>
-                        <Text style={[styles.stepTitle, item.highlight && { color: '#D4AF37' }]}>{item.title}</Text>
-                        <Text style={styles.stepDesc}>{item.description}</Text>
-                      </View>
+          <View style={styles.tabRow}>
+            <Pressable
+              onPress={() => handleTabChange('guia')}
+              style={[styles.tabBtn, activeTab === 'guia' && styles.tabBtnActive]}
+            >
+              <Ionicons
+                name="navigate-outline"
+                size={15}
+                color={activeTab === 'guia' ? Colors.accent : Colors.textMuted}
+              />
+              <Text style={[styles.tabText, activeTab === 'guia' && styles.tabTextActive]}>
+                Como Usar
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => handleTabChange('glossario')}
+              style={[styles.tabBtn, activeTab === 'glossario' && styles.tabBtnActive]}
+            >
+              <Ionicons
+                name="library-outline"
+                size={15}
+                color={activeTab === 'glossario' ? Colors.accent : Colors.textMuted}
+              />
+              <Text style={[styles.tabText, activeTab === 'glossario' && styles.tabTextActive]}>
+                Glossario
+              </Text>
+            </Pressable>
+          </View>
+
+          {activeTab === 'guia' ? (
+            <ScrollView key="guia" showsVerticalScrollIndicator={false} style={styles.scroll}>
+              {GUIDE_SECTIONS.map((section, sIdx) => (
+                <View key={sIdx} style={styles.sectionWrap}>
+                  <Animated.View entering={FadeInDown.delay(sIdx * 50).duration(280)}>
+                    <View style={styles.sectionHeader}>
+                      <View style={[styles.sectionDot, { backgroundColor: section.sectionColor }]} />
+                      <Ionicons name={section.sectionIcon} size={16} color={section.sectionColor} />
+                      <Text style={[styles.sectionTitle, { color: section.sectionColor }]}>{section.sectionTitle}</Text>
                     </View>
                   </Animated.View>
-                ))}
+                  {section.items.map((item, iIdx) => (
+                    <Animated.View key={iIdx} entering={FadeInDown.delay(sIdx * 50 + iIdx * 35).duration(280)}>
+                      <View style={[
+                        styles.stepCard,
+                        item.highlight && { borderColor: '#D4AF37' + '50', backgroundColor: '#D4AF37' + '08' },
+                      ]}>
+                        <View style={[
+                          styles.stepIcon,
+                          item.highlight && { backgroundColor: '#D4AF37' + '20' },
+                        ]}>
+                          <Ionicons name={item.icon} size={20} color={item.highlight ? '#D4AF37' : Colors.text} />
+                        </View>
+                        <View style={styles.stepContent}>
+                          <Text style={[styles.stepTitle, item.highlight && { color: '#D4AF37' }]}>{item.title}</Text>
+                          <Text style={styles.stepDesc}>{item.description}</Text>
+                        </View>
+                      </View>
+                    </Animated.View>
+                  ))}
+                </View>
+              ))}
+              <View style={styles.versionWrap}>
+                <Text style={styles.versionText}>Casa Blindada Auditoria v3.0</Text>
+                <Text style={styles.versionText}>MR ENG — Seguranca Estrategica</Text>
               </View>
-            ))}
+            </ScrollView>
+          ) : (
+            <ScrollView key="glossario" showsVerticalScrollIndicator={false} style={styles.scroll}>
+              <Animated.View entering={FadeIn.duration(300)}>
+                <View style={styles.glossaryIntro}>
+                  <Ionicons name="library-outline" size={16} color={Colors.accent} />
+                  <Text style={styles.glossaryIntroText}>
+                    {GLOSSARY.length} termos tecnicos explicados de forma simples
+                  </Text>
+                </View>
+              </Animated.View>
 
-            <View style={styles.versionWrap}>
-              <Text style={styles.versionText}>Casa Blindada Auditoria v3.0</Text>
-              <Text style={styles.versionText}>MR ENG — Seguranca Estrategica</Text>
-            </View>
-          </ScrollView>
+              {GLOSSARY.map((item, idx) => (
+                <Animated.View key={idx} entering={FadeInDown.delay(idx * 30).duration(260)}>
+                  <View style={styles.glossaryCard}>
+                    <View style={styles.glossaryLeft}>
+                      <View style={styles.glossaryLetterBg}>
+                        <Text style={styles.glossaryLetter}>
+                          {item.term.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.glossaryContent}>
+                      <Text style={styles.glossaryTerm}>{item.term}</Text>
+                      <Text style={styles.glossaryDef}>{item.definition}</Text>
+                    </View>
+                  </View>
+                </Animated.View>
+              ))}
+
+              <View style={styles.versionWrap}>
+                <Text style={styles.versionText}>Casa Blindada Auditoria v3.0</Text>
+                <Text style={styles.versionText}>MR ENG — Seguranca Estrategica</Text>
+              </View>
+            </ScrollView>
+          )}
 
           <Pressable
             onPress={() => { onClose(); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
@@ -345,7 +418,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerIcon: {
@@ -355,6 +428,39 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 18, fontWeight: '700' as const, color: Colors.text },
   headerSubtitle: { fontSize: 11, color: Colors.textSecondary, marginTop: 1 },
+
+  tabRow: {
+    flexDirection: 'row',
+    backgroundColor: Colors.card,
+    borderRadius: 12,
+    padding: 3,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  tabBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    borderRadius: 10,
+  },
+  tabBtnActive: {
+    backgroundColor: Colors.accent + '18',
+    borderWidth: 1,
+    borderColor: Colors.accent + '35',
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.textMuted,
+  },
+  tabTextActive: {
+    color: Colors.accent,
+  },
+
   scroll: { marginBottom: 12 },
   sectionWrap: { marginBottom: 8 },
   sectionHeader: {
@@ -365,9 +471,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingLeft: 2,
   },
-  sectionDot: {
-    width: 6, height: 6, borderRadius: 3,
-  },
+  sectionDot: { width: 6, height: 6, borderRadius: 3 },
   sectionTitle: {
     fontSize: 13,
     fontWeight: '800' as const,
@@ -393,6 +497,65 @@ const styles = StyleSheet.create({
   stepContent: { flex: 1 },
   stepTitle: { fontSize: 13, fontWeight: '700' as const, color: Colors.accent, marginBottom: 3 },
   stepDesc: { fontSize: 12, color: Colors.textSecondary, lineHeight: 18 },
+
+  glossaryIntro: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.accent + '10',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.accent + '20',
+  },
+  glossaryIntroText: {
+    fontSize: 12,
+    color: Colors.accent,
+    fontWeight: '600' as const,
+  },
+  glossaryCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.card,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  glossaryLeft: {
+    flexShrink: 0,
+  },
+  glossaryLetterBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.accent + '18',
+    borderWidth: 1,
+    borderColor: Colors.accent + '30',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  glossaryLetter: {
+    fontSize: 16,
+    fontWeight: '800' as const,
+    color: Colors.accent,
+  },
+  glossaryContent: { flex: 1 },
+  glossaryTerm: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  glossaryDef: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+  },
+
   versionWrap: {
     alignItems: 'center',
     paddingVertical: 16,
