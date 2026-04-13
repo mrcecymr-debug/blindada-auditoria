@@ -7,19 +7,17 @@ import Colors from '@/constants/colors';
 import { getDailyTip, SECURITY_TIPS } from '@/lib/security-content';
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  Acesso: 'key-outline',
-  Iluminacao: 'bulb-outline',
-  Eletronica: 'hardware-chip-outline',
-  Perimetro: 'shield-outline',
-  Humano: 'people-outline',
+  Chegada: 'home-outline',
+  Alerta: 'eye-outline',
+  Golpe: 'warning-outline',
+  Rotina: 'calendar-outline',
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Acesso: '#4D96FF',
-  Iluminacao: '#FFD93D',
-  Eletronica: Colors.accent,
-  Perimetro: '#6BCB77',
-  Humano: '#FF9F43',
+  Chegada: Colors.accent,
+  Alerta: '#FF9F43',
+  Golpe: '#FF6B6B',
+  Rotina: '#4D96FF',
 };
 
 export default function SecurityTipCard() {
