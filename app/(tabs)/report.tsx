@@ -17,6 +17,7 @@ import { getStatusColor, getCategoryColor, calculateScore, QUESTIONS, generateAc
 import { generateFullReportHTML } from '@/lib/pdf-report';
 import HeaderActions from '@/components/HeaderActions';
 import GuideModal from '@/components/GuideModal';
+import EmergencyModal from '@/components/EmergencyModal';
 
 function SaveModal({ visible, onClose, onSave }: {
   visible: boolean; onClose: () => void; onSave: (name: string) => void;
@@ -722,6 +723,7 @@ export default function ReportScreen() {
 
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showEmergency, setShowEmergency] = useState(false);
 
   if (viewingAudit) {
     return <ReportDetail audit={viewingAudit} onClose={() => setViewingAudit(null)} allAudits={savedAudits} />;
@@ -749,10 +751,11 @@ export default function ReportScreen() {
             <Text style={styles.headerTitle}>Relatorios</Text>
             <Text style={styles.headerSubtitle}>{savedAudits.length} diagnostico{savedAudits.length !== 1 ? 's' : ''} salvo{savedAudits.length !== 1 ? 's' : ''}</Text>
           </View>
-          <HeaderActions onShowGuide={() => setShowGuide(true)} extraButtons={trashButton} />
+          <HeaderActions onShowGuide={() => setShowGuide(true)} onShowEmergency={() => setShowEmergency(true)} extraButtons={trashButton} />
         </View>
       </LinearGradient>
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
+      <EmergencyModal visible={showEmergency} onClose={() => setShowEmergency(false)} />
 
       <ScrollView
         style={styles.scrollView}

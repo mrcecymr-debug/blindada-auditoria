@@ -12,6 +12,7 @@ import { CATEGORIES, getStatusColor, getCategoryColor } from '@/lib/audit-data';
 import FlowNavHint from '@/components/FlowNavHint';
 import HeaderActions from '@/components/HeaderActions';
 import GuideModal from '@/components/GuideModal';
+import EmergencyModal from '@/components/EmergencyModal';
 
 function ScoreGauge({ percentage, classification }: { percentage: number; classification: string }) {
   const getColor = () => {
@@ -79,6 +80,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { score, answeredCount, totalCount } = useAudit();
   const [showGuide, setShowGuide] = useState(false);
+  const [showEmergency, setShowEmergency] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -99,10 +101,11 @@ export default function DashboardScreen() {
                 `Baseado em ${answeredCount} de ${totalCount} respostas`}
             </Text>
           </View>
-          <HeaderActions onShowGuide={() => setShowGuide(true)} />
+          <HeaderActions onShowGuide={() => setShowGuide(true)} onShowEmergency={() => setShowEmergency(true)} />
         </View>
       </LinearGradient>
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
+      <EmergencyModal visible={showEmergency} onClose={() => setShowEmergency(false)} />
 
       <ScrollView
         style={styles.scrollView}

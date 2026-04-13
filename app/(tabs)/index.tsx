@@ -13,6 +13,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import FlowNavHint from '@/components/FlowNavHint';
 import HeaderActions from '@/components/HeaderActions';
 import GuideModal from '@/components/GuideModal';
+import EmergencyModal from '@/components/EmergencyModal';
 import SecurityTipCard from '@/components/SecurityTipCard';
 import Colors from '@/constants/colors';
 import { useAudit } from '@/lib/audit-context';
@@ -219,6 +220,7 @@ function getScoreColor(percentage: number): string {
   const router = useRouter();
   const { answeredCount, totalCount, score } = useAudit();
   const [showGuide, setShowGuide] = useState(false);
+  const [showEmergency, setShowEmergency] = useState(false);
   const progress = totalCount > 0 ? answeredCount / totalCount : 0;
 
   const hasLeftTab = useRef(false);
@@ -286,7 +288,7 @@ function getScoreColor(percentage: number): string {
             </View>
           </View>
 
-          <HeaderActions onShowGuide={() => setShowGuide(true)} />
+          <HeaderActions onShowGuide={() => setShowGuide(true)} onShowEmergency={() => setShowEmergency(true)} />
         </View>
 
         <View style={styles.headerContent}>
@@ -364,6 +366,7 @@ function getScoreColor(percentage: number): string {
         )}
       </ScrollView>
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
+      <EmergencyModal visible={showEmergency} onClose={() => setShowEmergency(false)} />
     </View>
   );
 }

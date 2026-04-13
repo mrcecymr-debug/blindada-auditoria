@@ -14,6 +14,7 @@ import { useAudit, getActionKey } from '@/lib/audit-context';
 import FlowNavHint from '@/components/FlowNavHint';
 import HeaderActions from '@/components/HeaderActions';
 import GuideModal from '@/components/GuideModal';
+import EmergencyModal from '@/components/EmergencyModal';
 
 function PriorityBadge({ priority }: { priority: number }) {
   const colors = {
@@ -382,6 +383,7 @@ export default function ActionsScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
   const [showGuide, setShowGuide] = useState(false);
+  const [showEmergency, setShowEmergency] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
   const scrollToSection = (key: string) => {
@@ -456,10 +458,11 @@ export default function ActionsScreen() {
                 : 'Recomendacoes baseadas no seu diagnostico'}
             </Text>
           </View>
-          <HeaderActions onShowGuide={() => setShowGuide(true)} />
+          <HeaderActions onShowGuide={() => setShowGuide(true)} onShowEmergency={() => setShowEmergency(true)} />
         </View>
       </LinearGradient>
       <GuideModal visible={showGuide} onClose={() => setShowGuide(false)} />
+      <EmergencyModal visible={showEmergency} onClose={() => setShowEmergency(false)} />
 
       <CelebrationModal
         visible={showCelebration}
