@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeOutUp, FadeIn, FadeOut } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import Colors from '@/constants/colors';
 import { getDailyTip, SECURITY_TIPS } from '@/lib/security-content';
@@ -20,23 +20,46 @@ const CATEGORY_COLORS: Record<string, string> = {
   Rotina: '#4D96FF',
 };
 
+function getDailyIndex(): number {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - start.getTime();
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  return dayOfYear % SECURITY_TIPS.length;
+}
+
 export default function SecurityTipCard() {
   const [dismissed, setDismissed] = useState(false);
-  const tip = getDailyTip();
+  const [index, setIndex] = useState(getDailyIndex);
+  const [animKey, setAnimKey] = useState(0);
+
+  const tip = SECURITY_TIPS[index];
   const icon = CATEGORY_ICONS[tip.category] || 'bulb-outline';
   const color = CATEGORY_COLORS[tip.category] || Colors.accent;
-  const tipNumber = ((tip.id - 1) % SECURITY_TIPS.length) + 1;
+
+  const handleNext = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setIndex((prev) => (prev + 1) % SECURITY_TIPS.length);
+    setAnimKey((k) => k + 1);
+  }, []);
+
+  const handlePrev = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setIndex((prev) => (prev - 1 + SECURITY_TIPS.length) % SECURITY_TIPS.length);
+    setAnimKey((k) => k + 1);
+  }, []);
+
+  const handleDismiss = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setDismissed(true);
+  }, []);
 
   if (dismissed) return null;
 
-  const handleDismiss = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setDismissed(true);
-  };
-
   return (
     <Animated.View entering={FadeInDown.delay(200).duration(400)} exiting={FadeOutUp.duration(300)}>
-      <View style={styles.card}>
+      <View style={[styles.card, { borderLeftColor: color }]}>
         <View style={[styles.accentBar, { backgroundColor: color }]} />
 
         <View style={styles.inner}>
@@ -45,22 +68,35 @@ export default function SecurityTipCard() {
               <Ionicons name={icon} size={18} color={color} />
             </View>
             <View style={styles.labelGroup}>
-              <Text style={styles.tipLabel}>DICA DO DIA</Text>
+              <Text style={styles.tipLabel}>DICA DE SEGURANCA</Text>
               <Text style={[styles.categoryLabel, { color }]}>{tip.category}</Text>
             </View>
             <View style={styles.counterBadge}>
-              <Text style={styles.counterText}>{tipNumber}/{SECURITY_TIPS.length}</Text>
+              <Text style={styles.counterText}>{index + 1}/{SECURITY_TIPS.length}</Text>
             </View>
             <Pressable onPress={handleDismiss} hitSlop={12} style={styles.closeBtn}>
               <Ionicons name="close" size={16} color={Colors.textMuted} />
             </Pressable>
           </View>
 
-          <Text style={styles.tipText}>{tip.tip}</Text>
+          <Animated.Text key={animKey} entering={FadeIn.duration(280)} style={styles.tipText}>
+            {tip.tip}
+          </Animated.Text>
 
-          <View style={styles.footer}>
-            <Ionicons name="shield-checkmark-outline" size={12} color={Colors.textMuted} />
-            <Text style={styles.footerText}>MR ENG — Seguranca Estrategica</Text>
+          <View style={styles.bottomRow}>
+            <View style={styles.navBtns}>
+              <Pressable onPress={handlePrev} style={styles.navBtn} hitSlop={8}>
+                <Ionicons name="chevron-back" size={14} color={Colors.textSecondary} />
+              </Pressable>
+              <Pressable onPress={handleNext} style={[styles.nextBtn, { borderColor: color + '40', backgroundColor: color + '12' }]} hitSlop={8}>
+                <Text style={[styles.nextBtnText, { color }]}>Próxima dica</Text>
+                <Ionicons name="chevron-forward" size={13} color={color} />
+              </Pressable>
+            </View>
+            <View style={styles.brand}>
+              <Ionicons name="shield-checkmark-outline" size={11} color={Colors.textMuted} />
+              <Text style={styles.brandText}>MR ENG</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -80,7 +116,6 @@ const styles = StyleSheet.create({
   },
   accentBar: {
     width: 4,
-    borderRadius: 4,
   },
   inner: {
     flex: 1,
@@ -136,12 +171,45 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: '400' as const,
   },
-  footer: {
+  bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    justifyContent: 'space-between',
   },
-  footerText: {
+  navBtns: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  navBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nextBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  nextBtnText: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+  },
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  brandText: {
     fontSize: 10,
     color: Colors.textMuted,
   },
